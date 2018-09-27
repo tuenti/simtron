@@ -1,0 +1,27 @@
+{
+  "name": "simtron",
+  "version": "0.0.1",
+  "private": true,
+  "babel": {
+    "presets": [
+      "env"
+    ]
+  },
+  "scripts": {
+    "babel-node": "babel-node --presets=env",
+    "compile": "rm -rf dist && babel --presets=env src --out-dir dist",
+    "start": "npm run compile && pm2 start ./dist/index.js --name simtron",
+    "dev": "DEVELOPMENT=1 DEBUG=app nodemon --exec npm run babel-node -- ./src/index.js"
+  },
+  "dependencies": {
+    "debug": "~2.6.9",
+    "nodemon": "^1.18.3",
+    "serialport": "^7.0.2",
+    "winston": "^3.0.0"
+  },
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
+  }
+}
