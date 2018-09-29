@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "debug": "~2.6.9",
+    "node-json-db": "^0.9.0",
     "nodemon": "^1.18.3",
     "serialport": "^7.0.2",
     "winston": "^3.0.0"

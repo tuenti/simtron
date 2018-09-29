@@ -1,8 +1,9 @@
-import childProcess from 'child_process';
 import SerialPort from 'serialport';
+import serialPortBindings from '@serialport/bindings';
 import readDataChunk from './data-chunk';
 import Error, {NON_RESPONSIVE_PORTS, SOME_NON_RESPONSIVE_PORTS} from '../error';
 import logger from '../logger';
+import { getVendorIds, getPortScanMaxRetriesCount } from '../config';
 
 const MANUFACTURER_AT_COMMAND = 'AT+CGMI';
 const portBaudRates = [9600, 115200, 14400, 19200, 38400, 57600, 128000, 256000];
@@ -11,8 +12,9 @@ const NO_TRIED_REASON = 'no-tried';
 const MODEM_RESPONSE_TIMEOUT_MS = 1000;
 const PORT_SCAN_TIMEOUT_MS = 1000;
 
-const selectPort = portData =>
-    portData && portData.manufacturer && portData.manufacturer.indexOf('FTDI') > -1;
+const isElegiblePort = (portData, allowedVendorIds) => {
+    return portData && portData.manufacturer && allowedVendorIds.find(vendorId => portData.manufacturer.indexOf(vendorId) > -1);
+};
 
 const isOpenPort = ({port, portName, baudRate}) => port && portName && baudRate;
 
@@ -45,7 +47,7 @@ const testPort = (portName, baudRate) =>
                 }
             });
         });
-        port.write(`${MANUFACTURER_AT_COMMAND}\r\n`);
+        port.write(`${MANUFACTURER_AT_COMMAND}\r`);
         setTimeout(() => {
             port.close();
             resolve(closedPort(portName, NO_RESPONSE_REASON));
@@ -57,7 +59,7 @@ const connectToPort = async portName => {
         try {
             const testPortResult = await testPort(portName, baudRate);
             if (isOpenPort(testPortResult)) {
-                return await testPortResult;
+                return testPortResult;
             }
         } catch (e) {}
     }
@@ -68,9 +70,10 @@ const connectToPorts = async ports => Promise.all(ports.map(port => connectToPor
 
 const scanPorts = () =>
     new Promise((resolve, reject) => {
-        childProcess.exec('./node_modules/serialport/bin/list.js -f json', (error, stdout) => {
-            const elegibleSimtronPorts = JSON.parse(stdout)
-                .filter(selectPort)
+        serialPortBindings.list().then(serialPorts => {
+            const allowedVendorIds = getVendorIds();
+            const elegibleSimtronPorts = serialPorts
+                .filter(portData => isElegiblePort(portData, allowedVendorIds))
                 .map(({comName}) => closedPort(comName, NO_TRIED_REASON));
             resolve(elegibleSimtronPorts);
         });
@@ -82,11 +85,12 @@ const scanPorts = () =>
 const createSimtronPorts = async () => {
     let connectedPorts = [];
     const elegibleSimtronPorts = await scanPorts();
+
     if (elegibleSimtronPorts.length > 0) {
         let closedPorts = elegibleSimtronPorts;
-        let retry = 1;
 
-        for (let retry of [1, 2, 3, 4, 5]) {
+        const maxRetriesCount = getPortScanMaxRetriesCount();
+        for (let retry = 1; retry < maxRetriesCount; retry++) {
             const portsConnectionResults = await connectToPorts(closedPorts);
             const newConnectedPorts = portsConnectionResults.filter(portConnectionResult =>
                 isOpenPort(portConnectionResult)
@@ -105,9 +109,11 @@ const createSimtronPorts = async () => {
             logger.error(Error(SOME_NON_RESPONSIVE_PORTS, portArrayToString(closedPorts)));
         }
     }
+
     if (connectedPorts.length === 0) {
         logger.error(Error(NON_RESPONSIVE_PORTS, 'Can not connect to any port'));
     }
+
     return connectedPorts;
 };
 

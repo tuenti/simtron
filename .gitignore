@@ -223,3 +223,6 @@ dist/*
 
 #VS Code
 .vscode/
+
+#config and runtime data
+data/*
