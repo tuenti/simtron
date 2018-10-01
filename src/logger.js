@@ -15,12 +15,8 @@ const logger = createLogger({
 });
 
 export default {
-    error: ({error, description = ''}) => {
-        if (description) {
-            logger.error({error, description});
-        } else {
-            logger.error(error);
-        }
+    error: error => {
+        logger.error(error);
         if (process.env.DEVELOPMENT) {
             throw error;
         }

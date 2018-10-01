@@ -3,7 +3,8 @@ import serialPortBindings from '@serialport/bindings';
 import readDataChunk from './data-chunk';
 import Error, {NON_RESPONSIVE_PORTS, SOME_NON_RESPONSIVE_PORTS} from '../error';
 import logger from '../logger';
-import { getVendorIds, getPortScanMaxRetriesCount } from '../config';
+import {getVendorIds, getPortScanMaxRetriesCount} from '../config';
+import createPortHandler from './port-handler';
 
 const MANUFACTURER_AT_COMMAND = 'AT+CGMI';
 const portBaudRates = [9600, 115200, 14400, 19200, 38400, 57600, 128000, 256000];
@@ -13,7 +14,11 @@ const MODEM_RESPONSE_TIMEOUT_MS = 1000;
 const PORT_SCAN_TIMEOUT_MS = 1000;
 
 const isElegiblePort = (portData, allowedVendorIds) => {
-    return portData && portData.manufacturer && allowedVendorIds.find(vendorId => portData.manufacturer.indexOf(vendorId) > -1);
+    return (
+        portData &&
+        portData.manufacturer &&
+        allowedVendorIds.find(vendorId => portData.manufacturer.indexOf(vendorId) > -1)
+    );
 };
 
 const isOpenPort = ({port, portName, baudRate}) => port && portName && baudRate;
@@ -39,19 +44,20 @@ const portArrayToString = ports =>
 const testPort = (portName, baudRate) =>
     new Promise((resolve, reject) => {
         const port = new SerialPort(portName, {baudRate});
+        const timeoutHandler = setTimeout(() => {
+            port.close();
+            resolve(closedPort(portName, NO_RESPONSE_REASON));
+        }, MODEM_RESPONSE_TIMEOUT_MS);
         port.on('data', data => {
             const decodedData = data.toString('utf8');
             readDataChunk(decodedData, line => {
                 if (line === MANUFACTURER_AT_COMMAND) {
+                    clearTimeout(timeoutHandler);
                     resolve(openPort(port, portName, baudRate));
                 }
             });
         });
         port.write(`${MANUFACTURER_AT_COMMAND}\r`);
-        setTimeout(() => {
-            port.close();
-            resolve(closedPort(portName, NO_RESPONSE_REASON));
-        }, MODEM_RESPONSE_TIMEOUT_MS);
     });
 
 const connectToPort = async portName => {
@@ -70,16 +76,17 @@ const connectToPorts = async ports => Promise.all(ports.map(port => connectToPor
 
 const scanPorts = () =>
     new Promise((resolve, reject) => {
+        const timeoutHandler = setTimeout(() => {
+            reject();
+        }, PORT_SCAN_TIMEOUT_MS);
         serialPortBindings.list().then(serialPorts => {
             const allowedVendorIds = getVendorIds();
             const elegibleSimtronPorts = serialPorts
                 .filter(portData => isElegiblePort(portData, allowedVendorIds))
                 .map(({comName}) => closedPort(comName, NO_TRIED_REASON));
+            clearTimeout(timeoutHandler);
             resolve(elegibleSimtronPorts);
         });
-        setTimeout(() => {
-            reject();
-        }, PORT_SCAN_TIMEOUT_MS);
     });
 
 const createSimtronPorts = async () => {
@@ -90,7 +97,7 @@ const createSimtronPorts = async () => {
         let closedPorts = elegibleSimtronPorts;
 
         const maxRetriesCount = getPortScanMaxRetriesCount();
-        for (let retry = 1; retry < maxRetriesCount; retry++) {
+        for (let retry = 1; retry <= maxRetriesCount; retry++) {
             const portsConnectionResults = await connectToPorts(closedPorts);
             const newConnectedPorts = portsConnectionResults.filter(portConnectionResult =>
                 isOpenPort(portConnectionResult)
@@ -106,7 +113,7 @@ const createSimtronPorts = async () => {
             }
         }
         if (closedPorts.length > 0) {
-            logger.error(Error(SOME_NON_RESPONSIVE_PORTS, portArrayToString(closedPorts)));
+            logger.warning(`There are some 'not responding' ports: ${portArrayToString(closedPorts)}`);
         }
     }
 
@@ -114,7 +121,9 @@ const createSimtronPorts = async () => {
         logger.error(Error(NON_RESPONSIVE_PORTS, 'Can not connect to any port'));
     }
 
-    return connectedPorts;
+    return connectedPorts.map(portData => {
+        return createPortHandler(portData);
+    });
 };
 
 export default createSimtronPorts;

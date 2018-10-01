@@ -1,6 +1,13 @@
-import createSimtronPorts from './transport/port-factory';
-import logger from './logger';
+import createSimtronPorts from './device-port/port-factory';
+import createSlackBot from './bots/slack-bot';
+import {getSlackBotToken} from './config';
+import createSimtronController from './simtron-controller';
 
-createSimtronPorts().then(portsInfo => {
-    console.log(portsInfo);
+let simtronController = null;
+
+createSimtronPorts().then(devicePortHandlers => {
+    const slackBot = createSlackBot(getSlackBotToken());
+
+    simtronController = createSimtronController(devicePortHandlers, {}, [slackBot]);
+    simtronController.start();
 });

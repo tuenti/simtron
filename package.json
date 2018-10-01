@@ -5,6 +5,9 @@
   "babel": {
     "presets": [
       "env"
+    ],
+    "plugins": [
+      "transform-object-rest-spread"
     ]
   },
   "scripts": {
@@ -14,6 +17,7 @@
     "dev": "DEVELOPMENT=1 DEBUG=app nodemon --exec npm run babel-node -- ./src/index.js"
   },
   "dependencies": {
+    "@slack/client": "^4.6.0",
     "debug": "~2.6.9",
     "node-json-db": "^0.9.0",
     "nodemon": "^1.18.3",
@@ -23,6 +27,7 @@
   "devDependencies": {
     "babel": "^6.23.0",
     "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0"
   }
 }
