@@ -89,41 +89,41 @@ const scanPorts = () =>
         });
     });
 
-const createSimtronPorts = async () => {
-    let connectedPorts = [];
-    const elegibleSimtronPorts = await scanPorts();
+export default {
+    createPorts: async () => {
+        let connectedPorts = [];
+        const elegibleSimtronPorts = await scanPorts();
 
-    if (elegibleSimtronPorts.length > 0) {
-        let closedPorts = elegibleSimtronPorts;
+        if (elegibleSimtronPorts.length > 0) {
+            let closedPorts = elegibleSimtronPorts;
 
-        const maxRetriesCount = getPortScanMaxRetriesCount();
-        for (let retry = 1; retry <= maxRetriesCount; retry++) {
-            const portsConnectionResults = await connectToPorts(closedPorts);
-            const newConnectedPorts = portsConnectionResults.filter(portConnectionResult =>
-                isOpenPort(portConnectionResult)
-            );
-            closedPorts = portsConnectionResults.filter(
-                portConnectionResult => !isOpenPort(portConnectionResult)
-            );
-            connectedPorts = [...connectedPorts, ...newConnectedPorts];
-            logger.info(`Iteration ${retry}, new online ports: ${portArrayToString(newConnectedPorts)}`);
-            if (closedPorts.length === 0) {
-                logger.info('Ports scan completed, all ports online.');
-                break;
+            const maxRetriesCount = getPortScanMaxRetriesCount();
+            for (let retry = 1; retry <= maxRetriesCount; retry++) {
+                const portsConnectionResults = await connectToPorts(closedPorts);
+                const newConnectedPorts = portsConnectionResults.filter(portConnectionResult =>
+                    isOpenPort(portConnectionResult)
+                );
+                closedPorts = portsConnectionResults.filter(
+                    portConnectionResult => !isOpenPort(portConnectionResult)
+                );
+                connectedPorts = [...connectedPorts, ...newConnectedPorts];
+                logger.info(`Iteration ${retry}, new online ports: ${portArrayToString(newConnectedPorts)}`);
+                if (closedPorts.length === 0) {
+                    logger.info('Ports scan completed, all ports online.');
+                    break;
+                }
+            }
+            if (closedPorts.length > 0) {
+                logger.warning(`There are some 'not responding' ports: ${portArrayToString(closedPorts)}`);
             }
         }
-        if (closedPorts.length > 0) {
-            logger.warning(`There are some 'not responding' ports: ${portArrayToString(closedPorts)}`);
+
+        if (connectedPorts.length === 0) {
+            logger.error(Error(NON_RESPONSIVE_PORTS, 'Can not connect to any port'));
         }
-    }
 
-    if (connectedPorts.length === 0) {
-        logger.error(Error(NON_RESPONSIVE_PORTS, 'Can not connect to any port'));
-    }
-
-    return connectedPorts.map(portData => {
-        return createPortHandler(portData);
-    });
+        return connectedPorts.map(portData => {
+            return createPortHandler(portData);
+        });
+    },
 };
-
-export default createSimtronPorts;

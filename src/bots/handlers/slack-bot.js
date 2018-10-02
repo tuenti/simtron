@@ -1,5 +1,9 @@
-import {RTMClient, WebClient, RTM_EVENTS, CLIENT_EVENTS} from '@slack/client';
-import logger from '../logger';
+import {RTMClient, WebClient} from '@slack/client';
+import logger from '../../logger';
+import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE} from '../message/message-type';
+
+const MESSAGE_TYPE_PLAIN = 'plain';
+const MESSAGE_TYPE_RICH = 'rich';
 
 const defaultOptions = {
     usePictures: false,
@@ -25,9 +29,18 @@ const createSlackBot = (botToken, options = {}) => {
     const postMessageToChannels = message => channels => {
         channels.map(channel => {
             message.container === MESSAGE_TYPE_PLAIN &&
-                slackBotWebClient.chat.postMessage(channel.id, message.text, {as_user: true});
+                slackBotWebClient.chat.postMessage({
+                    channel: channel.id,
+                    text: message.text,
+                    as_user: true,
+                });
             message.container === MESSAGE_TYPE_RICH &&
-                slackBotWebClient.chat.postMessage(channel.id, message.text, {...message, as_user: true});
+                slackBotWebClient.chat.postMessage({
+                    ...message,
+                    channel: channel.id,
+                    text: message.text,
+                    as_user: true,
+                });
         });
     };
 
@@ -35,8 +48,24 @@ const createSlackBot = (botToken, options = {}) => {
     const getChannels = () =>
         slackBotWebClient.channels.list().then(res => res.channels.filter(channel => channel.is_member));
 
-    const writeMessage = line => {
-        const message = parseMessage(line);
+    const adaptMessageToSlackFormat = message => {
+        switch (message.type) {
+            case NOTIFY_BOOTING:
+                return {
+                    container: MESSAGE_TYPE_PLAIN,
+                    text: ':rocket: Booting ...',
+                };
+            case NOTIFY_BOOT_DONE:
+                return {
+                    container: MESSAGE_TYPE_PLAIN,
+                    text: ':rocket: Ready ...',
+                };
+            default:
+                return undefined;
+        }
+    };
+
+    const sendMessage = message => {
         getGroups().then(postMessageToChannels(message));
         getChannels().then(postMessageToChannels(message));
     };
@@ -97,8 +126,14 @@ const createSlackBot = (botToken, options = {}) => {
             this.listeners = [];
         },
 
+        sendMessage(message) {
+            const slackMessage = adaptMessageToSlackFormat(message);
+            sendMessage(slackMessage);
+        },
+
         start() {
-            slackBot.start();
+            console.log('a ver si espera');
+            return slackBot.start();
         },
     };
 };
