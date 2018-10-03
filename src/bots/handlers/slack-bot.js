@@ -51,14 +51,10 @@ const createSlackBot = (botToken, options = {}) => {
     const adaptMessageToSlackFormat = message => {
         switch (message.type) {
             case NOTIFY_BOOTING:
-                return {
-                    container: MESSAGE_TYPE_PLAIN,
-                    text: ':rocket: Booting ...',
-                };
             case NOTIFY_BOOT_DONE:
                 return {
                     container: MESSAGE_TYPE_PLAIN,
-                    text: ':rocket: Ready ...',
+                    text: `:rocket: ${message.text}`,
                 };
             default:
                 return undefined;
@@ -132,7 +128,6 @@ const createSlackBot = (botToken, options = {}) => {
         },
 
         start() {
-            console.log('a ver si espera');
             return slackBot.start();
         },
     };

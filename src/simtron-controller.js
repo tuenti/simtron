@@ -1,8 +1,8 @@
 import {createBootingMessage, createBootDoneMessage} from './bots/message/models';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
-    const handlePortIncomingLine = (port, line) => {
-        console.log(`${port.portId}: ${line}`);
+    const handlePortIncomingNotification = (port, notification) => {
+        console.log(`${port.portId}: ${notification}`);
     };
 
     const startBots = async bots =>
@@ -17,6 +17,17 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
             return bot.sendMessage(message);
         });
 
+    const initializeDevices = async devicePortHandlers => {
+        return Promise.all(
+            devicePortHandlers.map(async portHandler => {
+                const echoCommandResponse = await portHandler.sendCommand('ATE1');
+                const enableNotificationsCommandResponse = await portHandler.sendCommand('AT+CNMI=1,2,0,0,0');
+                portHandler.addListener(handlePortIncomingNotification);
+                return echoCommandResponse.isSuccessful && enableNotificationsCommandResponse.isSuccessful;
+            })
+        );
+    };
+
     return {
         devicePortHandlers: [],
         simsCatalog,
@@ -27,9 +38,7 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
             sendMessageOnAllBots(bots, createBootingMessage());
             this.devicePortHandlers = await devicePortsFactory.createPorts();
             sendMessageOnAllBots(bots, createBootDoneMessage());
-            this.devicePortHandlers.forEach(portHandler => {
-                portHandler.addListener(handlePortIncomingLine);
-            });
+            return await initializeDevices(this.devicePortHandlers);
         },
     };
 };
