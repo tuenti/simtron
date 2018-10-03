@@ -1,18 +1,37 @@
 import readDataChunk from './data-chunk';
 import logger from '../logger';
+import {getDevicesCommandsTimeout} from '../config';
 
-const COMMAND_TIMEOUT_MS = 3000;
-
-const createOngoingCommandResolver = (resolve, reject, timeoutHandler) => ({
+const createOngoingCommandResolver = (command, resolve, reject, timeoutHandler) => ({
+    command,
     resolve,
     reject,
     timeoutHandler,
 });
 
-const createSuccessfulCommandResponse = responseLines => ({
-    isSuccessful: true,
+const createCommandResponse = (isSuccessful, responseLines) => ({
+    isSuccessful,
     responseLines,
 });
+
+const isExecutionStatusLine = line => line === 'OK' || line === 'ERROR';
+
+const isSuccessfulStatusLine = line => line === 'OK';
+
+const isOngoingCommandResponse = (ongoingCommand, responseLines) =>
+    ongoingCommand && responseLines.length > 0 && responseLines[0] === ongoingCommand.command;
+
+const logCompleteMessageReceived = (portId, lines) => {
+    lines.forEach(responseLine => {
+        logger.info(`Receiving command response line '${responseLine}' to port '${portId}'`);
+    });
+};
+
+const triggerNotificationReceived = portHandler => {
+    portHandler.listeners.forEach(listener => {
+        listener(portHandler, portHandler.commandResponseLines);
+    });
+};
 
 const createPortHandler = ({port, portName, baudRate}) => {
     const portHandler = {
@@ -20,7 +39,7 @@ const createPortHandler = ({port, portName, baudRate}) => {
         portId: portName,
         baudRate,
 
-        ongoingCommands: [],
+        ongoingCommand: null,
         commandResponseLines: [],
 
         listeners: [],
@@ -37,10 +56,10 @@ const createPortHandler = ({port, portName, baudRate}) => {
                 port.write(`${command}\r`);
                 const handleCommandTimedOut = () => {
                     reject();
-                    this.ongoingCommands.pop();
+                    this.ongoingCommand = null;
                 };
-                const timeoutHandler = setTimeout(handleCommandTimedOut, COMMAND_TIMEOUT_MS);
-                this.ongoingCommands.push(createOngoingCommandResolver(resolve, reject, timeoutHandler));
+                const timeoutHandler = setTimeout(handleCommandTimedOut, getDevicesCommandsTimeout());
+                this.ongoingCommand = createOngoingCommandResolver(command, resolve, reject, timeoutHandler);
                 logger.info(`Sending command '${command}' to port '${this.portId}'`);
             });
         },
@@ -49,21 +68,20 @@ const createPortHandler = ({port, portName, baudRate}) => {
         const decodedData = data.toString('utf8');
         readDataChunk(decodedData, line => {
             portHandler.commandResponseLines.push(line);
-            if (line === 'OK') {
-                portHandler.listeners.forEach(listener => {
-                    listener(portHandler, portHandler.commandResponseLines);
-                });
-                const ongoingCommand = portHandler.ongoingCommands.pop();
-                if (ongoingCommand) {
-                    portHandler.commandResponseLines.forEach(responseLine => {
-                        logger.info(
-                            `Receiving command response line '${responseLine}' to port '${
-                                portHandler.portId
-                            }'`
-                        );
-                    });
-                    ongoingCommand.resolve(createSuccessfulCommandResponse(portHandler.commandResponseLines));
+
+            if (isExecutionStatusLine(line)) {
+                logCompleteMessageReceived(portHandler.portId, portHandler.commandResponseLines);
+
+                if (isOngoingCommandResponse(portHandler.ongoingCommand, portHandler.commandResponseLines)) {
+                    const commandResponse = createCommandResponse(
+                        isSuccessfulStatusLine(line),
+                        portHandler.commandResponseLines
+                    );
+                    portHandler.ongoingCommand.resolve(commandResponse);
+                } else {
+                    triggerNotificationReceived(portHandler);
                 }
+
                 portHandler.commandResponseLines = [];
             }
         });
