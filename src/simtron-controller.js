@@ -1,4 +1,10 @@
 import {createBootingMessage, createBootDoneMessage} from './bots/message/models';
+import {
+    createSetEchoModeCommand,
+    createEnableNotifications,
+    createEnableNotificationsCommand,
+    createReadIccCommand,
+} from './device-port/command/models';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
     const handlePortIncomingNotification = (port, notification) => {
@@ -20,8 +26,12 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
     const initializeDevices = async devicePortHandlers => {
         return Promise.all(
             devicePortHandlers.map(async portHandler => {
-                const echoCommandResponse = await portHandler.sendCommand('ATE1');
-                const enableNotificationsCommandResponse = await portHandler.sendCommand('AT+CNMI=1,2,0,0,0');
+                const echoCommandResponse = await portHandler.sendCommand(createSetEchoModeCommand(true));
+                const enableNotificationsCommandResponse = await portHandler.sendCommand(
+                    createEnableNotificationsCommand()
+                );
+                const getIccCommandResponse = await portHandler.sendCommand(createReadIccCommand());
+                console.log(getIccCommandResponse);
                 portHandler.addListener(handlePortIncomingNotification);
                 return echoCommandResponse.isSuccessful && enableNotificationsCommandResponse.isSuccessful;
             })

@@ -1,18 +1,27 @@
-let serialLineBuffer = '';
-const readDataChunk = (dataChunk, onEndOfLineReceived) => {
-    const dataChunkLength = dataChunk.length;
+const createDataChunkReader = () => ({
+    serialLineBuffer: '',
 
-    for (let i = 0; i < dataChunkLength; i++) {
-        const charCode = dataChunk.charCodeAt(i);
-        if (charCode != 10 && charCode != 13) {
-            serialLineBuffer += dataChunk.charAt(i);
-        } else {
-            if (serialLineBuffer !== '') {
-                onEndOfLineReceived(serialLineBuffer);
+    read(dataChunk, onEndOfLineReceived) {
+        const dataChunkLength = dataChunk.length;
+
+        for (let i = 0; i < dataChunkLength; i++) {
+            const charCode = dataChunk.charCodeAt(i);
+            if (charCode !== 0) {
+                if (charCode != 10 && charCode != 13) {
+                    this.serialLineBuffer += dataChunk.charAt(i);
+                } else {
+                    if (this.serialLineBuffer !== '') {
+                        onEndOfLineReceived(this.serialLineBuffer);
+                    }
+                    this.serialLineBuffer = '';
+                }
             }
-            serialLineBuffer = '';
         }
-    }
-};
+    },
 
-export default readDataChunk;
+    clear() {
+        this.serialLineBuffer = '';
+    },
+});
+
+export default createDataChunkReader;

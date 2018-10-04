@@ -1,7 +1,7 @@
 import SerialPort from 'serialport';
 import serialPortBindings from '@serialport/bindings';
-import readDataChunk from './data-chunk';
-import Error, {NON_RESPONSIVE_PORTS, SOME_NON_RESPONSIVE_PORTS} from '../error';
+import createDataChunkReader from './data-chunk';
+import Error, {NON_RESPONSIVE_PORTS} from '../error';
 import logger from '../logger';
 import {getVendorIds, getPortScanMaxRetriesCount} from '../config';
 import createPortHandler from './port-handler';
@@ -41,18 +41,20 @@ const portArrayToString = ports =>
           }, '')
         : 'No ports';
 
-const testPort = (portName, baudRate) =>
+const testPort = (portName, baudRate, dataReader) =>
     new Promise((resolve, reject) => {
         const port = new SerialPort(portName, {baudRate});
         const timeoutHandler = setTimeout(() => {
             port.close();
+            dataReader.clear();
             resolve(closedPort(portName, NO_RESPONSE_REASON));
         }, MODEM_RESPONSE_TIMEOUT_MS);
         port.on('data', data => {
             const decodedData = data.toString('utf8');
-            readDataChunk(decodedData, line => {
+            dataReader.read(decodedData, line => {
                 if (line === MANUFACTURER_AT_COMMAND) {
                     clearTimeout(timeoutHandler);
+                    port.removeAllListeners();
                     resolve(openPort(port, portName, baudRate));
                 }
             });
@@ -60,10 +62,10 @@ const testPort = (portName, baudRate) =>
         port.write(`${MANUFACTURER_AT_COMMAND}\r`);
     });
 
-const connectToPort = async portName => {
+const connectToPort = async (portName, dataReader) => {
     for (let baudRate of portBaudRates) {
         try {
-            const testPortResult = await testPort(portName, baudRate);
+            const testPortResult = await testPort(portName, baudRate, dataReader);
             if (isOpenPort(testPortResult)) {
                 return testPortResult;
             }
@@ -72,7 +74,8 @@ const connectToPort = async portName => {
     return closedPort(portName, NO_RESPONSE_REASON);
 };
 
-const connectToPorts = async ports => Promise.all(ports.map(port => connectToPort(port.portName)));
+const connectToPorts = async ports =>
+    Promise.all(ports.map(port => connectToPort(port.portName, port.dataReader)));
 
 const scanPorts = () =>
     new Promise((resolve, reject) => {
@@ -95,7 +98,10 @@ export default {
         const elegibleSimtronPorts = await scanPorts();
 
         if (elegibleSimtronPorts.length > 0) {
-            let closedPorts = elegibleSimtronPorts;
+            let closedPorts = elegibleSimtronPorts.map(elegibleSimtronPort => ({
+                ...elegibleSimtronPort,
+                dataReader: createDataChunkReader(),
+            }));
 
             const maxRetriesCount = getPortScanMaxRetriesCount();
             for (let retry = 1; retry <= maxRetriesCount; retry++) {
