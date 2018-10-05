@@ -31,8 +31,9 @@ const openPort = (port, portName, baudRate) => ({
     baudRate,
 });
 
-const closedPort = (portName, reason) => ({
+const closedPort = (portName, dataReader, reason) => ({
     portName,
+    dataReader,
     reason,
 });
 
@@ -44,12 +45,12 @@ const portArrayToString = ports =>
         : 'No ports';
 
 const testPort = (portName, baudRate, dataReader) =>
-    new Promise((resolve, reject) => {
+    new Promise(resolve => {
         const port = new SerialPort(portName, {baudRate});
         const timeoutHandler = setTimeout(() => {
             port.close();
             dataReader.clear();
-            resolve(closedPort(portName, NO_RESPONSE_REASON));
+            resolve(closedPort(portName, dataReader, NO_RESPONSE_REASON));
         }, MODEM_RESPONSE_TIMEOUT_MS);
         port.on('data', data => {
             const decodedData = data.toString('utf8');
@@ -73,7 +74,7 @@ const connectToPort = async (portName, dataReader) => {
             }
         } catch (e) {}
     }
-    return closedPort(portName, NO_RESPONSE_REASON);
+    return closedPort(portName, dataReader, NO_RESPONSE_REASON);
 };
 
 const connectToPorts = async ports =>
@@ -88,7 +89,7 @@ const scanPorts = () =>
             const allowedVendorIds = getVendorIds();
             const eligibleSimtronPorts = serialPorts
                 .filter(portData => isEligiblePort(portData, allowedVendorIds))
-                .map(({comName}) => closedPort(comName, NO_TRIED_REASON));
+                .map(({comName}) => closedPort(comName, undefined, NO_TRIED_REASON));
             clearTimeout(timeoutHandler);
             resolve(eligibleSimtronPorts);
         });
