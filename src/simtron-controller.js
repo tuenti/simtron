@@ -1,14 +1,15 @@
 import {createBootingMessage, createBootDoneMessage} from './bots/message/models';
 import {
     createSetEchoModeCommand,
-    createEnableNotifications,
     createEnableNotificationsCommand,
+    createSetSmsTextModeCommand,
+    createEnableSmsUnsolicitedNotificationsCommand,
     createReadIccCommand,
 } from './device-port/command/models';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
     const handlePortIncomingNotification = (port, notification) => {
-        console.log(`${port.portId}: ${notification}`);
+        console.log({port: port.portId, notification: notification});
     };
 
     const startBots = async bots =>
@@ -26,14 +27,25 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
     const initializeDevices = async devicePortHandlers => {
         return Promise.all(
             devicePortHandlers.map(async portHandler => {
-                const echoCommandResponse = await portHandler.sendCommand(createSetEchoModeCommand(true));
+                const setEchoModeCommandResponse = await portHandler.sendCommand(
+                    createSetEchoModeCommand(true)
+                );
                 const enableNotificationsCommandResponse = await portHandler.sendCommand(
                     createEnableNotificationsCommand()
                 );
-                const getIccCommandResponse = await portHandler.sendCommand(createReadIccCommand());
-                console.log(getIccCommandResponse);
+                const setSmsTextCommandResponse = await portHandler.sendCommand(
+                    createSetSmsTextModeCommand()
+                );
+                const setEnableSmsUnsolicitedNotificationsCommandResponse = await portHandler.sendCommand(
+                    createEnableSmsUnsolicitedNotificationsCommand()
+                );
                 portHandler.addListener(handlePortIncomingNotification);
-                return echoCommandResponse.isSuccessful && enableNotificationsCommandResponse.isSuccessful;
+                return (
+                    setEchoModeCommandResponse.isSuccessful &&
+                    enableNotificationsCommandResponse.isSuccessful &&
+                    setSmsTextCommandResponse &&
+                    setEnableSmsUnsolicitedNotificationsCommandResponse
+                );
             })
         );
     };

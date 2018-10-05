@@ -5,15 +5,17 @@ import Error, {NON_RESPONSIVE_PORTS} from '../error';
 import logger from '../logger';
 import {getVendorIds, getPortScanMaxRetriesCount} from '../config';
 import createPortHandler from './port-handler';
+import {createReadVendorCommand} from './command/models';
 
-const MANUFACTURER_AT_COMMAND = 'AT+CGMI';
+const MODEM_ID_COMMAND = createReadVendorCommand().command;
+
 const portBaudRates = [9600, 115200, 14400, 19200, 38400, 57600, 128000, 256000];
 const NO_RESPONSE_REASON = 'no-response';
 const NO_TRIED_REASON = 'no-tried';
 const MODEM_RESPONSE_TIMEOUT_MS = 1000;
 const PORT_SCAN_TIMEOUT_MS = 1000;
 
-const isElegiblePort = (portData, allowedVendorIds) => {
+const isEligiblePort = (portData, allowedVendorIds) => {
     return (
         portData &&
         portData.manufacturer &&
@@ -52,14 +54,14 @@ const testPort = (portName, baudRate, dataReader) =>
         port.on('data', data => {
             const decodedData = data.toString('utf8');
             dataReader.read(decodedData, line => {
-                if (line === MANUFACTURER_AT_COMMAND) {
+                if (line === MODEM_ID_COMMAND) {
                     clearTimeout(timeoutHandler);
                     port.removeAllListeners();
                     resolve(openPort(port, portName, baudRate));
                 }
             });
         });
-        port.write(`${MANUFACTURER_AT_COMMAND}\r`);
+        port.write(`${MODEM_ID_COMMAND}\r`);
     });
 
 const connectToPort = async (portName, dataReader) => {
@@ -84,22 +86,22 @@ const scanPorts = () =>
         }, PORT_SCAN_TIMEOUT_MS);
         serialPortBindings.list().then(serialPorts => {
             const allowedVendorIds = getVendorIds();
-            const elegibleSimtronPorts = serialPorts
-                .filter(portData => isElegiblePort(portData, allowedVendorIds))
+            const eligibleSimtronPorts = serialPorts
+                .filter(portData => isEligiblePort(portData, allowedVendorIds))
                 .map(({comName}) => closedPort(comName, NO_TRIED_REASON));
             clearTimeout(timeoutHandler);
-            resolve(elegibleSimtronPorts);
+            resolve(eligibleSimtronPorts);
         });
     });
 
 export default {
     createPorts: async () => {
         let connectedPorts = [];
-        const elegibleSimtronPorts = await scanPorts();
+        const eligibleSimtronPorts = await scanPorts();
 
-        if (elegibleSimtronPorts.length > 0) {
-            let closedPorts = elegibleSimtronPorts.map(elegibleSimtronPort => ({
-                ...elegibleSimtronPort,
+        if (eligibleSimtronPorts.length > 0) {
+            let closedPorts = eligibleSimtronPorts.map(eligibleSimtronPort => ({
+                ...eligibleSimtronPort,
                 dataReader: createDataChunkReader(),
             }));
 
@@ -113,9 +115,9 @@ export default {
                     portConnectionResult => !isOpenPort(portConnectionResult)
                 );
                 connectedPorts = [...connectedPorts, ...newConnectedPorts];
-                logger.info(`Iteration ${retry}, new online ports: ${portArrayToString(newConnectedPorts)}`);
+                logger.debug(`Iteration ${retry}, new online ports: ${portArrayToString(newConnectedPorts)}`);
                 if (closedPorts.length === 0) {
-                    logger.info('Ports scan completed, all ports online.');
+                    logger.debug('Ports scan completed, all ports online.');
                     break;
                 }
             }

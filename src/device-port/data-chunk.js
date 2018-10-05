@@ -6,15 +6,13 @@ const createDataChunkReader = () => ({
 
         for (let i = 0; i < dataChunkLength; i++) {
             const charCode = dataChunk.charCodeAt(i);
-            if (charCode !== 0) {
-                if (charCode != 10 && charCode != 13) {
-                    this.serialLineBuffer += dataChunk.charAt(i);
-                } else {
-                    if (this.serialLineBuffer !== '') {
-                        onEndOfLineReceived(this.serialLineBuffer);
-                    }
-                    this.serialLineBuffer = '';
+            if (charCode != 10 && charCode != 13) {
+                this.serialLineBuffer += dataChunk.charAt(i);
+            } else {
+                if (this.serialLineBuffer !== '') {
+                    onEndOfLineReceived(this.serialLineBuffer);
                 }
+                this.serialLineBuffer = '';
             }
         }
     },

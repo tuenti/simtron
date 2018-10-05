@@ -1,5 +1,9 @@
 const ICC_LINE_PREFIX = '+CCID:';
 
+export const createReadVendorCommand = () => ({
+    command: 'AT+CGMI',
+});
+
 export const createSetEchoModeCommand = enable => ({
     command: `ATE${enable ? '1' : '0'}`,
 });
@@ -21,4 +25,16 @@ export const createReadIccCommand = () => ({
         }
         return {};
     },
+});
+
+export const createEnableSmsUnsolicitedNotificationsCommand = () => ({
+    command: 'AT+CNMI=2,2',
+});
+
+export const createSetSmsTextModeCommand = () => ({
+    command: 'AT+CMGF=1',
+});
+
+export const createDeleteSmsCommand = smsIndex => ({
+    command: `AT+CMGD=${smsIndex}`,
 });

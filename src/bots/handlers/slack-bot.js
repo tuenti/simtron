@@ -107,7 +107,7 @@ const createSlackBot = (botToken, options = {}) => {
 
     slackBot.on('authenticated', rtmStartData => {
         botId = rtmStartData.self.id;
-        logger.info(
+        logger.debug(
             `Logged in as ${rtmStartData.self.name} (id: ${botId}) of team ${rtmStartData.team.name}`
         );
     });
