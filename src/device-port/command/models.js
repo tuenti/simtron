@@ -31,8 +31,8 @@ export const createEnableSmsUnsolicitedNotificationsCommand = () => ({
     command: 'AT+CNMI=2,2',
 });
 
-export const createSetSmsTextModeCommand = () => ({
-    command: 'AT+CMGF=1',
+export const createSetSmsPduModeCommand = () => ({
+    command: 'AT+CMGF=0',
 });
 
 export const createDeleteSmsCommand = smsIndex => ({

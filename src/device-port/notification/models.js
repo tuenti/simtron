@@ -1,14 +1,15 @@
+import decodePdu from '../encoding/pdu';
+
 const createSmsReceivedNotification = () => ({
     id: '+CMT',
     notificationParser: notificationLines => {
-        const headerParts = notificationLines[0].split('"');
-        const senderMsisdn = headerParts[1];
-        const time = headerParts[5];
         const [, ...smsLines] = notificationLines;
+        const parsedSms = decodePdu(smsLines[0]);
+
         return {
-            senderMsisdn,
-            time,
-            smsLines,
+            senderMsisdn: parsedSms.sender,
+            time: parsedSms.time,
+            smsText: parsedSms.text,
         };
     },
 });

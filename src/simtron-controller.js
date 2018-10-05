@@ -2,9 +2,8 @@ import {createBootingMessage, createBootDoneMessage} from './bots/message/models
 import {
     createSetEchoModeCommand,
     createEnableNotificationsCommand,
-    createSetSmsTextModeCommand,
+    createSetSmsPduModeCommand,
     createEnableSmsUnsolicitedNotificationsCommand,
-    createReadIccCommand,
 } from './device-port/command/models';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
@@ -33,8 +32,8 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                 const enableNotificationsCommandResponse = await portHandler.sendCommand(
                     createEnableNotificationsCommand()
                 );
-                const setSmsTextCommandResponse = await portHandler.sendCommand(
-                    createSetSmsTextModeCommand()
+                const setSmsPduModeCommandResponse = await portHandler.sendCommand(
+                    createSetSmsPduModeCommand()
                 );
                 const setEnableSmsUnsolicitedNotificationsCommandResponse = await portHandler.sendCommand(
                     createEnableSmsUnsolicitedNotificationsCommand()
@@ -43,7 +42,7 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                 return (
                     setEchoModeCommandResponse.isSuccessful &&
                     enableNotificationsCommandResponse.isSuccessful &&
-                    setSmsTextCommandResponse &&
+                    setSmsPduModeCommandResponse &&
                     setEnableSmsUnsolicitedNotificationsCommandResponse
                 );
             })
