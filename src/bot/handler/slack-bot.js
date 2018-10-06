@@ -1,6 +1,7 @@
 import {RTMClient, WebClient} from '@slack/client';
 import logger from '../../logger';
 import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE} from '../message/message-type';
+import { getDevelopmentSlackChannelName } from '../../config';
 
 const MESSAGE_TYPE_PLAIN = 'plain';
 const MESSAGE_TYPE_RICH = 'rich';
@@ -26,7 +27,7 @@ const createSlackBot = (botToken, options = {}) => {
     const slackBot = new RTMClient(botToken, slackBotOptions.rtmOptions);
     const slackBotWebClient = new WebClient(botToken);
 
-    const postMessageToChannels = message => channels => {
+    const postMessageToChannels = (message, channels) => {
         channels.map(channel => {
             message.container === MESSAGE_TYPE_PLAIN &&
                 slackBotWebClient.chat.postMessage({
@@ -44,9 +45,15 @@ const createSlackBot = (botToken, options = {}) => {
         });
     };
 
-    const getGroups = () => slackBotWebClient.groups.list().then(res => res.groups);
-    const getChannels = () =>
-        slackBotWebClient.channels.list().then(res => res.channels.filter(channel => channel.is_member));
+    const canAccessToChannel = channel => channel.is_member
+        && (!process.env.DEVELOPMENT || channel.name === getDevelopmentSlackChannelName());
+
+    const getChannels = async () => {
+        const conversations = await slackBotWebClient.conversations.list({
+            types: 'public_channel,private_channel'
+        });
+        return conversations.channels.filter(canAccessToChannel);
+    }
 
     const adaptMessageToSlackFormat = message => {
         switch (message.type) {
@@ -61,9 +68,9 @@ const createSlackBot = (botToken, options = {}) => {
         }
     };
 
-    const sendMessage = message => {
-        getGroups().then(postMessageToChannels(message));
-        getChannels().then(postMessageToChannels(message));
+    const sendMessage = async message => {
+        const channels = await getChannels();
+        postMessageToChannels(message, channels);
     };
 
     const answerChannel = ({event, message}) => {
