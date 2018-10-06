@@ -1,10 +1,10 @@
-import {createBootingMessage, createBootDoneMessage} from './bots/message/models';
+import {createBootingMessage, createBootDoneMessage} from './bot/message/model';
 import {
     createSetEchoModeCommand,
     createEnableNotificationsCommand,
     createSetSmsPduModeCommand,
     createEnableSmsUnsolicitedNotificationsCommand,
-} from './device-port/command/models';
+} from './device-port/command/model';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
     const handlePortIncomingNotification = (port, notification) => {

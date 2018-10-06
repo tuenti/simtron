@@ -1,4 +1,4 @@
-import pdu from 'pdu';
+import pdu from 'pdu/pdu';
 
 const nonStandardGsmCharsToUnicode = {
     0x01: '\u00A3', // POUND SIGN

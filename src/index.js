@@ -1,5 +1,5 @@
 import portsFactory from './device-port/port-factory';
-import createSlackBot from './bots/handlers/slack-bot';
+import createSlackBot from './bot/handler/slack-bot';
 import {getSlackBotToken} from './config';
 import createSimtronController from './simtron-controller';
 

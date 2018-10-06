@@ -5,7 +5,7 @@ import Error, {NON_RESPONSIVE_PORTS} from '../error';
 import logger from '../logger';
 import {getVendorIds, getPortScanMaxRetriesCount} from '../config';
 import createPortHandler from './port-handler';
-import {createReadVendorCommand} from './command/models';
+import {createReadVendorCommand} from './command/model';
 
 const MODEM_ID_COMMAND = createReadVendorCommand().command;
 

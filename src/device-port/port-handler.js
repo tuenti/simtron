@@ -1,8 +1,8 @@
 import createDataChunkReader from './data-chunk';
 import logger from '../logger';
 import {getDevicesCommandsTimeout} from '../config';
-import notifications from './notification/models';
-import {createReadVendorCommand} from './command/models';
+import notifications from './notification/model';
+import {createReadVendorCommand} from './command/model';
 
 const notificationEndCommand = createReadVendorCommand();
 
