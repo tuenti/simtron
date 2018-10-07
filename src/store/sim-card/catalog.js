@@ -1,11 +1,11 @@
 import JsonDB from 'node-json-db';
-import logger from '../logger';
-import Error, {INVALID_ICC} from '../error';
+import logger from '../../logger';
+import Error, {INVALID_ICC} from '../../error';
 
-const CONFIG_DB_FILE = 'data/sim-catalog';
+const DB_FILE = 'data/sim-catalog';
 const SIM_CATALOG_PATH = '/catalog';
 
-const catalogDb = new JsonDB(CONFIG_DB_FILE, true, true);
+const catalogDb = new JsonDB(DB_FILE, true, true);
 
 const readSimCatalog = () => {
     try {

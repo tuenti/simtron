@@ -11,6 +11,9 @@ const DEFAULT_DEVICES_COMMANDS_TIMEOUT_MS = 7000;
 const DEVICES_COMMANDS_RESOLVE_DELAY_PATH = '/ports/commands/resolveDelay';
 const DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY = 100;
 
+const SMS_MEMORY_MAX_COUNT_PATH = '/sms/memoryMaxCount';
+const DEFAULT_SMS_MEMORY_MAX_COUNT = 25;
+
 const SLACK_BOT_TOKEN_PATH = '/slackBot/token';
 const DEVELOPMENT_SLACK_CHANNEL_NAME_PATH = '/slackBot/developmentChannelName';
 
@@ -31,6 +34,9 @@ export const getDevicesCommandsTimeout = () =>
     readPath(DEVICES_COMMANDS_TIMEOUT_MS_PATH, DEFAULT_DEVICES_COMMANDS_TIMEOUT_MS);
 export const getDevicesCommandsResolveDelay = () =>
     readPath(DEVICES_COMMANDS_RESOLVE_DELAY_PATH, DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY);
+
+export const getSmsMemoryMaxCount = () =>
+    readPath(SMS_MEMORY_MAX_COUNT_PATH, DEFAULT_SMS_MEMORY_MAX_COUNT);
 
 export const getSlackBotToken = () => readPath(SLACK_BOT_TOKEN_PATH, undefined);
 export const getDevelopmentSlackChannelName = () =>

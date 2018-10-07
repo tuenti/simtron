@@ -8,27 +8,33 @@ import {
     createEnableNetworkStatusNotificationsCommand,
     createDeleteAllSmsCommand,
 } from './device-port/model/command';
-import createSimCatalog from './sim-card/catalog';
+import createSimCatalog from './store/sim-card/catalog';
 import { NEW_SMS_NOTIFICATION_ID, NETWORK_STATUS_NOTIFICATION_ID } from './device-port/model/notification';
 import logger from './logger';
+import createSmsStore from './store/sms/received-sms';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
 
     const simCatalog = createSimCatalog();
+    const receivedSms = createSmsStore();
 
     const handlePortIncomingNotification = async (port, notification) => {
+        const {portId} = port;
         switch (notification.id) {
             case NEW_SMS_NOTIFICATION_ID:
+                const {senderMsisdn, time, smsText} = notification;
                 logger.debug(
-                    `Sms received on port: ${port.portId}, from: ${notification.senderMsisdn}, text: ${notification.smsText}`
+                    `Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`
                 );
+                receivedSms.addSms(senderMsisdn, time, smsText, portId);
                 await port.sendCommand(createDeleteAllSmsCommand());
             break;
             case NETWORK_STATUS_NOTIFICATION_ID:
+                const {networkStatus} = notification;
                 logger.debug(
-                    `Network status received on port: ${port.portId}, new status: ${notification.networkStatus.name}`
+                    `Network status received on port: ${portId}, new status: ${notification.networkStatus.name}`
                 );
-                simCatalog.updateSimNetworkStatus(notification.networkStatus, port.portId);
+                simCatalog.updateSimNetworkStatus(networkStatus, portId);
             break;
         }
     };
