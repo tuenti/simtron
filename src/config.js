@@ -8,6 +8,9 @@ const PORT_VENDORS_IDS_PATH = '/ports/vendors';
 const DEFAULT_PORT_VENDORS_IDS = ['FTDI'];
 const DEVICES_COMMANDS_TIMEOUT_MS_PATH = '/ports/commands/timeout';
 const DEFAULT_DEVICES_COMMANDS_TIMEOUT_MS = 5000;
+const DEVICES_COMMANDS_RESOLVE_DELAY_PATH = '/ports/commands/resolveDelay';
+const DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY = 100;
+
 const SLACK_BOT_TOKEN_PATH = '/slackBot/token';
 const DEVELOPMENT_SLACK_CHANNEL_NAME_PATH = '/slackBot/developmentChannelName';
 
@@ -26,6 +29,8 @@ export const getPortScanMaxRetriesCount = () =>
 export const getVendorIds = () => readPath(PORT_VENDORS_IDS_PATH, DEFAULT_PORT_VENDORS_IDS);
 export const getDevicesCommandsTimeout = () =>
     readPath(DEVICES_COMMANDS_TIMEOUT_MS_PATH, DEFAULT_DEVICES_COMMANDS_TIMEOUT_MS);
+export const getDevicesCommandsResolveDelay = () =>
+    readPath(DEVICES_COMMANDS_RESOLVE_DELAY_PATH, DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY);
 
 export const getSlackBotToken = () => readPath(SLACK_BOT_TOKEN_PATH, undefined);
 export const getDevelopmentSlackChannelName = () =>

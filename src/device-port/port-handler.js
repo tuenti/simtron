@@ -1,6 +1,6 @@
 import createDataChunkReader from './data-chunk';
 import logger from '../logger';
-import {getDevicesCommandsTimeout} from '../config';
+import {getDevicesCommandsTimeout, getDevicesCommandsResolveDelay} from '../config';
 import notifications from './model/notification';
 import {createReadVendorCommand} from './model/command';
 
@@ -38,7 +38,11 @@ const isOngoingCommandResponse = (ongoingCommand, responseLines) =>
 
 const createNotificationFromLines = (notification, notificationLines) => {
     notificationLines.pop();
-    return notification.notificationParser(notificationLines);
+    const notificationPayload = notification.notificationParser(notificationLines);
+    return {
+        id: notification.id,
+        ...notificationPayload,
+    }
 };
 
 const triggerNotificationReceived = (portHandler, notification) => {
@@ -52,6 +56,9 @@ const debugCompleteMessageReceived = (portId, lines) => {
         logger.debug(`Receiving command response line '${responseLine}' on port '${portId}'`);
     });
 };
+
+const resolveCommand = (commandHandler, commandResponse) =>
+    setTimeout(() => commandHandler.resolve(commandResponse), getDevicesCommandsResolveDelay());
 
 const createPortHandler = ({port, portName, baudRate}) => {
     const portHandler = {
@@ -97,6 +104,8 @@ const createPortHandler = ({port, portName, baudRate}) => {
 
     const dataReader = createDataChunkReader();
 
+    port.open();
+
     port.on('data', data => {
         const decodedData = data.toString('utf8');
         dataReader.read(decodedData, line => {
@@ -122,7 +131,7 @@ const createPortHandler = ({port, portName, baudRate}) => {
                             portHandler.ongoingCommand.commandHandler,
                             portHandler.responseLines
                         );
-                        portHandler.ongoingCommand.resolve(commandResponse);
+                        resolveCommand(portHandler.ongoingCommand, commandResponse);
                         debugCompleteMessageReceived(portHandler.portId, portHandler.responseLines);
                     }
                 }

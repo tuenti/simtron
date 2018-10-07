@@ -58,6 +58,7 @@ const testPort = (portName, baudRate, dataReader) =>
                 if (line === MODEM_ID_COMMAND) {
                     clearTimeout(timeoutHandler);
                     port.removeAllListeners();
+                    port.close();
                     resolve(openPort(port, portName, baudRate));
                 }
             });
