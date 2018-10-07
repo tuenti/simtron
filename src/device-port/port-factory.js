@@ -23,15 +23,14 @@ const isEligiblePort = (portData, allowedVendorIds) => {
     );
 };
 
-const isOpenPort = ({port, portName, baudRate}) => port && portName && baudRate;
+const isOpenPort = ({portName, baudRate}) => portName && baudRate;
 
-const openPort = (port, portName, baudRate) => ({
-    port,
+const createOpenPort = (portName, baudRate) => ({
     portName,
     baudRate,
 });
 
-const closedPort = (portName, dataReader, reason) => ({
+const createClosedPort = (portName, dataReader, reason) => ({
     portName,
     dataReader,
     reason,
@@ -50,7 +49,7 @@ const testPort = (portName, baudRate, dataReader) =>
         const timeoutHandler = setTimeout(() => {
             port.close();
             dataReader.clear();
-            resolve(closedPort(portName, dataReader, NO_RESPONSE_REASON));
+            resolve(createClosedPort(portName, dataReader, NO_RESPONSE_REASON));
         }, MODEM_RESPONSE_TIMEOUT_MS);
         port.on('data', data => {
             const decodedData = data.toString('utf8');
@@ -59,7 +58,7 @@ const testPort = (portName, baudRate, dataReader) =>
                     clearTimeout(timeoutHandler);
                     port.removeAllListeners();
                     port.close();
-                    resolve(openPort(port, portName, baudRate));
+                    resolve(createOpenPort(portName, baudRate));
                 }
             });
         });
@@ -75,7 +74,7 @@ const connectToPort = async (portName, dataReader) => {
             }
         } catch (e) {}
     }
-    return closedPort(portName, dataReader, NO_RESPONSE_REASON);
+    return createClosedPort(portName, dataReader, NO_RESPONSE_REASON);
 };
 
 const connectToPorts = async ports =>
@@ -90,7 +89,7 @@ const scanPorts = () =>
             const allowedVendorIds = getVendorIds();
             const eligibleSimtronPorts = serialPorts
                 .filter(portData => isEligiblePort(portData, allowedVendorIds))
-                .map(({comName}) => closedPort(comName, undefined, NO_TRIED_REASON));
+                .map(({comName}) => createClosedPort(comName, undefined, NO_TRIED_REASON));
             clearTimeout(timeoutHandler);
             resolve(eligibleSimtronPorts);
         });

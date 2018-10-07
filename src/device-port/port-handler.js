@@ -1,3 +1,4 @@
+import SerialPort from 'serialport';
 import createDataChunkReader from './data-chunk';
 import logger from '../logger';
 import {getDevicesCommandsTimeout, getDevicesCommandsResolveDelay} from '../config';
@@ -60,7 +61,10 @@ const debugCompleteMessageReceived = (portId, lines) => {
 const resolveCommand = (commandHandler, commandResponse) =>
     setTimeout(() => commandHandler.resolve(commandResponse), getDevicesCommandsResolveDelay());
 
-const createPortHandler = ({port, portName, baudRate}) => {
+const createPortHandler = ({portName, baudRate}) => {
+
+    const port = new SerialPort(portName, {baudRate});
+
     const portHandler = {
         port,
         portId: portName,
@@ -103,8 +107,6 @@ const createPortHandler = ({port, portName, baudRate}) => {
     };
 
     const dataReader = createDataChunkReader();
-
-    port.open();
 
     port.on('data', data => {
         const decodedData = data.toString('utf8');

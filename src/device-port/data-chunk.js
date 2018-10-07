@@ -1,3 +1,18 @@
+
+const allowedLinePrefixes = [
+    'AT',
+    'OK',
+    'ERROR',
+    '+CMS ERROR',
+    '+CME ERROR',
+    '+CMT',
+    '+CREG:',
+];
+
+const SMS_PDU_MIN_LENGTH = 20;
+
+const isValidLine = line => allowedLinePrefixes.some(prefix => line.startsWith(prefix)) || line.length >= SMS_PDU_MIN_LENGTH;
+
 const createDataChunkReader = () => ({
     serialLineBuffer: '',
 
@@ -9,7 +24,7 @@ const createDataChunkReader = () => ({
             if (charCode != 10 && charCode != 13) {
                 this.serialLineBuffer += dataChunk.charAt(i);
             } else {
-                if (this.serialLineBuffer !== '') {
+                if (isValidLine(this.serialLineBuffer)) {
                     onEndOfLineReceived(this.serialLineBuffer);
                 }
                 this.serialLineBuffer = '';
