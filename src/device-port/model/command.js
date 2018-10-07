@@ -13,10 +13,6 @@ export const createEnableSmsNotificationsCommand = () => ({
     command: 'AT+CNMI=2,2,0,0,0',
 });
 
-export const createDisableSmsNotificationsCommand = () => ({
-    command: 'AT+CNMI=2,0,0,0,0',
-});
-
 export const createReadIccCommand = () => ({
     command: 'AT+CCID',
     responseParser: responseLines => {
@@ -34,10 +30,6 @@ export const createReadIccCommand = () => ({
 
 export const createEnableNetworkStatusNotificationsCommand = () => ({
     command: 'AT+CREG=1',
-});
-
-export const createDisableNetworkStatusNotificationsCommand = () => ({
-    command: 'AT+CREG=0',
 });
 
 export const createGetNetworkStatusCommand = () => ({

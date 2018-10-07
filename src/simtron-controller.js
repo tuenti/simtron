@@ -6,8 +6,6 @@ import {
     createReadIccCommand,
     createGetNetworkStatusCommand,
     createEnableNetworkStatusNotificationsCommand,
-    createDisableSmsNotificationsCommand,
-    createDisableNetworkStatusNotificationsCommand,
 } from './device-port/model/command';
 import createSimCatalog from './sim-card/catalog';
 import { NEW_SMS_NOTIFICATION_ID, NETWORK_STATUS_NOTIFICATION_ID } from './device-port/model/notification';
