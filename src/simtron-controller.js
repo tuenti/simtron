@@ -1,4 +1,4 @@
-import {createBootingMessage, createBootDoneMessage} from './bot/message/model';
+import {createBootingMessage, createBootDoneMessage} from './bot/model/message';
 import {
     createSetEchoModeCommand,
     createEnableNotificationsCommand,

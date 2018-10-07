@@ -1,6 +1,6 @@
 import {RTMClient, WebClient} from '@slack/client';
 import logger from '../../logger';
-import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE} from '../message/message-type';
+import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE} from '../model/message-type';
 import { getDevelopmentSlackChannelName } from '../../config';
 
 const MESSAGE_TYPE_PLAIN = 'plain';
