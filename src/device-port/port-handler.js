@@ -23,7 +23,7 @@ const createCommandResponse = (isSuccessful, commandHandler, responseLines) => (
     ...parseCommandResponse(isSuccessful, responseLines, commandHandler.responseParser),
 });
 
-const isNotificationStartLine = line => notifications.find(notification => line.startsWith(notification.id));
+const isNotificationStartLine = (line, ongoingCommand) => !ongoingCommand && notifications.find(notification => line.startsWith(notification.id));
 
 const isNotificationEndLine = (line, ongoingNotification) =>
     line === notificationEndCommand.command && ongoingNotification !== null;
@@ -78,7 +78,7 @@ const createPortHandler = ({port, portName, baudRate}) => {
                 port.write(`${commandHandler.command}\r`);
                 if (waitForResponse) {
                     const handleCommandTimedOut = () => {
-                        reject();
+                        reject(commandHandler.command);
                         this.ongoingCommand = null;
                     };
                     this.ongoingCommand = createOngoingCommandResolver(
@@ -102,7 +102,7 @@ const createPortHandler = ({port, portName, baudRate}) => {
         dataReader.read(decodedData, line => {
             portHandler.responseLines.push(line);
 
-            if (isNotificationStartLine(line)) {
+            if (isNotificationStartLine(line, portHandler.ongoingCommand)) {
                 portHandler.ongoingNotification = notifications.find(n => line.startsWith(n.id));
                 portHandler.sendCommand(notificationEndCommand, {waitForResponse: false});
             } else if (isNotificationEndLine(line, portHandler.ongoingNotification)) {

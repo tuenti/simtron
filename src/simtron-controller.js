@@ -1,11 +1,11 @@
 import {createBootingMessage, createBootDoneMessage} from './bot/model/message';
 import {
     createSetEchoModeCommand,
-    createEnableNotificationsCommand,
+    createEnableSmsNotificationsCommand,
     createSetSmsPduModeCommand,
-    createEnableSmsUnsolicitedNotificationsCommand,
     createReadIccCommand,
     createGetNetworkStatusCommand,
+    createEnableNetworkStatusNotificationsCommand,
 } from './device-port/model/command';
 import createSimCatalog from './sim-card/catalog';
 
@@ -35,21 +35,21 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                 const setEchoModeCommandResponse = await portHandler.sendCommand(
                     createSetEchoModeCommand(true)
                 );
-                const enableNotificationsCommandResponse = await portHandler.sendCommand(
-                    createEnableNotificationsCommand()
-                );
-                const setEnableSmsUnsolicitedNotificationsCommandResponse = await portHandler.sendCommand(
-                    createEnableSmsUnsolicitedNotificationsCommand()
+                const enableSmsNotificationsCommandResponse = await portHandler.sendCommand(
+                    createEnableSmsNotificationsCommand()
                 );
                 const setSmsPduModeCommandResponse = await portHandler.sendCommand(
                     createSetSmsPduModeCommand()
                 );
+                const enableNetworkStatusNotificationsCommandResponse = await portHandler.sendCommand(
+                    createEnableNetworkStatusNotificationsCommand()
+                )
                 portHandler.addListener(handlePortIncomingNotification);
                 return (
                     setEchoModeCommandResponse.isSuccessful &&
-                    enableNotificationsCommandResponse.isSuccessful &&
+                    enableSmsNotificationsCommandResponse.isSuccessful &&
                     setSmsPduModeCommandResponse &&
-                    setEnableSmsUnsolicitedNotificationsCommandResponse
+                    enableNetworkStatusNotificationsCommandResponse
                 );
             })
         );

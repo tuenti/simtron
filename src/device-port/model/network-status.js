@@ -25,3 +25,8 @@ const networkStatusName = {
 };
 
 export const getNetworkStatusName = networkStatus => networkStatusName[networkStatus];
+
+export const createNetworkStatus = networkStatusId => ({
+    id: networkStatusId,
+    name: getNetworkStatusName(networkStatusId),
+})

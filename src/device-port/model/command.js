@@ -1,7 +1,5 @@
-import { getNetworkStatusName } from "./network-status";
-
-const ICC_LINE_PREFIX = '+CCID:';
-const NETWORK_STATUS_LINE_PREFIX = '+CREG:';
+import { createNetworkStatus } from "./network-status";
+import { ICC_LINE_PREFIX, NETWORK_STATUS_LINE_PREFIX } from "./parser-token";
 
 export const createReadVendorCommand = () => ({
     command: 'AT+CGMI',
@@ -11,8 +9,8 @@ export const createSetEchoModeCommand = enable => ({
     command: `ATE${enable ? '1' : '0'}`,
 });
 
-export const createEnableNotificationsCommand = () => ({
-    command: 'AT+CNMI=1,2,0,0,0',
+export const createEnableSmsNotificationsCommand = () => ({
+    command: 'AT+CNMI=2,2,0,0,0',
 });
 
 export const createReadIccCommand = () => ({
@@ -30,6 +28,10 @@ export const createReadIccCommand = () => ({
     },
 });
 
+export const createEnableNetworkStatusNotificationsCommand = () => ({
+    command: 'AT+CREG=1',
+});
+
 export const createGetNetworkStatusCommand = () => ({
     command: 'AT+CREG?',
     responseParser: responseLines => {
@@ -39,18 +41,11 @@ export const createGetNetworkStatusCommand = () => ({
         if (statusLine) {
             const networkStatus = statusLine.match(/\d+$/g)[0];
             return {
-                networkStatus: {
-                    id: networkStatus,
-                    name: getNetworkStatusName(networkStatus),
-                }
+                networkStatus: createNetworkStatus(networkStatus)
             };
         }
         return {};
     },
-});
-
-export const createEnableSmsUnsolicitedNotificationsCommand = () => ({
-    command: 'AT+CNMI=2,2',
 });
 
 export const createSetSmsPduModeCommand = () => ({
