@@ -47,8 +47,8 @@ const createNotificationFromLines = (notification, notificationLines) => {
 };
 
 const triggerNotificationReceived = (portHandler, notification) => {
-    portHandler.listeners.forEach(listener => {
-        listener(portHandler, notification);
+    portHandler.listeners.forEach(async listener => {
+        await listener(portHandler, notification);
     });
 };
 
@@ -108,7 +108,7 @@ const createPortHandler = ({portName, baudRate}) => {
 
     const dataReader = createDataChunkReader();
 
-    port.on('data', data => {
+    port.on('data', async data => {
         const decodedData = data.toString('utf8');
         dataReader.read(decodedData, line => {
             portHandler.responseLines.push(line);
@@ -121,8 +121,8 @@ const createPortHandler = ({portName, baudRate}) => {
                     portHandler.ongoingNotification,
                     portHandler.responseLines
                 );
-                triggerNotificationReceived(portHandler, notification);
                 debugCompleteMessageReceived(portHandler.portId, portHandler.responseLines);
+                triggerNotificationReceived(portHandler, notification);
             } else if (isCommandExecutionStatusLine(line)) {
                 if (portHandler.ongoingNotification) {
                     portHandler.ongoingNotification = null;
@@ -133,8 +133,8 @@ const createPortHandler = ({portName, baudRate}) => {
                             portHandler.ongoingCommand.commandHandler,
                             portHandler.responseLines
                         );
-                        resolveCommand(portHandler.ongoingCommand, commandResponse);
                         debugCompleteMessageReceived(portHandler.portId, portHandler.responseLines);
+                        resolveCommand(portHandler.ongoingCommand, commandResponse);
                     }
                 }
                 portHandler.responseLines = [];
