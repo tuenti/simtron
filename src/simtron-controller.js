@@ -4,9 +4,15 @@ import {
     createEnableNotificationsCommand,
     createSetSmsPduModeCommand,
     createEnableSmsUnsolicitedNotificationsCommand,
-} from './device-port/command/model';
+    createReadIccCommand,
+    createGetNetworkStatusCommand,
+} from './device-port/model/command';
+import createSimCatalog from './sim-card/catalog';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
+
+    const simCatalog = createSimCatalog();
+
     const handlePortIncomingNotification = (port, notification) => {
         console.log({port: port.portId, notification: notification});
     };
@@ -32,11 +38,11 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                 const enableNotificationsCommandResponse = await portHandler.sendCommand(
                     createEnableNotificationsCommand()
                 );
-                const setSmsPduModeCommandResponse = await portHandler.sendCommand(
-                    createSetSmsPduModeCommand()
-                );
                 const setEnableSmsUnsolicitedNotificationsCommandResponse = await portHandler.sendCommand(
                     createEnableSmsUnsolicitedNotificationsCommand()
+                );
+                const setSmsPduModeCommandResponse = await portHandler.sendCommand(
+                    createSetSmsPduModeCommand()
                 );
                 portHandler.addListener(handlePortIncomingNotification);
                 return (
@@ -46,6 +52,30 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                     setEnableSmsUnsolicitedNotificationsCommandResponse
                 );
             })
+        );
+    };
+
+    const updateSimStatus = async portHandler => {
+        const readIccCommandResponse = await portHandler.sendCommand(createReadIccCommand());
+        if (readIccCommandResponse.isSuccessful) {
+            const getNetworkStatusCommandResponse = await portHandler.sendCommand(createGetNetworkStatusCommand());
+            if (getNetworkStatusCommandResponse.isSuccessful) {
+                simCatalog.setSimInUse(
+                    readIccCommandResponse.icc,
+                    getNetworkStatusCommandResponse.networkStatus,
+                    portHandler.portId
+                );
+                console.log(simCatalog.getAllSimsInUse());
+            }
+        }
+        return {
+            success: readIccCommandResponse.isSuccessful
+        };
+    };
+
+    const updateAllInUseSims = async devicePortHandlers => {
+        return Promise.all(
+            devicePortHandlers.map(updateSimStatus)
         );
     };
 
@@ -59,7 +89,8 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
             sendMessageOnAllBots(bots, createBootingMessage());
             this.devicePortHandlers = await devicePortsFactory.createPorts();
             sendMessageOnAllBots(bots, createBootDoneMessage());
-            return await initializeDevices(this.devicePortHandlers);
+            await initializeDevices(this.devicePortHandlers);
+            await updateAllInUseSims(this.devicePortHandlers);
         },
     };
 };

@@ -1,4 +1,4 @@
-var JsonDB = require('node-json-db');
+import JsonDB from 'node-json-db';
 
 const CONFIG_DB_FILE = 'data/config';
 
