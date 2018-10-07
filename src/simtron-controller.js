@@ -65,7 +65,6 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                     getNetworkStatusCommandResponse.networkStatus,
                     portHandler.portId
                 );
-                console.log(simCatalog.getAllSimsInUse());
             }
         }
         return {
