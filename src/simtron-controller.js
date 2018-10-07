@@ -10,13 +10,27 @@ import {
     createDisableNetworkStatusNotificationsCommand,
 } from './device-port/model/command';
 import createSimCatalog from './sim-card/catalog';
+import { NEW_SMS_NOTIFICATION_ID, NETWORK_STATUS_NOTIFICATION_ID } from './device-port/model/notification';
+import logger from './logger';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
 
     const simCatalog = createSimCatalog();
 
     const handlePortIncomingNotification = (port, notification) => {
-        console.log({port: port.portId, notification: notification});
+        switch (notification.id) {
+            case NEW_SMS_NOTIFICATION_ID:
+                logger.debug(
+                    `Sms received on port: ${port.portId}, from: ${notification.senderMsisdn}, text: ${notification.smsText}`
+                );
+            break;
+            case NETWORK_STATUS_NOTIFICATION_ID:
+                logger.debug(
+                    `Network status received on port: ${port.portId}, new status: ${notification.networkStatus.name}`
+                );
+                simCatalog.updateSimNetworkStatus(notification.networkStatus, port.portId);
+            break;
+        }
     };
 
     const startBots = async bots =>

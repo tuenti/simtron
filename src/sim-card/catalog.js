@@ -64,6 +64,13 @@ const createSimCatalog = () => ({
             logger.error(Error(INVALID_ICC, `Invalid icc: ${icc}`));
         }
     },
+
+    updateSimNetworkStatus(networkStatus, portId) {
+        const sim = this.inUse[portId];
+        if (sim) {
+            this.setSimInUse(sim.icc, networkStatus, portId);
+        }
+    },
 });
 
 export default createSimCatalog;
