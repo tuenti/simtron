@@ -1,17 +1,11 @@
+import logger from '../logger';
 
-const allowedLinePrefixes = [
-    'AT',
-    'OK',
-    'ERROR',
-    '+CMS ERROR',
-    '+CME ERROR',
-    '+CMT',
-    '+CREG:',
-];
+const allowedLinePrefixes = ['AT', 'OK', 'ERROR', '+CMS ERROR', '+CME ERROR', '+CMT', '+CREG:'];
 
 const SMS_PDU_MIN_LENGTH = 20;
 
-const isValidLine = line => allowedLinePrefixes.some(prefix => line.startsWith(prefix)) || line.length >= SMS_PDU_MIN_LENGTH;
+const isValidLine = line =>
+    allowedLinePrefixes.some(prefix => line.startsWith(prefix)) || line.length >= SMS_PDU_MIN_LENGTH;
 
 const createDataChunkReader = () => ({
     serialLineBuffer: '',
@@ -26,6 +20,8 @@ const createDataChunkReader = () => ({
             } else {
                 if (isValidLine(this.serialLineBuffer)) {
                     onEndOfLineReceived(this.serialLineBuffer);
+                } else if (this.serialLineBuffer.length > 0) {
+                    logger.debug(`Receiving unsupported line: ${this.serialLineBuffer}`);
                 }
                 this.serialLineBuffer = '';
             }

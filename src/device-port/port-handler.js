@@ -24,7 +24,8 @@ const createCommandResponse = (isSuccessful, commandHandler, responseLines) => (
     ...parseCommandResponse(isSuccessful, responseLines, commandHandler.responseParser),
 });
 
-const isNotificationStartLine = (line, ongoingCommand) => !ongoingCommand && notifications.find(notification => line.startsWith(notification.id));
+const isNotificationStartLine = (line, ongoingCommand) =>
+    !ongoingCommand && notifications.find(notification => line.startsWith(notification.id));
 
 const isNotificationEndLine = (line, ongoingNotification) =>
     line === notificationEndCommand.command && ongoingNotification !== null;
@@ -43,7 +44,7 @@ const createNotificationFromLines = (notification, notificationLines) => {
     return {
         id: notification.id,
         ...notificationPayload,
-    }
+    };
 };
 
 const triggerNotificationReceived = (portHandler, notification) => {
@@ -62,13 +63,11 @@ const resolveCommand = (commandHandler, commandResponse) =>
     setTimeout(() => commandHandler.resolve(commandResponse), getDevicesCommandsResolveDelay());
 
 const createPortHandler = ({portName, baudRate}) => {
-
     const port = new SerialPort(portName, {baudRate});
 
     const portHandler = {
         port,
         portId: portName,
-        baudRate,
 
         ongoingCommand: null,
         ongoingNotification: null,

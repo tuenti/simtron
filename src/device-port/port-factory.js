@@ -6,6 +6,7 @@ import logger from '../logger';
 import {getVendorIds, getPortScanMaxRetriesCount} from '../config';
 import createPortHandler from './port-handler';
 import {createReadVendorCommand} from './model/command';
+import createMessageQueue from './command-queue';
 
 const MODEM_ID_COMMAND = createReadVendorCommand().command;
 
@@ -132,7 +133,8 @@ export default {
         }
 
         return connectedPorts.map(portData => {
-            return createPortHandler(portData);
+            const portHandler = createPortHandler(portData);
+            return createMessageQueue(portHandler);
         });
     },
 };
