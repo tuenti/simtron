@@ -133,6 +133,7 @@ export default {
         }
 
         return connectedPorts.map(portData => {
+            logger.debug(`Creating instance of port with id: '${portData.portName}' and baud rate: ${portData.baudRate}`);
             const portHandler = createPortHandler(portData);
             return createMessageQueue(portHandler);
         });

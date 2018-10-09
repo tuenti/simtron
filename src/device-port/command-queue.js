@@ -1,8 +1,8 @@
 import logger from '../logger';
 import Error from '../error';
 
-const createMessageQueue = portHandler => {
-    const messageQueue = {
+const createCommandQueue = portHandler => {
+    const commandQueue = {
         portId: portHandler.portId,
         portHandler,
 
@@ -11,16 +11,17 @@ const createMessageQueue = portHandler => {
         addListener(listener) {
             portHandler.addListener(listener);
         },
+
         clearListeners() {
             portHandler.clearListeners();
         },
 
-        sendCommand(commandHandler, options = {}) {
+        sendCommand(commandHandler) {
             const result = new Promise((resolve, reject) => {
                 this.lastCommandToExecute
                     .finally(() => {
                         this.portHandler
-                            .sendCommand(commandHandler, options)
+                            .sendCommand(commandHandler)
                             .then(resolve)
                             .catch(reject);
                     })
@@ -35,7 +36,7 @@ const createMessageQueue = portHandler => {
         },
     };
 
-    return messageQueue;
+    return commandQueue;
 };
 
-export default createMessageQueue;
+export default createCommandQueue;

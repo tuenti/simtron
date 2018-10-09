@@ -90,10 +90,6 @@ const replaceNonStandardGsmChars = smsText => {
     return result;
 };
 
-/**
- * This function fixes some issues related to the used GSM7 library
- * @param {*} smsText
- */
 const removeUnicodeNullChars = smsText => smsText.replace(/[\u0000]/g, '');
 
 export default pduContent => {
