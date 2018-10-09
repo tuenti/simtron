@@ -3,9 +3,6 @@ import createDataChunkReader from './data-chunk';
 import logger from '../logger';
 import {getDevicesCommandsTimeout, getDevicesCommandsResolveDelay} from '../config';
 import notifications from './model/notification';
-import {createReadVendorCommand} from './model/command';
-
-const notificationEndCommand = createReadVendorCommand();
 
 const createOngoingCommandResolver = (commandHandler, resolve, reject, timeoutCallback) => ({
     commandHandler,

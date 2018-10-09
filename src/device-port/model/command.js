@@ -1,10 +1,6 @@
 import { createNetworkStatus } from "./network-status";
 import { ICC_LINE_PREFIX, NETWORK_STATUS_LINE_PREFIX } from "./parser-token";
 
-export const createReadVendorCommand = () => ({
-    command: 'AT+CGMI',
-});
-
 export const createSetEchoModeCommand = enable => ({
     command: `ATE${enable ? '1' : '0'}`,
 });

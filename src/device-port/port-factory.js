@@ -5,10 +5,10 @@ import Error, {NON_RESPONSIVE_PORTS} from '../error';
 import logger from '../logger';
 import {getVendorIds, getPortScanMaxRetriesCount} from '../config';
 import createPortHandler from './port-handler';
-import {createReadVendorCommand} from './model/command';
 import createMessageQueue from './command-queue';
 
-const MODEM_ID_COMMAND = createReadVendorCommand().command;
+const MODEM_DETECTION_COMMAND = 'AT';
+const MODEM_DETECTION_RESPONSE = 'AT';
 
 const portBaudRates = [9600, 115200, 14400, 19200, 38400, 57600, 128000, 256000];
 const NO_RESPONSE_REASON = 'no-response';
@@ -55,7 +55,7 @@ const testPort = (portName, baudRate, dataReader) =>
         port.on('data', data => {
             const decodedData = data.toString('utf8');
             dataReader.read(decodedData, line => {
-                if (line === MODEM_ID_COMMAND) {
+                if (line === MODEM_DETECTION_RESPONSE) {
                     clearTimeout(timeoutHandler);
                     port.removeAllListeners();
                     port.close();
@@ -63,7 +63,7 @@ const testPort = (portName, baudRate, dataReader) =>
                 }
             });
         });
-        port.write(`${MODEM_ID_COMMAND}\r`);
+        port.write(`${MODEM_DETECTION_COMMAND}\r`);
     });
 
 const connectToPort = async (portName, dataReader) => {
