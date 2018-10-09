@@ -15,6 +15,8 @@ const createOngoingCommandResolver = (commandHandler, resolve, reject, timeoutCa
     timeoutCallback,
 });
 
+const createOngoingNotification = notification => ({...notification});
+
 const parseCommandResponse = (isSuccessful, responseLines, responseParser) =>
     responseParser && isSuccessful ? responseParser(responseLines) : {};
 
@@ -24,11 +26,14 @@ const createCommandResponse = (isSuccessful, commandHandler, responseLines) => (
     ...parseCommandResponse(isSuccessful, responseLines, commandHandler.responseParser),
 });
 
-const isNotificationStartLine = (line, ongoingCommand) =>
-    !ongoingCommand && notifications.find(notification => line.startsWith(notification.id));
+const isNotificationStartLine = (line, ongoingNotification) =>
+    !ongoingNotification && notifications.find(notification => line.startsWith(notification.id));
 
-const isNotificationEndLine = (line, ongoingNotification) =>
-    line === notificationEndCommand.command && ongoingNotification !== null;
+const isNotificationLine = (line, ongoingCommand, ongoingNotification) =>
+    !ongoingCommand && (ongoingNotification || isNotificationStartLine(line));
+
+const isNotificationEndLine = ongoingNotification =>
+    ongoingNotification && ongoingNotification.lineCount === 1;
 
 const isCommandExecutionStatusLine = line =>
     line === 'OK' || line === 'ERROR' || line.startsWith('+CMS ERROR');
@@ -39,7 +44,6 @@ const isOngoingCommandResponse = (ongoingCommand, responseLines) =>
     ongoingCommand && responseLines.length > 0 && responseLines[0] === ongoingCommand.commandHandler.command;
 
 const createNotificationFromLines = (notification, notificationLines) => {
-    notificationLines.pop();
     const notificationPayload = notification.notificationParser(notificationLines);
     return {
         id: notification.id,
@@ -71,7 +75,8 @@ const createPortHandler = ({portName, baudRate}) => {
 
         ongoingCommand: null,
         ongoingNotification: null,
-        responseLines: [],
+        commandResponseLines: [],
+        notificationLines: [],
 
         listeners: [],
 
@@ -110,33 +115,40 @@ const createPortHandler = ({portName, baudRate}) => {
     port.on('data', async data => {
         const decodedData = data.toString('utf8');
         dataReader.read(decodedData, line => {
-            portHandler.responseLines.push(line);
-
-            if (isNotificationStartLine(line, portHandler.ongoingCommand)) {
-                portHandler.ongoingNotification = notifications.find(n => line.startsWith(n.id));
-                portHandler.sendCommand(notificationEndCommand, {waitForResponse: false});
-            } else if (isNotificationEndLine(line, portHandler.ongoingNotification)) {
-                const notification = createNotificationFromLines(
-                    portHandler.ongoingNotification,
-                    portHandler.responseLines
-                );
-                debugCompleteMessageReceived(portHandler.portId, portHandler.responseLines);
-                triggerNotificationReceived(portHandler, notification);
-            } else if (isCommandExecutionStatusLine(line)) {
-                if (portHandler.ongoingNotification) {
-                    portHandler.ongoingNotification = null;
-                } else {
-                    if (isOngoingCommandResponse(portHandler.ongoingCommand, portHandler.responseLines)) {
-                        const commandResponse = createCommandResponse(
-                            isSuccessfulStatusLine(line),
-                            portHandler.ongoingCommand.commandHandler,
-                            portHandler.responseLines
-                        );
-                        debugCompleteMessageReceived(portHandler.portId, portHandler.responseLines);
-                        resolveCommand(portHandler.ongoingCommand, commandResponse);
-                    }
+            if (isNotificationLine(line, portHandler.ongoingCommand, portHandler.ongoingNotification)) {
+                portHandler.notificationLines.push(line);
+                if (isNotificationStartLine(line, portHandler.ongoingNotification)) {
+                    portHandler.ongoingNotification = createOngoingNotification(
+                        notifications.find(n => line.startsWith(n.id))
+                    );
                 }
-                portHandler.responseLines = [];
+                if (isNotificationEndLine(portHandler.ongoingNotification)) {
+                    const notification = createNotificationFromLines(
+                        portHandler.ongoingNotification,
+                        portHandler.notificationLines
+                    );
+                    debugCompleteMessageReceived(portHandler.portId, portHandler.notificationLines);
+                    triggerNotificationReceived(portHandler, notification);
+                    portHandler.ongoingNotification = null;
+                    portHandler.notificationLines = [];
+                } else {
+                    portHandler.ongoingNotification.lineCount--;
+                }
+            } else {
+                if (isCommandExecutionStatusLine(line, portHandler.ongoingCommand)) {
+                    portHandler.commandResponseLines.push(line);
+                    const commandResponse = createCommandResponse(
+                        isSuccessfulStatusLine(line),
+                        portHandler.ongoingCommand.commandHandler,
+                        portHandler.commandResponseLines
+                    );
+                    debugCompleteMessageReceived(portHandler.portId, portHandler.commandResponseLines);
+                    resolveCommand(portHandler.ongoingCommand, commandResponse);
+                    portHandler.ongoingCommand = null;
+                    portHandler.commandResponseLines = [];
+                } else {
+                    portHandler.commandResponseLines.push(line);
+                }
             }
         });
     });

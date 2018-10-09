@@ -1,8 +1,8 @@
 import logger from '../logger';
 
-const allowedLinePrefixes = ['AT', 'OK', 'ERROR', '+CMS ERROR', '+CME ERROR', '+CMT', '+CREG:'];
+const allowedLinePrefixes = ['AT', 'OK', 'ERROR', '+CMS ERROR', '+CME ERROR', '+CMT', '+CREG:', '+CCID'];
 
-const SMS_PDU_MIN_LENGTH = 20;
+const SMS_PDU_MIN_LENGTH = 50;
 
 const isValidLine = line =>
     allowedLinePrefixes.some(prefix => line.startsWith(prefix)) || line.length >= SMS_PDU_MIN_LENGTH;

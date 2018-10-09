@@ -24,7 +24,7 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                 const {senderMsisdn, time, smsText} = notification;
                 logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
                 receivedSms.addSms(senderMsisdn, time, smsText, portId);
-                await port.sendCommand(createDeleteAllSmsCommand());
+                port.sendCommand(createDeleteAllSmsCommand());
                 break;
             case NETWORK_STATUS_NOTIFICATION_ID:
                 const {networkStatus} = notification;
@@ -38,7 +38,7 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
         }
     };
 
-    const startBots = async bots =>
+    const startBots = bots =>
         Promise.all(
             bots.map(bot => {
                 return bot.start();
@@ -51,21 +51,14 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
         });
 
     const initializeDevice = async portHandler => {
-        const setEchoModeCommandResponse = await portHandler.sendCommand(createSetEchoModeCommand(true));
-        const setSmsPduModeCommandResponse = await portHandler.sendCommand(createSetSmsPduModeCommand());
-        const enableSmsNotificationsCommandResponse = await portHandler.sendCommand(
-            createEnableSmsNotificationsCommand()
-        );
-        const enableNetworkStatusNotificationsCommandResponse = await portHandler.sendCommand(
-            createEnableNetworkStatusNotificationsCommand()
-        );
+        const commandsSucceeded = await Promise.all([
+            portHandler.sendCommand(createSetEchoModeCommand(true)),
+            portHandler.sendCommand(createSetSmsPduModeCommand()),
+            portHandler.sendCommand(createEnableSmsNotificationsCommand()),
+            portHandler.sendCommand(createEnableNetworkStatusNotificationsCommand()),
+        ]);
         portHandler.addListener(handlePortIncomingNotification);
-        return (
-            setEchoModeCommandResponse.isSuccessful &&
-            setSmsPduModeCommandResponse.isSuccessful &&
-            enableSmsNotificationsCommandResponse.isSuccessful &&
-            enableNetworkStatusNotificationsCommandResponse.isSuccessful
-        );
+        return commandsSucceeded.every(command => command.isSuccessful);
     };
 
     const updateSimStatus = async portHandler => {
@@ -87,13 +80,11 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
         };
     };
 
-    const initializeAllDevices = async devicePortHandlers => {
-        return Promise.all(devicePortHandlers.map(initializeDevice));
-    };
+    const initializeAllDevices = async devicePortHandlers =>
+        Promise.all(devicePortHandlers.map(initializeDevice));
 
-    const updateAllInUseSims = async devicePortHandlers => {
-        return Promise.all(devicePortHandlers.map(updateSimStatus));
-    };
+    const updateAllInUseSims = async devicePortHandlers =>
+        Promise.all(devicePortHandlers.map(updateSimStatus));
 
     return {
         devicePortHandlers: [],
@@ -107,8 +98,6 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
             await initializeAllDevices(this.devicePortHandlers);
             await updateAllInUseSims(this.devicePortHandlers);
             sendMessageOnAllBots(bots, createBootDoneMessage());
-
-            return true;
         },
     };
 };
