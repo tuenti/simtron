@@ -1,25 +1,22 @@
 import {createBootingMessage, createBootDoneMessage} from './bot/model/message';
-import {
-    createSetEchoModeCommand,
-    createEnableSmsNotificationsCommand,
-    createSetSmsPduModeCommand,
-    createEnableNetworkStatusNotificationsCommand,
-    createDeleteAllSmsCommand,
-} from './device-port/model/command';
+import {createDeleteAllSmsCommand} from './device-port/model/command';
 import createSimCatalog from './store/sim-card/catalog';
 import createSimStatusHandler from './sim-status-handler';
 import {NEW_SMS_NOTIFICATION_ID, NETWORK_STATUS_NOTIFICATION_ID, SIM_RETURNED_TO_MAIN_MENU_ID} from './device-port/model/notification';
 import logger from './logger';
 import createSmsStore from './store/sms/received-sms';
-import {getStatusRequestScheduleTime} from './config';
+import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
-    const simCatalog = createSimCatalog();
-    const simStatusHandler = createSimStatusHandler(simCatalog);
+    const simStatusHandler = createSimStatusHandler(createSimCatalog());
     const receivedSms = createSmsStore();
 
-    const handlePortIncomingNotification = async (port, notification) => {
-        const {portId} = port;
+    let devicePortHandlers = [];
+
+    const findPortById = portId => devicePortHandlers.find(portHandler => portHandler.portId === portId);
+
+    const handlePortIncomingNotification = async (portId, notification) => {
+        const port = findPortById(portId);
         switch (notification.id) {
             case NEW_SMS_NOTIFICATION_ID:
                 const {senderMsisdn, time, smsText} = notification;
@@ -40,9 +37,14 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                 logger.debug(
                     `Sim returned to main menu notification received on port: ${portId}`
                 );
-                simStatusHandler.scheduleStatusRequest(port, getStatusRequestScheduleTime());
+                simStatusHandler.scheduleDeviceInit(port, getSimStatusRequestScheduleTime());
                 break;
         }
+    };
+
+    const initializePort = async portHandler => {
+        await simStatusHandler.scheduleDeviceInit(portHandler);
+        portHandler.addListener(handlePortIncomingNotification);
     };
 
     const startBots = bots =>
@@ -57,34 +59,22 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
             return bot.sendMessage(message);
         });
 
-    const initializeDevice = async portHandler => {
-        const commandsSucceeded = await Promise.all([
-            portHandler.sendCommand(createSetEchoModeCommand(true)),
-            portHandler.sendCommand(createSetSmsPduModeCommand()),
-            portHandler.sendCommand(createEnableSmsNotificationsCommand()),
-            portHandler.sendCommand(createEnableNetworkStatusNotificationsCommand()),
-        ]);
-        portHandler.addListener(handlePortIncomingNotification);
-        return commandsSucceeded.every(command => command.isSuccessful);
-    };
+    const initializeAllPorts = async devicePortHandlers =>
+        Promise.all(devicePortHandlers.map(initializePort));
 
-    const initializeAllDevices = async devicePortHandlers =>
-        Promise.all(devicePortHandlers.map(initializeDevice));
-
-    const updateAllInUseSims = async devicePortHandlers =>
-        Promise.all(devicePortHandlers.map(simStatusHandler.scheduleStatusRequest));
+    const startSimStatusPolling = (devicePortHandlers, pollingTime) => {
+        setInterval(() => {
+            Promise.all(devicePortHandlers.map(simStatusHandler.scheduleDeviceInit));
+        }, pollingTime);
+    }
 
     return {
-        devicePortHandlers: [],
-        simsCatalog,
-        bots,
-
         async start() {
             await startBots(bots);
             sendMessageOnAllBots(bots, createBootingMessage());
-            this.devicePortHandlers = await devicePortsFactory.createPorts();
-            await initializeAllDevices(this.devicePortHandlers);
-            await updateAllInUseSims(this.devicePortHandlers);
+            devicePortHandlers = await devicePortsFactory.createPorts();
+            await initializeAllPorts(devicePortHandlers);
+            await startSimStatusPolling(devicePortHandlers, getSimStatusPollingTime());
             sendMessageOnAllBots(bots, createBootDoneMessage());
         },
     };

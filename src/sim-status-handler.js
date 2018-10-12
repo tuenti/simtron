@@ -1,33 +1,59 @@
-import {createReadIccCommand, createGetNetworkStatusCommand} from './device-port/model/command';
+import {
+    createSetEchoModeCommand,
+    createEnableSmsNotificationsCommand,
+    createSetSmsPduModeCommand,
+    createEnableNetworkStatusNotificationsCommand,
+    createReadIccCommand,
+    createGetNetworkStatusCommand
+} from './device-port/model/command';
 
 const createSimStatusHandler = (simsCatalog) => {
 
-    let pendingStatusRequests = {};
+    let pendingRequests = {};
 
-    const updateSimStatus = async (portHandler, simsCatalog) => {
+    const initializeDevice = async portHandler => {
+        const commandsSucceeded = await Promise.all([
+            portHandler.sendCommand(createSetEchoModeCommand(true)),
+            portHandler.sendCommand(createSetSmsPduModeCommand()),
+            portHandler.sendCommand(createEnableSmsNotificationsCommand()),
+            portHandler.sendCommand(createEnableNetworkStatusNotificationsCommand()),
+        ]);
+        return commandsSucceeded.every(command => command.isSuccessful);
+    };
+
+    const updateSimStatus = async (portHandler) => {
         const readIccCommandResponse = await portHandler.sendCommand(createReadIccCommand());
         if (readIccCommandResponse.isSuccessful) {
             const getNetworkStatusCommandResponse = await portHandler.sendCommand(
                 createGetNetworkStatusCommand()
             );
             if (getNetworkStatusCommandResponse.isSuccessful) {
-                simsCatalog.setSimInUse(
-                    readIccCommandResponse.icc,
-                    getNetworkStatusCommandResponse.networkStatus,
-                    portHandler.portId
-                );
+                return {
+                    icc: readIccCommandResponse.icc,
+                    networkStatus: getNetworkStatusCommandResponse.networkStatus,
+                };
             }
         }
-        return {
-            success: readIccCommandResponse.isSuccessful,
-        };
+        return null;
     };
 
-    const scheduleStatusRequest = (portHandler, timeOutMs = 0) => {
-        if (!pendingStatusRequests[portHandler.portId] || timeOutMs === 0) {
-            pendingStatusRequests[portHandler.portId] = setTimeout(async () => {
-                await updateSimStatus(portHandler, simsCatalog);
-                pendingStatusRequests[portHandler.portId] = undefined;
+    const scheduleDeviceInit = (portHandler, timeOutMs = 0) => {
+        if (!pendingRequests[portHandler.portId] || timeOutMs === 0) {
+            pendingRequests[portHandler.portId] = setTimeout(async () => {
+                const deviceInitialized = await initializeDevice(portHandler);
+                if (deviceInitialized) {
+                    const simStatus = await updateSimStatus(portHandler);
+                    if (simStatus) {
+                        simsCatalog.setSimInUse(
+                            simStatus.icc,
+                            simStatus.networkStatus,
+                            portHandler.portId
+                        );
+                    } else {
+                        simsCatalog.setSimRemoved(portHandler.portId);
+                    }
+                }
+                pendingRequests[portHandler.portId] = undefined;
             }, timeOutMs);
         }
     };
@@ -36,7 +62,7 @@ const createSimStatusHandler = (simsCatalog) => {
         simsCatalog.updateSimNetworkStatus(networkStatus, portId);
 
     return {
-        scheduleStatusRequest,
+        scheduleDeviceInit,
         storeSimNetworkStatus,
     };
 }

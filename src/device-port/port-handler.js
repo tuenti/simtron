@@ -24,6 +24,11 @@ const createCommandResponse = (isSuccessful, commandHandler, responseLines) => (
     ...parseCommandResponse(isSuccessful, responseLines, commandHandler.responseParser),
 });
 
+const createCommandTimeoutResponse = command => ({
+    isSuccessful: false,
+    command,
+})
+
 const createNotificationFromLines = ({id, notificationParser}, notificationLines) => ({
     id,
     ...(notificationParser ? notificationParser(notificationLines) : {}),
@@ -45,7 +50,7 @@ const isSuccessfulStatusLine = line => line === 'OK';
 
 const triggerNotificationReceived = (portHandler, notification) => {
     portHandler.listeners.forEach(async listener => {
-        await listener(portHandler, notification);
+        await listener(portHandler.portId, notification);
     });
 };
 
@@ -129,7 +134,7 @@ const createPortHandler = ({portName, baudRate}) => {
             return new Promise((resolve, reject) => {
                 port.write(`${commandHandler.command}\r`);
                 const handleCommandTimedOut = () => {
-                    reject(commandHandler.command);
+                    reject(createCommandTimeoutResponse(commandHandler.command));
                     this.ongoingCommand = null;
                 };
                 this.ongoingCommand = createOngoingCommandResolver(

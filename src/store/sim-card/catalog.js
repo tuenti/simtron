@@ -65,6 +65,10 @@ const createSimCatalog = () => ({
         }
     },
 
+    setSimRemoved(portId) {
+        delete this.inUse[portId];
+    },
+
     updateSimNetworkStatus(networkStatus, portId) {
         const sim = this.inUse[portId];
         if (sim) {
