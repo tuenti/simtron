@@ -3,18 +3,19 @@ import {
     createSetEchoModeCommand,
     createEnableSmsNotificationsCommand,
     createSetSmsPduModeCommand,
-    createReadIccCommand,
-    createGetNetworkStatusCommand,
     createEnableNetworkStatusNotificationsCommand,
     createDeleteAllSmsCommand,
 } from './device-port/model/command';
 import createSimCatalog from './store/sim-card/catalog';
-import {NEW_SMS_NOTIFICATION_ID, NETWORK_STATUS_NOTIFICATION_ID} from './device-port/model/notification';
+import createSimStatusHandler from './sim-status-handler';
+import {NEW_SMS_NOTIFICATION_ID, NETWORK_STATUS_NOTIFICATION_ID, SIM_RETURNED_TO_MAIN_MENU_ID} from './device-port/model/notification';
 import logger from './logger';
 import createSmsStore from './store/sms/received-sms';
+import {getStatusRequestScheduleTime} from './config';
 
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
     const simCatalog = createSimCatalog();
+    const simStatusHandler = createSimStatusHandler(simCatalog);
     const receivedSms = createSmsStore();
 
     const handlePortIncomingNotification = async (port, notification) => {
@@ -33,7 +34,13 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                         notification.networkStatus.name
                     }`
                 );
-                simCatalog.updateSimNetworkStatus(networkStatus, portId);
+                simStatusHandler.storeSimNetworkStatus(networkStatus, portId);
+                break;
+            case SIM_RETURNED_TO_MAIN_MENU_ID:
+                logger.debug(
+                    `Sim returned to main menu notification received on port: ${portId}`
+                );
+                simStatusHandler.scheduleStatusRequest(port, getStatusRequestScheduleTime());
                 break;
         }
     };
@@ -61,30 +68,11 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
         return commandsSucceeded.every(command => command.isSuccessful);
     };
 
-    const updateSimStatus = async portHandler => {
-        const readIccCommandResponse = await portHandler.sendCommand(createReadIccCommand());
-        if (readIccCommandResponse.isSuccessful) {
-            const getNetworkStatusCommandResponse = await portHandler.sendCommand(
-                createGetNetworkStatusCommand()
-            );
-            if (getNetworkStatusCommandResponse.isSuccessful) {
-                simCatalog.setSimInUse(
-                    readIccCommandResponse.icc,
-                    getNetworkStatusCommandResponse.networkStatus,
-                    portHandler.portId
-                );
-            }
-        }
-        return {
-            success: readIccCommandResponse.isSuccessful,
-        };
-    };
-
     const initializeAllDevices = async devicePortHandlers =>
         Promise.all(devicePortHandlers.map(initializeDevice));
 
     const updateAllInUseSims = async devicePortHandlers =>
-        Promise.all(devicePortHandlers.map(updateSimStatus));
+        Promise.all(devicePortHandlers.map(simStatusHandler.scheduleStatusRequest));
 
     return {
         devicePortHandlers: [],

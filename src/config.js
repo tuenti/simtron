@@ -14,6 +14,9 @@ const DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY = 100;
 const SMS_MEMORY_MAX_COUNT_PATH = '/sms/memoryMaxCount';
 const DEFAULT_SMS_MEMORY_MAX_COUNT = 25;
 
+const SIM_STATUS_SCHEDULE_TIME_PATH = '/sim/statusScheduleMs';
+const DEFAULT_SIM_STATUS_SCHEDULE_TIME_MS = '30000';
+
 const SLACK_BOT_TOKEN_PATH = '/slackBot/token';
 const DEVELOPMENT_SLACK_CHANNEL_NAME_PATH = '/slackBot/developmentChannelName';
 
@@ -37,6 +40,9 @@ export const getDevicesCommandsResolveDelay = () =>
 
 export const getSmsMemoryMaxCount = () =>
     readPath(SMS_MEMORY_MAX_COUNT_PATH, DEFAULT_SMS_MEMORY_MAX_COUNT);
+
+export const getStatusRequestScheduleTime = () =>
+    readPath(SIM_STATUS_SCHEDULE_TIME_PATH, DEFAULT_SIM_STATUS_SCHEDULE_TIME_MS);
 
 export const getSlackBotToken = () => readPath(SLACK_BOT_TOKEN_PATH, undefined);
 export const getDevelopmentSlackChannelName = () =>

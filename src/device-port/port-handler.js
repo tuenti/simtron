@@ -24,9 +24,9 @@ const createCommandResponse = (isSuccessful, commandHandler, responseLines) => (
     ...parseCommandResponse(isSuccessful, responseLines, commandHandler.responseParser),
 });
 
-const createNotificationFromLines = (notification, notificationLines) => ({
-    id: notification.id,
-    ...notification.notificationParser(notificationLines),
+const createNotificationFromLines = ({id, notificationParser}, notificationLines) => ({
+    id,
+    ...(notificationParser ? notificationParser(notificationLines) : {}),
 });
 
 const isNotificationStartLine = (line, ongoingNotification) =>
