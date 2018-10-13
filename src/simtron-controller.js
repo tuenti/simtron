@@ -15,8 +15,24 @@ import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config
 const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
     const simStatusHandler = createSimStatusHandler(createSimCatalog());
     const receivedSms = createSmsStore();
-
     let devicePortHandlers = [];
+
+    const handleBotIncomingMessage = async (bot, message) => {
+        console.log(message);
+    };
+
+    const startBots = bots =>
+        Promise.all(
+            bots.map(bot => {
+                bot.addListener(handleBotIncomingMessage);
+                return bot.start();
+            })
+        );
+
+    const sendMessageOnAllBots = (bots, message) =>
+        bots.forEach(bot => {
+            return bot.sendMessage(message);
+        });
 
     const findPortById = portId => devicePortHandlers.find(portHandler => portHandler.portId === portId);
 
@@ -52,18 +68,6 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
         await simStatusHandler.scheduleDeviceInit(portHandler);
         portHandler.addListener(handlePortIncomingNotification);
     };
-
-    const startBots = bots =>
-        Promise.all(
-            bots.map(bot => {
-                return bot.start();
-            })
-        );
-
-    const sendMessageOnAllBots = (bots, message) =>
-        bots.forEach(bot => {
-            return bot.sendMessage(message);
-        });
 
     const initializeAllPorts = async devicePortHandlers =>
         Promise.all(devicePortHandlers.map(initializePort));

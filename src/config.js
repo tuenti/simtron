@@ -21,6 +21,10 @@ const DEFAULT_SIM_STATUS_POLLING_TIME_MS = 600000; // 10 min
 
 const SLACK_BOT_TOKEN_PATH = '/slackBot/token';
 const DEVELOPMENT_SLACK_CHANNEL_NAME_PATH = '/slackBot/developmentChannelName';
+const SLACK_BOT_NAMES_PATH = '/slackBot/names';
+const DEFAULT_SLACK_BOT_NAMES = ['simtron', '@simtron', '<@U9EEFTDKL>'];
+const SLACK_BOT_ADMIN_USER_IDS_PATH = '/slackBot/adminUserIds';
+const DEFAULT_SLACK_BOT_ADMIN_USER_IDS = ['U6XTUAV7X', 'U41NYS5EZ'];
 
 const db = new JsonDB(CONFIG_DB_FILE, true, true);
 
@@ -52,3 +56,6 @@ export const getSimStatusPollingTime = () =>
 export const getSlackBotToken = () => readPath(SLACK_BOT_TOKEN_PATH, undefined);
 export const getDevelopmentSlackChannelName = () =>
     readPath(DEVELOPMENT_SLACK_CHANNEL_NAME_PATH, undefined);
+export const getSlackBotNames = () => readPath(SLACK_BOT_NAMES_PATH, DEFAULT_SLACK_BOT_NAMES);
+export const getSlackBotAdminUserIds = () =>
+    readPath(SLACK_BOT_ADMIN_USER_IDS_PATH, DEFAULT_SLACK_BOT_ADMIN_USER_IDS);
