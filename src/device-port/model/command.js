@@ -49,5 +49,5 @@ export const createSetSmsPduModeCommand = () => ({
 });
 
 export const createDeleteAllSmsCommand = () => ({
-    command: 'AT+CMGDA=6',
+    command: 'AT+CMGD=1,4',
 });
