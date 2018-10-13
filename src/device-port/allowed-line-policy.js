@@ -1,4 +1,15 @@
-const allowedLinePrefixes = ['AT', 'OK', 'ERROR', '+CMS ERROR', '+CME ERROR', '+CMT', '+CREG:', '+CCID', '+STIN: 25'];
+const allowedLinePrefixes = [
+    'AT',
+    'OK',
+    'ERROR',
+    '+CMS ERROR',
+    '+CME ERROR',
+    '+CMT',
+    '+CREG:',
+    '+CCID',
+    '+STIN: 25',
+    '+CPIN: READY',
+];
 
 const previousLinesExceptionPrefixes = ['AT+CCID', '+CMT'];
 

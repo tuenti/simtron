@@ -5,6 +5,7 @@ import {createNetworkStatus} from './network-status';
 export const NEW_SMS_NOTIFICATION_ID = '+CMT';
 export const NETWORK_STATUS_NOTIFICATION_ID = '+CREG:';
 export const SIM_RETURNED_TO_MAIN_MENU_ID = '+STIN: 25';
+export const SIM_PIN_READY_ID = '+CPIN: READY';
 
 const createSmsReceivedNotification = () => ({
     id: NEW_SMS_NOTIFICATION_ID,
@@ -43,4 +44,14 @@ const createSimReadyNotification = () => ({
     lineCount: 1,
 });
 
-export default [createSmsReceivedNotification(), createNetworkStatusNotification(), createSimReadyNotification()];
+const createSimPinReadyNotification = () => ({
+    id: SIM_PIN_READY_ID,
+    lineCount: 1,
+});
+
+export default [
+    createSmsReceivedNotification(),
+    createNetworkStatusNotification(),
+    createSimReadyNotification(),
+    createSimPinReadyNotification(),
+];

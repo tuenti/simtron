@@ -2,7 +2,12 @@ import {createBootingMessage, createBootDoneMessage} from './bot/model/message';
 import {createDeleteAllSmsCommand} from './device-port/model/command';
 import createSimCatalog from './store/sim-card/catalog';
 import createSimStatusHandler from './sim-status-handler';
-import {NEW_SMS_NOTIFICATION_ID, NETWORK_STATUS_NOTIFICATION_ID, SIM_RETURNED_TO_MAIN_MENU_ID} from './device-port/model/notification';
+import {
+    NEW_SMS_NOTIFICATION_ID,
+    NETWORK_STATUS_NOTIFICATION_ID,
+    SIM_RETURNED_TO_MAIN_MENU_ID,
+    SIM_PIN_READY_ID
+} from './device-port/model/notification';
 import logger from './logger';
 import createSmsStore from './store/sms/received-sms';
 import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config';
@@ -34,8 +39,9 @@ const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
                 simStatusHandler.storeSimNetworkStatus(networkStatus, portId);
                 break;
             case SIM_RETURNED_TO_MAIN_MENU_ID:
+            case SIM_PIN_READY_ID:
                 logger.debug(
-                    `Sim returned to main menu notification received on port: ${portId}`
+                    `Sim ready notification received on port: ${portId}`
                 );
                 simStatusHandler.scheduleDeviceInit(port, getSimStatusRequestScheduleTime());
                 break;
