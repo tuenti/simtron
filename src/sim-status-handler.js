@@ -61,9 +61,12 @@ const createSimStatusHandler = (simsCatalog) => {
     const storeSimNetworkStatus = (networkStatus, portId) =>
         simsCatalog.updateSimNetworkStatus(networkStatus, portId);
 
+    const getAllSimsInUse = () => simsCatalog.getAllSimsInUse();
+
     return {
         scheduleDeviceInit,
         storeSimNetworkStatus,
+        getAllSimsInUse,
     };
 }
 

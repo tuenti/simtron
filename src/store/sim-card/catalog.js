@@ -7,6 +7,14 @@ const SIM_CATALOG_PATH = '/catalog';
 
 const catalogDb = new JsonDB(DB_FILE, true, true);
 
+/**
+ * @typedef {Object} Sim
+ * @property {String} msisdn sim's msisdn
+ * @property {String} icc sim's icc
+ * @property {String} provider sim's provider OB
+ * @property {String} lineType sim's line type
+ * @returns {[Sim]} array of Sim objects
+ */
 const readSimCatalog = () => {
     try {
         return catalogDb.getData(SIM_CATALOG_PATH);

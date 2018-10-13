@@ -29,4 +29,10 @@ export const getNetworkStatusName = networkStatus => networkStatusName[networkSt
 export const createNetworkStatus = networkStatusId => ({
     id: networkStatusId,
     name: getNetworkStatusName(networkStatusId),
+    isWorking: [
+        REGISTERED_HOME,
+        REGISTERED_ROAMING,
+        REGISTERED_HOME_SMS_ONLY,
+        REGISTERED_ROAMING_SMS_ONLY
+    ].includes(networkStatusId),
 })

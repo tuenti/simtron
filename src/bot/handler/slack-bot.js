@@ -1,7 +1,8 @@
 import {RTMClient, WebClient} from '@slack/client';
 import logger from '../../logger';
-import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE} from '../model/message-type';
+import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE, ANSWER_SIM_STATUS, ANSWER_CATALOG_MESSAGE} from '../model/message-type';
 import {getDevelopmentSlackChannelName, getSlackBotNames, getSlackBotAdminUserIds} from '../../config';
+import { USER_MENTION } from '../model/message-placeholder';
 
 const MESSAGE_TYPE_PLAIN = 'plain';
 const MESSAGE_TYPE_RICH = 'rich';
@@ -37,18 +38,18 @@ const createSlackBot = botToken => {
     const slackBot = new RTMClient(botToken, {});
     const slackBotWebClient = new WebClient(botToken);
 
-    const postMessageToChannels = (message, channels) => {
-        channels.map(channel => {
+    const postMessageToRecipients = (message, recipients) => {
+        recipients.map(recipientId => {
             message.container === MESSAGE_TYPE_PLAIN &&
                 slackBotWebClient.chat.postMessage({
-                    channel: channel.id,
+                    channel: recipientId,
                     text: message.text,
                     as_user: true,
                 });
             message.container === MESSAGE_TYPE_RICH &&
                 slackBotWebClient.chat.postMessage({
                     ...message,
-                    channel: channel.id,
+                    channel: recipientId,
                     text: message.text,
                     as_user: true,
                 });
@@ -59,12 +60,14 @@ const createSlackBot = botToken => {
         const conversations = await slackBotWebClient.conversations.list({
             types: 'public_channel,private_channel'
         });
-        return conversations.channels.filter(canAccessToChannel);
+        return conversations.channels
+            .filter(canAccessToChannel)
+            .map(channel => channel.id);
     }
 
-    const sendMessage = async message => {
-        const channels = await getChannels();
-        postMessageToChannels(message, channels);
+    const sendMessage = async (message) => {
+        const recipients = message.replyOn ? [message.replyOn] : await getChannels();
+        postMessageToRecipients(message, recipients);
     };
 
     const isValidUser = userInfo => userInfo.ok
@@ -73,7 +76,7 @@ const createSlackBot = botToken => {
         && !userInfo.is_restricted
         && !userInfo.is_ultra_restricted;
 
-    const adaptMessageToSlackFormat = message => {
+    const adaptMessageToSlackFormat = (message, repliedMessage) => {
         switch (message.type) {
             case NOTIFY_BOOTING:
             case NOTIFY_BOOT_DONE:
@@ -81,6 +84,15 @@ const createSlackBot = botToken => {
                     container: MESSAGE_TYPE_PLAIN,
                     text: `:rocket: ${message.text}`,
                 };
+            case ANSWER_CATALOG_MESSAGE:
+                return {
+                    container: MESSAGE_TYPE_PLAIN,
+                    text: message.text.replace(USER_MENTION, `@${repliedMessage.userName}`),
+                    replyOn: repliedMessage.channel,
+                };
+            case ANSWER_SIM_STATUS:
+                console.log('aqui');
+                return {};
             default:
                 return undefined;
         }
@@ -102,9 +114,11 @@ const createSlackBot = botToken => {
             this.listeners = [];
         },
 
-        sendMessage(message) {
-            const slackMessage = adaptMessageToSlackFormat(message);
-            sendMessage(slackMessage);
+        sendMessage(message, repliedMessage = {}) {
+            const slackMessage = adaptMessageToSlackFormat(message, repliedMessage);
+            if (slackMessage) {
+                sendMessage(slackMessage);
+            }
         },
 
         start() {

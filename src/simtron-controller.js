@@ -1,7 +1,5 @@
-import {createBootingMessage, createBootDoneMessage} from './bot/model/message';
+import {createBootingMessage, createBootDoneMessage, createCatalogAnswerMessage, createSimStatusAnswerMessage} from './bot/model/message';
 import {createDeleteAllSmsCommand} from './device-port/model/command';
-import createSimCatalog from './store/sim-card/catalog';
-import createSimStatusHandler from './sim-status-handler';
 import {
     NEW_SMS_NOTIFICATION_ID,
     NETWORK_STATUS_NOTIFICATION_ID,
@@ -9,16 +7,21 @@ import {
     SIM_PIN_READY_ID
 } from './device-port/model/notification';
 import logger from './logger';
-import createSmsStore from './store/sms/received-sms';
 import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config';
+import identifyMessage from './bot/message-identifier';
+import { REQUEST_CATALOG } from './bot/model/message-type';
 
-const createSimtronController = (devicePortsFactory, simsCatalog, bots) => {
-    const simStatusHandler = createSimStatusHandler(createSimCatalog());
-    const receivedSms = createSmsStore();
+const createSimtronController = (bots, devicePortsFactory, simStatusHandler, receivedSms) => {
     let devicePortHandlers = [];
 
-    const handleBotIncomingMessage = async (bot, message) => {
-        console.log(message);
+    const handleBotIncomingMessage = async (bot, incomingMessage) => {
+        const messageType = identifyMessage(incomingMessage);
+        switch (messageType) {
+            case REQUEST_CATALOG:
+                bot.sendMessage(createCatalogAnswerMessage(), incomingMessage);
+                bot.sendMessage(createSimStatusAnswerMessage(simStatusHandler.getAllSimsInUse()), incomingMessage);
+                break;
+        }
     };
 
     const startBots = bots =>
