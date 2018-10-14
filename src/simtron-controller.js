@@ -1,4 +1,4 @@
-import {createBootingMessage, createBootDoneMessage, createCatalogAnswerMessage, createSimStatusAnswerMessage} from './bot/model/message';
+import {createBootingMessage, createBootDoneMessage, createNewSmsNotificationMessage} from './bot/model/message';
 import {createDeleteAllSmsCommand} from './device-port/model/command';
 import {
     NEW_SMS_NOTIFICATION_ID,
@@ -43,6 +43,8 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
                 const {senderMsisdn, time, smsText} = notification;
                 logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
                 store.sms.addSms(senderMsisdn, time, smsText, portId);
+                const sim = store.sim.findSimInUseByPortId(portId);
+                sendMessageOnAllBots(bots, createNewSmsNotificationMessage(sim, smsText))
                 port.sendCommand(createDeleteAllSmsCommand());
                 break;
             case NETWORK_STATUS_NOTIFICATION_ID:
