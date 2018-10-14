@@ -1,11 +1,7 @@
 import {RTMClient, WebClient} from '@slack/client';
 import logger from '../../logger';
-import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE, ANSWER_SIM_STATUS, ANSWER_CATALOG_MESSAGE} from '../model/message-type';
 import {getDevelopmentSlackChannelName, getSlackBotNames, getSlackBotAdminUserIds} from '../../config';
-import { USER_MENTION, STRIKE_TEXT_MARK, BOLD_TEXT_MARK } from '../model/message-placeholder';
-
-const MESSAGE_TYPE_PLAIN = 'plain';
-const MESSAGE_TYPE_RICH = 'rich';
+import adaptMessage, {MESSAGE_TYPE_RICH, MESSAGE_TYPE_PLAIN} from '../message-adapter/slack';
 
 const isMessage = event => event.type === 'message' && event.text;
 
@@ -76,59 +72,6 @@ const createSlackBot = botToken => {
         && !userInfo.is_restricted
         && !userInfo.is_ultra_restricted;
 
-    const replaceAll = (text, textToFind, replacementText) => {
-        let resultText = text;
-        while (resultText.includes(textToFind)) {
-            resultText = resultText.replace(textToFind, replacementText);
-        }
-        return resultText;
-    }
-
-    const adaptSimStatusText = text => replaceAll(
-            replaceAll(text, STRIKE_TEXT_MARK, '~'),
-            BOLD_TEXT_MARK,
-            '*'
-        );
-
-    const adaptMessageToSlackFormat = (message, repliedMessage) => {
-        switch (message.type) {
-            case NOTIFY_BOOTING:
-            case NOTIFY_BOOT_DONE:
-                return {
-                    container: MESSAGE_TYPE_PLAIN,
-                    text: `:rocket: ${message.text}`,
-                };
-            case ANSWER_CATALOG_MESSAGE:
-                return {
-                    container: MESSAGE_TYPE_RICH,
-                    attachments: [
-                        {
-                            color: '#2eb886',
-                            text: replaceAll(
-                                replaceAll(message.text, USER_MENTION, `@${repliedMessage.userName}`),
-                                BOLD_TEXT_MARK,
-                                '*'
-                            ),
-                        }
-                    ],
-                    replyOn: repliedMessage.channel,
-                };
-            case ANSWER_SIM_STATUS:
-                const messageText = message.text.reduce(
-                    (text,line) => `${text}\n${adaptSimStatusText(line)}`
-                    , ''
-                );
-                return {
-                    container: MESSAGE_TYPE_PLAIN,
-                    text: messageText,
-                    replyOn: repliedMessage.channel,
-                };
-                return {};
-            default:
-                return undefined;
-        }
-    };
-
     const triggerMessageReceived = (listeners, bot, messageData) => {
         listeners.forEach(listener => {
             listener(bot, messageData);
@@ -146,7 +89,7 @@ const createSlackBot = botToken => {
         },
 
         sendMessage(message, repliedMessage = {}) {
-            const slackMessage = adaptMessageToSlackFormat(message, repliedMessage);
+            const slackMessage = adaptMessage(message, repliedMessage);
             if (slackMessage) {
                 sendMessage(slackMessage);
             }

@@ -7,24 +7,17 @@ import {
     SIM_PIN_READY_ID
 } from './device-port/model/notification';
 import logger from './logger';
-import {getSimStatusRequestScheduleTime, getSimStatusPollingTime, getBotMessageSequenceEnsuringTime} from './config';
-import identifyMessage from './bot/message-identifier';
-import { REQUEST_CATALOG } from './bot/model/message-type';
+import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config';
+import getMessageSpeech from './bot/speeches';
+import createSimStatusHandler from './sim-status-handler';
 
-const createSimtronController = (bots, devicePortsFactory, simStatusHandler, receivedSms) => {
+const createSimtronController = (bots, devicePortsFactory, store, receivedSms) => {
+    const simStatusHandler = createSimStatusHandler(store);
     let devicePortHandlers = [];
 
     const handleBotIncomingMessage = async (bot, incomingMessage) => {
-        const messageType = identifyMessage(incomingMessage);
-        switch (messageType) {
-            case REQUEST_CATALOG:
-                bot.sendMessage(createCatalogAnswerMessage(), incomingMessage);
-                setTimeout(
-                    () => bot.sendMessage(createSimStatusAnswerMessage(simStatusHandler.getAllSimsInUse()), incomingMessage),
-                    getBotMessageSequenceEnsuringTime()
-                );
-                break;
-        }
+        const messageSpeech = getMessageSpeech(incomingMessage);
+        messageSpeech.action(bot, incomingMessage, store);
     };
 
     const startBots = bots =>
