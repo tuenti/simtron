@@ -7,7 +7,7 @@ import {
     createGetNetworkStatusCommand
 } from './device-port/model/command';
 
-const createSimStatusHandler = (simsCatalog) => {
+const createSimStatusHandler = simStore => {
 
     let pendingRequests = {};
 
@@ -44,13 +44,13 @@ const createSimStatusHandler = (simsCatalog) => {
                 if (deviceInitialized) {
                     const simStatus = await getSimStatus(portHandler);
                     if (simStatus) {
-                        simsCatalog.setSimInUse(
+                        simStore.setSimInUse(
                             simStatus.icc,
                             simStatus.networkStatus,
                             portHandler.portId
                         );
                     } else {
-                        simsCatalog.setSimRemoved(portHandler.portId);
+                        simStore.setSimRemoved(portHandler.portId);
                     }
                 }
                 pendingRequests[portHandler.portId] = undefined;
@@ -59,9 +59,9 @@ const createSimStatusHandler = (simsCatalog) => {
     };
 
     const storeSimNetworkStatus = (networkStatus, portId) =>
-        simsCatalog.updateSimNetworkStatus(networkStatus, portId);
+        simStore.updateSimNetworkStatus(networkStatus, portId);
 
-    const getAllSimsInUse = () => simsCatalog.getAllSimsInUse();
+    const getAllSimsInUse = () => simStore.getAllSimsInUse();
 
     return {
         scheduleDeviceInit,

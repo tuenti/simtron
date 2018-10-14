@@ -9,7 +9,7 @@ const speeches = [
         action: (bot, message, store) => {
             bot.sendMessage(createCatalogAnswerMessage(), message);
             setTimeout(
-                () => bot.sendMessage(createSimStatusAnswerMessage(store.getAllSimsInUse()), message),
+                () => bot.sendMessage(createSimStatusAnswerMessage(store.sim.getAllSimsInUse()), message),
                 getBotMessageSequenceEnsuringTime()
             );
         }

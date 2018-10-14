@@ -11,8 +11,8 @@ import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config
 import getMessageSpeech from './bot/speeches';
 import createSimStatusHandler from './sim-status-handler';
 
-const createSimtronController = (bots, devicePortsFactory, store, receivedSms) => {
-    const simStatusHandler = createSimStatusHandler(store);
+const createSimtronController = (bots, devicePortsFactory, store) => {
+    const simStatusHandler = createSimStatusHandler(store.sim);
     let devicePortHandlers = [];
 
     const handleBotIncomingMessage = async (bot, incomingMessage) => {
@@ -41,7 +41,7 @@ const createSimtronController = (bots, devicePortsFactory, store, receivedSms) =
             case NEW_SMS_NOTIFICATION_ID:
                 const {senderMsisdn, time, smsText} = notification;
                 logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
-                receivedSms.addSms(senderMsisdn, time, smsText, portId);
+                store.sms.addSms(senderMsisdn, time, smsText, portId);
                 port.sendCommand(createDeleteAllSmsCommand());
                 break;
             case NETWORK_STATUS_NOTIFICATION_ID:

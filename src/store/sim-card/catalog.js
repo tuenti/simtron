@@ -46,7 +46,7 @@ const createKnownSimInUse = (sim, networkStatus, portId) => {
     };
 };
 
-const createSimCatalog = () => ({
+const createSimStore = () => ({
     catalog: readSimCatalog(),
     inUse: {},
 
@@ -85,4 +85,4 @@ const createSimCatalog = () => ({
     },
 });
 
-export default createSimCatalog;
+export default createSimStore;
