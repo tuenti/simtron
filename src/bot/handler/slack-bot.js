@@ -2,7 +2,7 @@ import {RTMClient, WebClient} from '@slack/client';
 import logger from '../../logger';
 import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE, ANSWER_SIM_STATUS, ANSWER_CATALOG_MESSAGE} from '../model/message-type';
 import {getDevelopmentSlackChannelName, getSlackBotNames, getSlackBotAdminUserIds} from '../../config';
-import { USER_MENTION } from '../model/message-placeholder';
+import { USER_MENTION, STRIKE_TEXT_MARK, BOLD_TEXT_MARK } from '../model/message-placeholder';
 
 const MESSAGE_TYPE_PLAIN = 'plain';
 const MESSAGE_TYPE_RICH = 'rich';
@@ -76,6 +76,20 @@ const createSlackBot = botToken => {
         && !userInfo.is_restricted
         && !userInfo.is_ultra_restricted;
 
+    const replaceAll = (text, textToFind, replacementText) => {
+        let resultText = text;
+        while (resultText.includes(textToFind)) {
+            resultText = resultText.replace(textToFind, replacementText);
+        }
+        return resultText;
+    }
+
+    const adaptSimStatusText = text => replaceAll(
+            replaceAll(text, STRIKE_TEXT_MARK, '~'),
+            BOLD_TEXT_MARK,
+            '*'
+        );
+
     const adaptMessageToSlackFormat = (message, repliedMessage) => {
         switch (message.type) {
             case NOTIFY_BOOTING:
@@ -86,12 +100,29 @@ const createSlackBot = botToken => {
                 };
             case ANSWER_CATALOG_MESSAGE:
                 return {
-                    container: MESSAGE_TYPE_PLAIN,
-                    text: message.text.replace(USER_MENTION, `@${repliedMessage.userName}`),
+                    container: MESSAGE_TYPE_RICH,
+                    attachments: [
+                        {
+                            color: '#2eb886',
+                            text: replaceAll(
+                                replaceAll(message.text, USER_MENTION, `@${repliedMessage.userName}`),
+                                BOLD_TEXT_MARK,
+                                '*'
+                            ),
+                        }
+                    ],
                     replyOn: repliedMessage.channel,
                 };
             case ANSWER_SIM_STATUS:
-                console.log('aqui');
+                const messageText = message.text.reduce(
+                    (text,line) => `${text}\n${adaptSimStatusText(line)}`
+                    , ''
+                );
+                return {
+                    container: MESSAGE_TYPE_PLAIN,
+                    text: messageText,
+                    replyOn: repliedMessage.channel,
+                };
                 return {};
             default:
                 return undefined;

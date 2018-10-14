@@ -34,13 +34,7 @@ export const createGetNetworkStatusCommand = () => ({
         const statusLine = responseLines.find(line => {
             return line.startsWith(NETWORK_STATUS_LINE_PREFIX);
         });
-        if (statusLine) {
-            const networkStatus = statusLine.match(/\d+$/g)[0];
-            return {
-                networkStatus: createNetworkStatus(networkStatus)
-            };
-        }
-        return {};
+        return statusLine ? {networkStatus: createNetworkStatus(statusLine)} : {};
     },
 });
 

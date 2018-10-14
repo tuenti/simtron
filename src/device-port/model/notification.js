@@ -26,15 +26,15 @@ const createNetworkStatusNotification = () => ({
     id: NETWORK_STATUS_NOTIFICATION_ID,
     lineCount: 1,
     notificationParser: notificationLines => {
-        const networkStatus = notificationLines
+        const networkStatusLine = notificationLines
             .filter(line => {
                 return line.startsWith(NETWORK_STATUS_LINE_PREFIX);
             })
             .reduce((previousLine, currentLine) => {
-                return currentLine.match(/\d+$/g)[0];
-            }, 0);
+                return currentLine;
+            }, '0');
         return {
-            networkStatus: createNetworkStatus(networkStatus),
+            networkStatus: createNetworkStatus(networkStatusLine),
         };
     },
 });

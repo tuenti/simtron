@@ -11,7 +11,8 @@ const catalogDb = new JsonDB(DB_FILE, true, true);
  * @typedef {Object} Sim
  * @property {String} msisdn sim's msisdn
  * @property {String} icc sim's icc
- * @property {String} provider sim's provider OB
+ * @property {String} brand sim's brand
+ * @property {String} country sim' scountry
  * @property {String} lineType sim's line type
  * @returns {[Sim]} array of Sim objects
  */
@@ -38,10 +39,9 @@ const createUnknownSimInUse = (icc, networkStatus, portId) => {
 };
 
 const createKnownSimInUse = (sim, networkStatus, portId) => {
-    const {id, name} = networkStatus;
     return {
         ...sim,
-        networkStatus: {id, name},
+        networkStatus,
         portId,
     };
 };

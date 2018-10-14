@@ -21,7 +21,7 @@ const createSimStatusHandler = (simsCatalog) => {
         return commandsSucceeded.every(command => command.isSuccessful);
     };
 
-    const updateSimStatus = async (portHandler) => {
+    const getSimStatus = async portHandler => {
         const readIccCommandResponse = await portHandler.sendCommand(createReadIccCommand());
         if (readIccCommandResponse.isSuccessful) {
             const getNetworkStatusCommandResponse = await portHandler.sendCommand(
@@ -42,7 +42,7 @@ const createSimStatusHandler = (simsCatalog) => {
             pendingRequests[portHandler.portId] = setTimeout(async () => {
                 const deviceInitialized = await initializeDevice(portHandler);
                 if (deviceInitialized) {
-                    const simStatus = await updateSimStatus(portHandler);
+                    const simStatus = await getSimStatus(portHandler);
                     if (simStatus) {
                         simsCatalog.setSimInUse(
                             simStatus.icc,

@@ -7,7 +7,7 @@ import {
     SIM_PIN_READY_ID
 } from './device-port/model/notification';
 import logger from './logger';
-import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config';
+import {getSimStatusRequestScheduleTime, getSimStatusPollingTime, getBotMessageSequenceEnsuringTime} from './config';
 import identifyMessage from './bot/message-identifier';
 import { REQUEST_CATALOG } from './bot/model/message-type';
 
@@ -19,7 +19,10 @@ const createSimtronController = (bots, devicePortsFactory, simStatusHandler, rec
         switch (messageType) {
             case REQUEST_CATALOG:
                 bot.sendMessage(createCatalogAnswerMessage(), incomingMessage);
-                bot.sendMessage(createSimStatusAnswerMessage(simStatusHandler.getAllSimsInUse()), incomingMessage);
+                setTimeout(
+                    () => bot.sendMessage(createSimStatusAnswerMessage(simStatusHandler.getAllSimsInUse()), incomingMessage),
+                    getBotMessageSequenceEnsuringTime()
+                );
                 break;
         }
     };

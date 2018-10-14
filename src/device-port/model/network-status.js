@@ -26,13 +26,16 @@ const networkStatusName = {
 
 export const getNetworkStatusName = networkStatus => networkStatusName[networkStatus];
 
-export const createNetworkStatus = networkStatusId => ({
-    id: networkStatusId,
-    name: getNetworkStatusName(networkStatusId),
-    isWorking: [
-        REGISTERED_HOME,
-        REGISTERED_ROAMING,
-        REGISTERED_HOME_SMS_ONLY,
-        REGISTERED_ROAMING_SMS_ONLY
-    ].includes(networkStatusId),
-})
+export const createNetworkStatus = networkStatusLine => {
+    const networkStatusId = parseInt(networkStatusLine.match(/\d+$/g)[0]);
+    return {
+        id: networkStatusId,
+        name: getNetworkStatusName(networkStatusId),
+        isWorking: [
+            REGISTERED_HOME,
+            REGISTERED_ROAMING,
+            REGISTERED_HOME_SMS_ONLY,
+            REGISTERED_ROAMING_SMS_ONLY
+        ].includes(networkStatusId),
+    };
+};
