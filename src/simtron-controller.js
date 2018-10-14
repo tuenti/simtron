@@ -11,9 +11,10 @@ import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config
 import getMessageSpeech from './bot/speeches';
 import createSimStatusHandler from './sim-status-handler';
 
-const createSimtronController = (bots, devicePortsFactory, store) => {
-    const simStatusHandler = createSimStatusHandler(store.sim);
+const createSimtronController = (botFactory, devicePortsFactory, store) => {
+    let bots = [];
     let devicePortHandlers = [];
+    const simStatusHandler = createSimStatusHandler(store.sim);
 
     const handleBotIncomingMessage = async (bot, incomingMessage) => {
         const messageSpeech = getMessageSpeech(incomingMessage);
@@ -79,6 +80,7 @@ const createSimtronController = (bots, devicePortsFactory, store) => {
 
     return {
         async start() {
+            bots = botFactory.createBots();
             await startBots(bots);
             sendMessageOnAllBots(bots, createBootingMessage());
             devicePortHandlers = await devicePortsFactory.createPorts();
