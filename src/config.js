@@ -28,6 +28,8 @@ const DEFAULT_SLACK_BOT_ADMIN_USER_IDS = ['U6XTUAV7X', 'U41NYS5EZ'];
 
 const BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH = '/bot/sequenceWaitTime';
 const DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME = 500;
+const BOT_FLAG_REPRESENTATION_PATH = '/bot/flags';
+const DEFAULT_FLAG_REPRESENTATION = ':waving_white_flag:';
 
 
 const db = new JsonDB(CONFIG_DB_FILE, true, true);
@@ -66,3 +68,5 @@ export const getSlackBotAdminUserIds = () =>
 
 export const getBotMessageSequenceEnsuringTime = () =>
     readPath(BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH, DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME);
+export const getCountryFlag = country =>
+    readPath(`${BOT_FLAG_REPRESENTATION_PATH}/${country}`,DEFAULT_FLAG_REPRESENTATION);

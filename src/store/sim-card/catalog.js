@@ -29,22 +29,17 @@ const readSimCatalog = () => {
 
 const findSimByIcc = (icc, catalog) => catalog.find(sim => sim.icc === icc);
 
-const createUnknownSimInUse = (icc, networkStatus, portId) => {
-    const {id, name} = networkStatus;
-    return {
-        icc,
-        networkStatus: {id, name},
-        portId,
-    };
-};
+const createUnknownSimInUse = (icc, networkStatus, portId) => ({
+    icc,
+    networkStatus,
+    portId,
+});
 
-const createKnownSimInUse = (sim, networkStatus, portId) => {
-    return {
-        ...sim,
-        networkStatus,
-        portId,
-    };
-};
+const createKnownSimInUse = (sim, networkStatus, portId) => ({
+    ...sim,
+    networkStatus,
+    portId,
+});
 
 const createSimStore = () => ({
     catalog: readSimCatalog(),

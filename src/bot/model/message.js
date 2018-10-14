@@ -1,5 +1,8 @@
 import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE, ANSWER_CATALOG_MESSAGE, ANSWER_SIM_STATUS, NOTIFY_SMS_RECEIVED} from './message-type';
-import {USER_MENTION, BOLD_TEXT_MARK, STRIKE_TEXT_MARK} from './message-placeholder';
+import { getCountryFlag } from '../../config';
+
+export const USER_MENTION = '[USER_MENTION]';
+
 export const createBootingMessage = () => ({
     type: NOTIFY_BOOTING,
     text: 'Booting ...',
@@ -12,7 +15,7 @@ export const createBootDoneMessage = () => ({
 
 export const createCatalogAnswerMessage = () => ({
     type: ANSWER_CATALOG_MESSAGE,
-    text: `${BOLD_TEXT_MARK}${USER_MENTION}${BOLD_TEXT_MARK} getting catalog info.`,
+    text: `:+1: *${USER_MENTION}* getting catalog info.`,
 });
 
 const createSimIdentityLine = ({icc, msisdn = undefined, brand = undefined, country = undefined, lineType = undefined}) =>
@@ -27,8 +30,8 @@ export const createSimStatusAnswerMessage = (sims) => {
             const sim = sims[portId];
             const simData = createSimIdentityLine(sim);
             return sim.networkStatus.isWorking
-                ? `${BOLD_TEXT_MARK}${simData}${BOLD_TEXT_MARK}: ${sim.networkStatus.name}`
-                : `${BOLD_TEXT_MARK}${STRIKE_TEXT_MARK}${simData}${STRIKE_TEXT_MARK}${BOLD_TEXT_MARK}: ${sim.networkStatus.name}`
+                ? `${getCountryFlag(sim.country)} *${simData}*: ${sim.networkStatus.name}`
+                : `${getCountryFlag(sim.country)} *~${simData}~*: ${sim.networkStatus.name}`
         }),
     };
 };
@@ -38,7 +41,7 @@ export const createNewSmsNotificationMessage = (sim, smsText) => {
     return {
         type: NOTIFY_SMS_RECEIVED,
         text: [
-            `New SMS from ${simData}`,
+            `${getCountryFlag(sim.country)} *${simData}*`,
             smsText,
         ],
     };
