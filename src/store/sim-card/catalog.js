@@ -29,15 +29,17 @@ const readSimCatalog = () => {
 
 const findSimByIcc = (icc, catalog) => catalog.find(sim => sim.icc === icc);
 
-const createUnknownSimInUse = (icc, networkStatus, portId) => ({
+const createUnknownSimInUse = (icc, networkStatus, smsMode, portId) => ({
     icc,
     networkStatus,
+    smsMode,
     portId,
 });
 
-const createKnownSimInUse = (sim, networkStatus, portId) => ({
+const createKnownSimInUse = (sim, networkStatus, smsMode, portId) => ({
     ...sim,
     networkStatus,
+    smsMode,
     portId,
 });
 
@@ -57,12 +59,12 @@ const createSimStore = () => ({
         return this.inUse[portId];
     },
 
-    setSimInUse(icc, networkStatus, portId) {
-        if (icc && networkStatus) {
+    setSimInUse(icc, networkStatus, smsMode, portId) {
+        if (icc && networkStatus && smsMode) {
             const sim = findSimByIcc(icc, this.catalog);
             this.inUse[portId] = sim
-                ? createKnownSimInUse(sim, networkStatus, portId)
-                : createUnknownSimInUse(icc, networkStatus, portId); 
+                ? createKnownSimInUse(sim, networkStatus, smsMode, portId)
+                : createUnknownSimInUse(icc, networkStatus, smsMode, portId); 
         } else {
             logger.error(Error(INVALID_ICC, `Invalid icc: ${icc}`));
         }

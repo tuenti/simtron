@@ -7,6 +7,7 @@ const allowedLinePrefixes = [
     '+CMT',
     '+CREG:',
     '+CCID',
+    '+CSCS:',
     '+STIN: 25',
     '+CPIN: READY',
 ];

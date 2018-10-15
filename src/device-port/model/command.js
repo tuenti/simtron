@@ -1,5 +1,5 @@
 import {createNetworkStatus} from "./network-status";
-import {ICC_LINE_PREFIX, NETWORK_STATUS_LINE_PREFIX} from "./parser-token";
+import {ICC_LINE_PREFIX, NETWORK_STATUS_LINE_PREFIX, ENCODINGS_LINE_PREFIX} from "./parser-token";
 
 export const createSetEchoModeCommand = enable => ({
     command: `ATE${enable ? '1' : '0'}`,
@@ -24,6 +24,26 @@ export const createReadIccCommand = () => ({
     },
 });
 
+export const createGetAllowedEncodingsCommand = () => ({
+    command: 'AT+CSCS=?',
+    responseParser: responseLines => {
+        const encodingsLine = responseLines.find(line => {
+            return line.startsWith(ENCODINGS_LINE_PREFIX);
+        });
+        if (encodingsLine) {
+            return {
+                encodings: encodingsLine.match(/\"([^"]+)\"/g)
+                    .map(item => item.replace(/\"/g, '')),
+            };
+        }
+        return {};
+    },
+});
+
+export const createSetUtf16EncodingCommand = () => ({
+    command: 'AT+CSCS="UCS2"',
+});
+
 export const createEnableNetworkStatusNotificationsCommand = () => ({
     command: 'AT+CREG=1',
 });
@@ -40,6 +60,10 @@ export const createGetNetworkStatusCommand = () => ({
 
 export const createSetSmsPduModeCommand = () => ({
     command: 'AT+CMGF=0',
+});
+
+export const createSetSmsTextModeCommand = () => ({
+    command: 'AT+CMGF=1',
 });
 
 export const createDeleteAllSmsCommand = () => ({
