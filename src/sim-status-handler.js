@@ -14,12 +14,11 @@ import {UTF16_ENCODING} from './device-port/model/parser-token';
 
 export const TEXT_MODE = 'text';
 export const PDU_MODE = 'pdu';
-export const NOT_INITIALIZED = '';
 
 const createSimStatusHandler = simStore => {
     let pendingRequests = {};
 
-    const initializeDevice = async portHandler => {
+    const configureDevice = async portHandler => {
         const commandsSucceeded = await Promise.all([
             portHandler.sendCommand(createSetEchoModeCommand(true)),
             portHandler.sendCommand(createEnableSmsNotificationsCommand()),
@@ -68,54 +67,52 @@ const createSimStatusHandler = simStore => {
                 const setUtf16EncodingCommandResponse = await portHandler.sendCommand(
                     createSetUtf16EncodingCommand()
                 );
-                return enableTextModeCommandResponse.isSuccessful &&
-                    setUtf16EncodingCommandResponse.isSuccessful
-                    ? TEXT_MODE
-                    : NOT_INITIALIZED;
+                const textModeConfigured =
+                    enableTextModeCommandResponse.isSuccessful &&
+                    setUtf16EncodingCommandResponse.isSuccessful;
+                if (textModeConfigured) {
+                    return TEXT_MODE;
+                }
             } else {
                 const enablePduModeCommandResponse = await portHandler.sendCommand(
                     createSetSmsPduModeCommand()
                 );
-                return enablePduModeCommandResponse.isSuccessful ? PDU_MODE : NOT_INITIALIZED;
+                if (enablePduModeCommandResponse.isSuccessful) {
+                    return PDU_MODE;
+                }
             }
         }
-        return NOT_INITIALIZED;
+        return null;
     };
 
-    const scheduleDeviceInit = (portHandler, timeOutMs = 0) => {
-        if (!pendingRequests[portHandler.portId] || timeOutMs === 0) {
-            pendingRequests[portHandler.portId] = setTimeout(async () => {
-                const deviceInitialized = await initializeDevice(portHandler);
-                if (deviceInitialized) {
-                    const smsMode = await initilizeSmsMode(portHandler);
-                    if (smsMode) {
-                        const simStatus = await getSimStatus(portHandler);
-                        if (simStatus) {
-                            simStore.setSimInUse(
-                                simStatus.icc,
-                                simStatus.networkStatus,
-                                smsMode,
-                                portHandler.portId
-                            );
-                        } else {
-                            simStore.setSimRemoved(portHandler.portId);
-                        }
-                    }
+    const syncDevice = portHandler => async () => {
+        const deviceConfigured = await configureDevice(portHandler);
+        if (deviceConfigured) {
+            const smsMode = await initilizeSmsMode(portHandler);
+            if (smsMode) {
+                const simStatus = await getSimStatus(portHandler);
+                if (simStatus) {
+                    simStore.setSimInUse(simStatus.icc, simStatus.networkStatus, smsMode, portHandler.portId);
+                } else {
+                    simStore.setSimRemoved(portHandler.portId);
                 }
-                pendingRequests[portHandler.portId] = undefined;
-            }, timeOutMs);
+            }
+        }
+        pendingRequests[portHandler.portId] = undefined;
+    };
+
+    const scheduleSyncDevice = (portHandler, timeOutMs = 0) => {
+        if (!pendingRequests[portHandler.portId] || timeOutMs === 0) {
+            pendingRequests[portHandler.portId] = setTimeout(syncDevice(portHandler), timeOutMs);
         }
     };
 
     const storeSimNetworkStatus = (networkStatus, portId) =>
         simStore.updateSimNetworkStatus(networkStatus, portId);
 
-    const getAllSimsInUse = () => simStore.getAllSimsInUse();
-
     return {
-        scheduleDeviceInit,
+        scheduleSyncDevice,
         storeSimNetworkStatus,
-        getAllSimsInUse,
     };
 };
 

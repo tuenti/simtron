@@ -1,10 +1,14 @@
-import {createBootingMessage, createBootDoneMessage, createNewSmsNotificationMessage} from './bot/model/message';
+import {
+    createBootingMessage,
+    createBootDoneMessage,
+    createNewSmsNotificationMessage,
+} from './bot/model/message';
 import {createDeleteAllSmsCommand} from './device-port/model/command';
 import {
     NEW_SMS_NOTIFICATION_ID,
     NETWORK_STATUS_NOTIFICATION_ID,
     SIM_RETURNED_TO_MAIN_MENU_ID,
-    SIM_PIN_READY_ID
+    SIM_PIN_READY_ID,
 } from './device-port/model/notification';
 import logger from './logger';
 import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config';
@@ -44,7 +48,7 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
                 logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
                 store.sms.addSms(senderMsisdn, time, smsText, portId);
                 const sim = store.sim.findSimInUseByPortId(portId);
-                sendMessageOnAllBots(bots, createNewSmsNotificationMessage(sim, smsText))
+                sendMessageOnAllBots(bots, createNewSmsNotificationMessage(sim, smsText));
                 port.sendCommand(createDeleteAllSmsCommand());
                 break;
             case NETWORK_STATUS_NOTIFICATION_ID:
@@ -58,27 +62,24 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
                 break;
             case SIM_RETURNED_TO_MAIN_MENU_ID:
             case SIM_PIN_READY_ID:
-                logger.debug(
-                    `Sim ready notification received on port: ${portId}`
-                );
-                simStatusHandler.scheduleDeviceInit(port, getSimStatusRequestScheduleTime());
+                logger.debug(`Sim ready notification received on port: ${portId}`);
+                simStatusHandler.scheduleSyncDevice(port, getSimStatusRequestScheduleTime());
                 break;
         }
     };
 
-    const initializePort = async portHandler => {
-        await simStatusHandler.scheduleDeviceInit(portHandler);
+    const syncPort = async portHandler => {
+        await simStatusHandler.scheduleSyncDevice(portHandler);
         portHandler.addListener(handlePortIncomingNotification);
     };
 
-    const initializeAllPorts = async devicePortHandlers =>
-        Promise.all(devicePortHandlers.map(initializePort));
+    const syncAllPorts = async devicePortHandlers => Promise.all(devicePortHandlers.map(syncPort));
 
     const startSimStatusPolling = (devicePortHandlers, pollingTime) => {
         setInterval(() => {
-            Promise.all(devicePortHandlers.map(simStatusHandler.scheduleDeviceInit));
+            Promise.all(devicePortHandlers.map(simStatusHandler.scheduleSyncDevice));
         }, pollingTime);
-    }
+    };
 
     return {
         async start() {
@@ -86,7 +87,7 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
             await startBots(bots);
             sendMessageOnAllBots(bots, createBootingMessage());
             devicePortHandlers = await devicePortsFactory.createPorts();
-            await initializeAllPorts(devicePortHandlers);
+            await syncAllPorts(devicePortHandlers);
             await startSimStatusPolling(devicePortHandlers, getSimStatusPollingTime());
             sendMessageOnAllBots(bots, createBootDoneMessage());
         },
