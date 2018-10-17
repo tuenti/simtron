@@ -7,6 +7,7 @@ const allowedLinePrefixes = [
     '+CMT',
     '+CREG:',
     '+CCID',
+    '+ICCID',
     '+CSCS:',
     '+STIN: 25',
     '+CPIN: READY',
@@ -14,12 +15,10 @@ const allowedLinePrefixes = [
 
 const previousLinesExceptionPrefixes = ['AT+CCID', '+CMT'];
 
-const someStartsWith = (lines, prefix)=> lines.some(line => line.startsWith(prefix));
+const someStartsWith = (lines, prefix) => lines.some(line => line.startsWith(prefix));
 
 const isValidLine = (line, previousLines) =>
-    allowedLinePrefixes.some(allowedLinePrefix => line.startsWith(allowedLinePrefix))
-    || previousLinesExceptionPrefixes.some(
-        exceptionPrefix => someStartsWith(previousLines, exceptionPrefix)
-    );
+    allowedLinePrefixes.some(allowedLinePrefix => line.startsWith(allowedLinePrefix)) ||
+    previousLinesExceptionPrefixes.some(exceptionPrefix => someStartsWith(previousLines, exceptionPrefix));
 
 export default isValidLine;

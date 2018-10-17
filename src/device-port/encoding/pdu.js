@@ -1,4 +1,5 @@
 import pdu from 'pdu/pdu';
+import {NULL_UNICODE_CHAR} from '../../util/matcher';
 
 const nonStandardGsmCharsToUnicode = {
     0x01: '\u00A3', // POUND SIGN
@@ -90,7 +91,7 @@ const replaceNonStandardGsmChars = smsText => {
     return result;
 };
 
-const removeUnicodeNullChars = smsText => smsText.replace(/[\u0000]/g, '');
+const removeUnicodeNullChars = smsText => smsText.replace(NULL_UNICODE_CHAR, '');
 
 export default pduContent => {
     const decodedPdu = pdu.parse(pduContent);

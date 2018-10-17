@@ -1,5 +1,11 @@
-import {createNetworkStatus} from "./network-status";
-import {ICC_LINE_PREFIX, NETWORK_STATUS_LINE_PREFIX, ENCODINGS_LINE_PREFIX} from "./parser-token";
+import {createNetworkStatus} from './network-status';
+import {
+    ICC_LINE_PREFIX,
+    NETWORK_STATUS_LINE_PREFIX,
+    ENCODINGS_LINE_PREFIX,
+    SIM_CARD_ICC_LINE_PREFIX,
+} from './parser-token';
+import {NON_DIGITS, ALLOWED_ENCODING_RESPONSE_GROUPS, QUOTES} from '../../util/matcher';
 
 export const createSetEchoModeCommand = enable => ({
     command: `ATE${enable ? '1' : '0'}`,
@@ -17,7 +23,22 @@ export const createReadIccCommand = () => ({
         });
         if (iccLine) {
             return {
-                icc: iccLine.replace(/\D/g, ''),
+                icc: iccLine.replace(NON_DIGITS, ''),
+            };
+        }
+        return {};
+    },
+});
+
+export const createReadIccDirectCardAccessCommand = () => ({
+    command: 'AT+CICCID',
+    responseParser: responseLines => {
+        const iccLine = responseLines.find(line => {
+            return line.startsWith(SIM_CARD_ICC_LINE_PREFIX) || line.length > 18;
+        });
+        if (iccLine) {
+            return {
+                icc: iccLine.replace(NON_DIGITS, ''),
             };
         }
         return {};
@@ -32,8 +53,9 @@ export const createGetAllowedEncodingsCommand = () => ({
         });
         if (encodingsLine) {
             return {
-                encodings: encodingsLine.match(/\"([^"]+)\"/g)
-                    .map(item => item.replace(/\"/g, '')),
+                encodings: encodingsLine
+                    .match(ALLOWED_ENCODING_RESPONSE_GROUPS)
+                    .map(item => item.replace(QUOTES, '')),
             };
         }
         return {};
