@@ -6,6 +6,7 @@ export const NEW_SMS_NOTIFICATION_ID = '+CMT';
 export const NETWORK_STATUS_NOTIFICATION_ID = '+CREG:';
 export const SIM_RETURNED_TO_MAIN_MENU_ID = '+STIN: 25';
 export const SIM_PIN_READY_ID = '+CPIN: READY';
+export const MODEM_RESTART_ID = 'START';
 
 const createSmsReceivedNotification = () => ({
     id: NEW_SMS_NOTIFICATION_ID,
@@ -39,6 +40,11 @@ const createNetworkStatusNotification = () => ({
     },
 });
 
+const createModemRestartNotification = () => ({
+    id: MODEM_RESTART_ID,
+    lineCount: 1,
+});
+
 const createSimReadyNotification = () => ({
     id: SIM_RETURNED_TO_MAIN_MENU_ID,
     lineCount: 1,
@@ -54,4 +60,5 @@ export default [
     createNetworkStatusNotification(),
     createSimReadyNotification(),
     createSimPinReadyNotification(),
+    createModemRestartNotification(),
 ];

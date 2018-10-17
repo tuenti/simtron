@@ -11,6 +11,7 @@ import {
     createReadIccDirectCardAccessCommand,
 } from './device-port/model/command';
 import {UTF16_ENCODING} from './device-port/model/parser-token';
+import logger from './logger';
 
 export const TEXT_MODE = 'text';
 export const PDU_MODE = 'pdu';
@@ -18,26 +19,19 @@ export const PDU_MODE = 'pdu';
 const createSimStatusHandler = simStore => {
     let pendingRequests = {};
 
-    const configureDevice = async portHandler => {
-        const commandsSucceeded = await Promise.all([
-            portHandler.sendCommand(createSetEchoModeCommand(true)),
-            portHandler.sendCommand(createEnableSmsNotificationsCommand()),
-            portHandler.sendCommand(createEnableNetworkStatusNotificationsCommand()),
-        ]);
-        return commandsSucceeded.every(command => command.isSuccessful);
-    };
-
     const getSimIcc = async portHandler => {
-        const readIccFromSimCommandResponse = await portHandler.sendCommand(
-            createReadIccDirectCardAccessCommand()
-        );
-        if (readIccFromSimCommandResponse.isSuccessful) {
-            return readIccFromSimCommandResponse.icc;
-        }
-        const readIccFromModuleCommandResponse = await portHandler.sendCommand(createReadIccCommand());
-        if (readIccFromModuleCommandResponse.isSuccessful) {
-            return readIccFromModuleCommandResponse.icc;
-        }
+        try {
+            const readIccFromSimCommandResponse = await portHandler.sendCommand(
+                createReadIccDirectCardAccessCommand()
+            );
+            if (readIccFromSimCommandResponse.isSuccessful) {
+                return readIccFromSimCommandResponse.icc;
+            }
+            const readIccFromModuleCommandResponse = await portHandler.sendCommand(createReadIccCommand());
+            if (readIccFromModuleCommandResponse.isSuccessful) {
+                return readIccFromModuleCommandResponse.icc;
+            }
+        } catch (e) {}
         return null;
     };
 
@@ -57,7 +51,7 @@ const createSimStatusHandler = simStore => {
         return null;
     };
 
-    const initilizeSmsMode = async portHandler => {
+    const configureSmsMode = async portHandler => {
         const supportedEncodingsResponse = await portHandler.sendCommand(createGetAllowedEncodingsCommand());
         if (supportedEncodingsResponse.isSuccessful) {
             if (supportedEncodingsResponse.encodings.includes(UTF16_ENCODING)) {
@@ -85,25 +79,47 @@ const createSimStatusHandler = simStore => {
         return null;
     };
 
-    const syncDevice = portHandler => async () => {
-        const deviceConfigured = await configureDevice(portHandler);
-        if (deviceConfigured) {
-            const smsMode = await initilizeSmsMode(portHandler);
-            if (smsMode) {
-                const simStatus = await getSimStatus(portHandler);
-                if (simStatus) {
-                    simStore.setSimInUse(simStatus.icc, simStatus.networkStatus, smsMode, portHandler.portId);
-                } else {
-                    simStore.setSimRemoved(portHandler.portId);
+    const configureDevice = async portHandler => {
+        const enableEchoResponse = await portHandler.sendCommand(createSetEchoModeCommand());
+        if (enableEchoResponse.isSuccessful) {
+            const enableNetworkStatusNotificationsResponse = await portHandler.sendCommand(
+                createEnableNetworkStatusNotificationsCommand()
+            );
+            const simStatus = await getSimStatus(portHandler);
+            if (enableNetworkStatusNotificationsResponse.isSuccessful && simStatus) {
+                const smsMode = await configureSmsMode(portHandler);
+                if (smsMode) {
+                    const enableSmsNotificationsResponse = await portHandler.sendCommand(
+                        createEnableSmsNotificationsCommand()
+                    );
+
+                    const simConfigured =
+                        enableSmsNotificationsResponse.isSuccessful &&
+                        enableNetworkStatusNotificationsResponse.isSuccessful;
+
+                    if (simConfigured) {
+                        simStore.setSimInUse(
+                            simStatus.icc,
+                            simStatus.networkStatus,
+                            smsMode,
+                            portHandler.portId
+                        );
+                        return true;
+                    }
                 }
+                logger.error(`Device configuration error on port: ${portHandler.portId}`);
             }
         }
-        pendingRequests[portHandler.portId] = undefined;
+        simStore.setSimRemoved(portHandler.portId);
+        return false;
     };
 
-    const scheduleSyncDevice = (portHandler, timeOutMs = 0) => {
+    const scheduleDeviceConfiguration = (portHandler, timeOutMs = 0) => {
         if (!pendingRequests[portHandler.portId] || timeOutMs === 0) {
-            pendingRequests[portHandler.portId] = setTimeout(syncDevice(portHandler), timeOutMs);
+            pendingRequests[portHandler.portId] = setTimeout(() => {
+                configureDevice(portHandler);
+                pendingRequests[portHandler.portId] = undefined;
+            }, timeOutMs);
         }
     };
 
@@ -111,7 +127,7 @@ const createSimStatusHandler = simStore => {
         simStore.updateSimNetworkStatus(networkStatus, portId);
 
     return {
-        scheduleSyncDevice,
+        scheduleDeviceConfiguration,
         storeSimNetworkStatus,
     };
 };

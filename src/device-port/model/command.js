@@ -7,12 +7,12 @@ import {
 } from './parser-token';
 import {NON_DIGITS, ALLOWED_ENCODING_RESPONSE_GROUPS, QUOTES} from '../../util/matcher';
 
-export const createSetEchoModeCommand = enable => ({
-    command: `ATE${enable ? '1' : '0'}`,
+export const createSetEchoModeCommand = () => ({
+    command: 'ATE1',
 });
 
 export const createEnableSmsNotificationsCommand = () => ({
-    command: 'AT+CNMI=2,2,0,0,0',
+    command: 'AT+CNMI=2,1,0,0,0',
 });
 
 export const createReadIccCommand = () => ({

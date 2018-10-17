@@ -27,7 +27,7 @@ const createCommandResponse = (isSuccessful, commandHandler, responseLines) => (
 const createCommandTimeoutResponse = command => ({
     isSuccessful: false,
     command,
-})
+});
 
 const createNotificationFromLines = ({id, notificationParser}, notificationLines) => ({
     id,
@@ -44,7 +44,7 @@ const isNotificationEndLine = ongoingNotification =>
     ongoingNotification && ongoingNotification.lineCount === 1;
 
 const isCommandExecutionStatusLine = line =>
-    line === 'OK' || line === 'ERROR' || line.startsWith('+CMS ERROR');
+    line === 'OK' || line === 'ERROR' || line.startsWith('+CMS ERROR') || line.startsWith('+CME ERROR');
 
 const isSuccessfulStatusLine = line => line === 'OK';
 
@@ -86,28 +86,30 @@ const handleNotificationLine = (line, portHandler) => {
     } else {
         logger.debug(`Receiving unsupported line '${line}' in notification.`);
     }
-}
+};
 
 const handleCommandResponseLine = (line, portHandler) => {
     if (isValidLine(line, portHandler.commandResponseLines)) {
         if (isCommandExecutionStatusLine(line, portHandler.ongoingCommand)) {
-            portHandler.commandResponseLines.push(line);
-            const commandResponse = createCommandResponse(
-                isSuccessfulStatusLine(line),
-                portHandler.ongoingCommand.commandHandler,
-                portHandler.commandResponseLines
-            );
-            debugCompleteMessageReceived(portHandler.portId, portHandler.commandResponseLines);
-            resolveCommand(portHandler.ongoingCommand, commandResponse);
-            portHandler.ongoingCommand = null;
-            portHandler.commandResponseLines = [];
+            if (portHandler.ongoingCommand) {
+                portHandler.commandResponseLines.push(line);
+                const commandResponse = createCommandResponse(
+                    isSuccessfulStatusLine(line),
+                    portHandler.ongoingCommand.commandHandler,
+                    portHandler.commandResponseLines
+                );
+                debugCompleteMessageReceived(portHandler.portId, portHandler.commandResponseLines);
+                resolveCommand(portHandler.ongoingCommand, commandResponse);
+                portHandler.ongoingCommand = null;
+                portHandler.commandResponseLines = [];
+            }
         } else {
             portHandler.commandResponseLines.push(line);
         }
     } else {
         logger.debug(`Receiving unsupported line '${line}' in command response.`);
     }
-}
+};
 
 const createPortHandler = ({portName, baudRate}) => {
     const port = new SerialPort(portName, {baudRate});

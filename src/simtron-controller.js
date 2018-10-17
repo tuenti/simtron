@@ -9,6 +9,7 @@ import {
     NETWORK_STATUS_NOTIFICATION_ID,
     SIM_RETURNED_TO_MAIN_MENU_ID,
     SIM_PIN_READY_ID,
+    MODEM_RESTART_ID,
 } from './device-port/model/notification';
 import logger from './logger';
 import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config';
@@ -62,22 +63,23 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
                 break;
             case SIM_RETURNED_TO_MAIN_MENU_ID:
             case SIM_PIN_READY_ID:
+            case MODEM_RESTART_ID:
                 logger.debug(`Sim ready notification received on port: ${portId}`);
-                simStatusHandler.scheduleSyncDevice(port, getSimStatusRequestScheduleTime());
+                simStatusHandler.scheduleDeviceConfiguration(port, getSimStatusRequestScheduleTime());
                 break;
         }
     };
 
-    const syncPort = async portHandler => {
-        await simStatusHandler.scheduleSyncDevice(portHandler);
+    const configurePort = async portHandler => {
+        await simStatusHandler.scheduleDeviceConfiguration(portHandler);
         portHandler.addListener(handlePortIncomingNotification);
     };
 
-    const syncAllPorts = async devicePortHandlers => Promise.all(devicePortHandlers.map(syncPort));
+    const configureAllPorts = async devicePortHandlers => Promise.all(devicePortHandlers.map(configurePort));
 
     const startSimStatusPolling = (devicePortHandlers, pollingTime) => {
         setInterval(() => {
-            Promise.all(devicePortHandlers.map(simStatusHandler.scheduleSyncDevice));
+            Promise.all(devicePortHandlers.map(simStatusHandler.scheduleDeviceConfiguration));
         }, pollingTime);
     };
 
@@ -87,7 +89,7 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
             await startBots(bots);
             sendMessageOnAllBots(bots, createBootingMessage());
             devicePortHandlers = await devicePortsFactory.createPorts();
-            await syncAllPorts(devicePortHandlers);
+            await configureAllPorts(devicePortHandlers);
             await startSimStatusPolling(devicePortHandlers, getSimStatusPollingTime());
             sendMessageOnAllBots(bots, createBootDoneMessage());
         },
