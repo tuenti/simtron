@@ -1,6 +1,6 @@
-import {REQUEST_CATALOG} from "./model/message-type";
-import {createCatalogAnswerMessage, createSimStatusAnswerMessage} from "./model/message";
-import {getBotMessageSequenceEnsuringTime} from "../config";
+import {REQUEST_CATALOG} from './model/message-type';
+import {createCatalogAnswerMessage, createSimStatusAnswerMessage} from './model/message';
+import {getBotMessageSequenceEnsuringTime} from '../config';
 
 const speeches = [
     {
@@ -12,11 +12,10 @@ const speeches = [
                 () => bot.sendMessage(createSimStatusAnswerMessage(store.sim.getAllSimsInUse()), message),
                 getBotMessageSequenceEnsuringTime()
             );
-        }
-    }
+        },
+    },
 ];
 
-const getMessageSpeech = message =>
-    speeches.find(speech => speech.messageIdentifier(message));
+const getMessageSpeech = message => speeches.find(speech => speech.messageIdentifier(message));
 
 export default getMessageSpeech;

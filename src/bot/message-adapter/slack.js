@@ -1,4 +1,10 @@
-import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE, ANSWER_SIM_STATUS, ANSWER_CATALOG_MESSAGE, NOTIFY_SMS_RECEIVED} from '../model/message-type';
+import {
+    NOTIFY_BOOTING,
+    NOTIFY_BOOT_DONE,
+    ANSWER_SIM_STATUS,
+    ANSWER_CATALOG_MESSAGE,
+    NOTIFY_SMS_RECEIVED,
+} from '../model/message-type';
 import {USER_MENTION} from '../model/message';
 
 export const MESSAGE_TYPE_PLAIN = 'plain';
@@ -20,10 +26,10 @@ const adaptMessage = (message, repliedMessage) => {
                 replyOn: repliedMessage.channel,
             };
         case ANSWER_SIM_STATUS:
-            const messageText = message.text.reduce(
-                (text,line) => `${text}\n${line}`
-                , ''
-            );
+            const messageText =
+                message.textLines.length > 0
+                    ? message.textLines.reduce((text, line) => `${text}\n${line}`, '')
+                    : 'No SIM cards detected.';
             return {
                 container: MESSAGE_TYPE_PLAIN,
                 text: messageText,
@@ -38,7 +44,7 @@ const adaptMessage = (message, repliedMessage) => {
                         author_name: ':envelope_with_arrow: New sms:',
                         color: '#D3D3D3',
                         text: message.text[1],
-                    }
+                    },
                 ],
             };
         default:

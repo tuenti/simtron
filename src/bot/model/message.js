@@ -1,5 +1,11 @@
-import {NOTIFY_BOOTING, NOTIFY_BOOT_DONE, ANSWER_CATALOG_MESSAGE, ANSWER_SIM_STATUS, NOTIFY_SMS_RECEIVED} from './message-type';
-import { getCountryFlag } from '../../config';
+import {
+    NOTIFY_BOOTING,
+    NOTIFY_BOOT_DONE,
+    ANSWER_CATALOG_MESSAGE,
+    ANSWER_SIM_STATUS,
+    NOTIFY_SMS_RECEIVED,
+} from './message-type';
+import {getCountryFlag} from '../../config';
 
 export const USER_MENTION = '[USER_MENTION]';
 
@@ -18,20 +24,26 @@ export const createCatalogAnswerMessage = () => ({
     text: `:+1: *${USER_MENTION}* getting catalog info.`,
 });
 
-const createSimIdentityLine = ({icc, msisdn = undefined, brand = undefined, country = undefined, lineType = undefined}) =>
+const createSimIdentityLine = ({
+    icc,
+    msisdn = undefined,
+    brand = undefined,
+    country = undefined,
+    lineType = undefined,
+}) =>
     msisdn && brand && country && lineType
         ? `${msisdn} ${brand} ${country} ${lineType}`
         : `Unknown sim with icc ${icc}`;
 
-export const createSimStatusAnswerMessage = (sims) => {
+export const createSimStatusAnswerMessage = sims => {
     return {
         type: ANSWER_SIM_STATUS,
-        text: Object.keys(sims).map((portId) => {
+        textLines: Object.keys(sims).map(portId => {
             const sim = sims[portId];
             const simData = createSimIdentityLine(sim);
             return sim.networkStatus.isWorking
                 ? `${getCountryFlag(sim.country)} *${simData}*: ${sim.networkStatus.name}`
-                : `${getCountryFlag(sim.country)} *~${simData}~*: ${sim.networkStatus.name}`
+                : `${getCountryFlag(sim.country)} *~${simData}~*: ${sim.networkStatus.name}`;
         }),
     };
 };
@@ -40,9 +52,6 @@ export const createNewSmsNotificationMessage = (sim, smsText) => {
     const simData = createSimIdentityLine(sim);
     return {
         type: NOTIFY_SMS_RECEIVED,
-        text: [
-            `${getCountryFlag(sim.country)} *${simData}*`,
-            smsText,
-        ],
+        text: [`${getCountryFlag(sim.country)} *${simData}*`, smsText],
     };
 };
