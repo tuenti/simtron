@@ -55,6 +55,12 @@ const createSimStore = () => ({
         return this.inUse;
     },
 
+    getAllUnknownSimsInUse() {
+        return Object.keys(this.inUse)
+            .map(portId => this.inUse[portId])
+            .filter(sim => !sim.msisdn);
+    },
+
     findSimInUseByPortId(portId) {
         return this.inUse[portId];
     },

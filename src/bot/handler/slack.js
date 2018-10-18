@@ -33,18 +33,23 @@ const createSlackBot = botToken => {
     const slackBot = new RTMClient(botToken, {});
     const slackBotWebClient = new WebClient(botToken);
 
-    const postMessageToRecipients = (message, recipients) => {
-        recipients.map(recipientId => {
+    const postMessageToRecipients = (message, channels, userId) => {
+        const messageSender = message.isPrivate
+            ? slackBotWebClient.chat.postEphemeral
+            : slackBotWebClient.chat.postMessage;
+        channels.map(channelId => {
             message.container === MESSAGE_TYPE_PLAIN &&
-                slackBotWebClient.chat.postMessage({
-                    channel: recipientId,
+                messageSender({
+                    channel: channelId,
+                    user: message.isPrivate ? userId : undefined,
                     text: message.text,
                     as_user: true,
                 });
             message.container === MESSAGE_TYPE_RICH &&
-                slackBotWebClient.chat.postMessage({
+                messageSender({
                     ...message,
-                    channel: recipientId,
+                    channel: channelId,
+                    user: message.isPrivate ? userId : undefined,
                     text: message.text,
                     as_user: true,
                 });
@@ -58,9 +63,9 @@ const createSlackBot = botToken => {
         return conversations.channels.filter(canAccessToChannel).map(channel => channel.id);
     };
 
-    const sendMessage = async message => {
-        const recipients = message.replyOn ? [message.replyOn] : await getChannels();
-        postMessageToRecipients(message, recipients);
+    const sendMessage = async (message, userId) => {
+        const channels = message.replyOn ? [message.replyOn] : await getChannels();
+        postMessageToRecipients(message, channels, userId);
     };
 
     const isValidUser = userInfo =>
@@ -89,7 +94,7 @@ const createSlackBot = botToken => {
         sendMessage(message, repliedMessage = {}) {
             const slackMessage = adaptMessage(message, repliedMessage);
             if (slackMessage) {
-                sendMessage(slackMessage);
+                sendMessage(slackMessage, slackMessage.isPrivate ? repliedMessage.userId : undefined);
             }
         },
 

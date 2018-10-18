@@ -4,6 +4,7 @@ import {
     ANSWER_CATALOG_MESSAGE,
     ANSWER_SIM_STATUS,
     NOTIFY_SMS_RECEIVED,
+    NOTIFY_UNKNOWN_SIM_EXISTENCE,
 } from './message-type';
 import {getCountryFlag} from '../../config';
 
@@ -48,10 +49,17 @@ export const createSimStatusAnswerMessage = sims => {
     };
 };
 
+export const createUnknownSimsExistenceNotificationMessage = unknownSims => {
+    return {
+        type: NOTIFY_UNKNOWN_SIM_EXISTENCE,
+        textLines: unknownSims.map(sim => `Icc: *${sim.icc}*`),
+    };
+};
+
 export const createNewSmsNotificationMessage = (sim, smsText) => {
     const simData = createSimIdentityLine(sim);
     return {
         type: NOTIFY_SMS_RECEIVED,
-        text: [`${getCountryFlag(sim.country)} *${simData}*`, smsText],
+        textLines: [`${getCountryFlag(sim.country)} *${simData}*`, smsText],
     };
 };

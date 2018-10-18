@@ -31,7 +31,6 @@ const DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME = 500;
 const BOT_FLAG_REPRESENTATION_PATH = '/bot/flags';
 const DEFAULT_FLAG_REPRESENTATION = ':waving_white_flag:';
 
-
 const db = new JsonDB(CONFIG_DB_FILE, true, true);
 
 const readPath = (path, defaultValue) => {
@@ -50,8 +49,7 @@ export const getDevicesCommandsTimeout = () =>
 export const getDevicesCommandsResolveDelay = () =>
     readPath(DEVICES_COMMANDS_RESOLVE_DELAY_PATH, DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY);
 
-export const getSmsMemoryMaxCount = () =>
-    readPath(SMS_MEMORY_MAX_COUNT_PATH, DEFAULT_SMS_MEMORY_MAX_COUNT);
+export const getSmsMemoryMaxCount = () => readPath(SMS_MEMORY_MAX_COUNT_PATH, DEFAULT_SMS_MEMORY_MAX_COUNT);
 
 export const getSimStatusRequestScheduleTime = () =>
     readPath(SIM_STATUS_SCHEDULE_TIME_PATH, DEFAULT_SIM_STATUS_SCHEDULE_TIME_MS);
@@ -60,13 +58,13 @@ export const getSimStatusPollingTime = () =>
     readPath(SIM_STATUS_POLLING_TIME_PATH, DEFAULT_SIM_STATUS_POLLING_TIME_MS);
 
 export const getSlackBotToken = () => readPath(SLACK_BOT_TOKEN_PATH, undefined);
-export const getDevelopmentSlackChannelName = () =>
-    readPath(DEVELOPMENT_SLACK_CHANNEL_NAME_PATH, undefined);
+export const getDevelopmentSlackChannelName = () => readPath(DEVELOPMENT_SLACK_CHANNEL_NAME_PATH, undefined);
 export const getSlackBotNames = () => readPath(SLACK_BOT_NAMES_PATH, DEFAULT_SLACK_BOT_NAMES);
+export const getSlackBotDisplayName = () => getSlackBotNames()[0];
 export const getSlackBotAdminUserIds = () =>
     readPath(SLACK_BOT_ADMIN_USER_IDS_PATH, DEFAULT_SLACK_BOT_ADMIN_USER_IDS);
 
 export const getBotMessageSequenceEnsuringTime = () =>
     readPath(BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH, DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME);
 export const getCountryFlag = country =>
-    readPath(`${BOT_FLAG_REPRESENTATION_PATH}/${country}`,DEFAULT_FLAG_REPRESENTATION);
+    readPath(`${BOT_FLAG_REPRESENTATION_PATH}/${country}`, DEFAULT_FLAG_REPRESENTATION);
