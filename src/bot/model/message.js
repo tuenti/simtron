@@ -42,8 +42,8 @@ export const createSimStatusAnswerMessage = sims => {
             const sim = sims[portId];
             const simData = createSimIdentityLine(sim);
             return sim.networkStatus.isWorking
-                ? `${getCountryFlag(sim.country)} *${simData}*: ${sim.networkStatus.name}`
-                : `${getCountryFlag(sim.country)} *~${simData}~*: ${sim.networkStatus.name}`;
+                ? `${getCountryFlag(sim.country)} *${simData}* ${sim.networkStatus.name}`
+                : `${getCountryFlag(sim.country)} *~${simData}~* ${sim.networkStatus.name}`;
         }),
     };
 };

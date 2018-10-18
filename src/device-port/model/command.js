@@ -6,7 +6,7 @@ import {
     SIM_CARD_ICC_LINE_PREFIX,
 } from './parser-token';
 import {NON_DIGITS, QUOTED_TEXTS, QUOTES} from '../../util/matcher';
-import {SMS_TEXT_MODE} from '../../sim-status-handler';
+import {SMS_TEXT_MODE} from '../../device-configuration-handler';
 import decodeUtf16 from '../encoding/utf16';
 import decodePdu from '../encoding/pdu';
 
