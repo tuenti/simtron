@@ -3,7 +3,7 @@ import {
     createBootDoneMessage,
     createNewSmsNotificationMessage,
 } from './bot/model/message';
-import {createDeleteAllSmsCommand} from './device-port/model/command';
+import {createDeleteAllSmsCommand, createReadSmsCommand} from './device-port/model/command';
 import {
     NEW_SMS_NOTIFICATION_ID,
     NETWORK_STATUS_NOTIFICATION_ID,
@@ -15,6 +15,7 @@ import logger from './logger';
 import {getSimStatusRequestScheduleTime, getSimStatusPollingTime} from './config';
 import getMessageSpeech from './bot/speeches';
 import createSimStatusHandler from './sim-status-handler';
+import Error, {SIM_NOT_PRESENT} from './error';
 
 const createSimtronController = (botFactory, devicePortsFactory, store) => {
     let bots = [];
@@ -45,27 +46,34 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
         const port = findPortById(portId);
         switch (notification.id) {
             case NEW_SMS_NOTIFICATION_ID:
-                const {senderMsisdn, time, smsText} = notification;
-                logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
-                store.sms.addSms(senderMsisdn, time, smsText, portId);
                 const sim = store.sim.findSimInUseByPortId(portId);
-                sendMessageOnAllBots(bots, createNewSmsNotificationMessage(sim, smsText));
-                port.sendCommand(createDeleteAllSmsCommand());
+                if (sim) {
+                    const readSmsResponse = await port.sendCommand(
+                        createReadSmsCommand(notification.smsIndex, sim.smsMode)
+                    );
+                    const {senderMsisdn, time, smsText} = readSmsResponse;
+                    store.sms.addSms(senderMsisdn, time, smsText, portId);
+                    sendMessageOnAllBots(bots, createNewSmsNotificationMessage(sim, smsText));
+                    port.sendCommand(createDeleteAllSmsCommand());
+                    logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
+                } else {
+                    logger.error(Error(SIM_NOT_PRESENT, `Sms arrived on port: ${portId}, no sim on port`));
+                }
                 break;
             case NETWORK_STATUS_NOTIFICATION_ID:
                 const {networkStatus} = notification;
+                simStatusHandler.storeSimNetworkStatus(networkStatus, portId);
                 logger.debug(
                     `Network status received on port: ${portId}, new status: ${
                         notification.networkStatus.name
                     }`
                 );
-                simStatusHandler.storeSimNetworkStatus(networkStatus, portId);
                 break;
             case SIM_RETURNED_TO_MAIN_MENU_ID:
             case SIM_PIN_READY_ID:
             case MODEM_RESTART_ID:
-                logger.debug(`Sim ready notification received on port: ${portId}`);
                 simStatusHandler.scheduleDeviceConfiguration(port, getSimStatusRequestScheduleTime());
+                logger.debug(`Sim ready notification received on port: ${portId}`);
                 break;
         }
     };

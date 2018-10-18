@@ -13,8 +13,8 @@ import {
 import {UTF16_ENCODING} from './device-port/model/parser-token';
 import logger from './logger';
 
-export const TEXT_MODE = 'text';
-export const PDU_MODE = 'pdu';
+export const SMS_TEXT_MODE = 'text';
+export const SMS_PDU_MODE = 'pdu';
 
 const createSimStatusHandler = simStore => {
     let pendingRequests = {};
@@ -65,14 +65,14 @@ const createSimStatusHandler = simStore => {
                     enableTextModeCommandResponse.isSuccessful &&
                     setUtf16EncodingCommandResponse.isSuccessful;
                 if (textModeConfigured) {
-                    return TEXT_MODE;
+                    return SMS_TEXT_MODE;
                 }
             } else {
                 const enablePduModeCommandResponse = await portHandler.sendCommand(
                     createSetSmsPduModeCommand()
                 );
                 if (enablePduModeCommandResponse.isSuccessful) {
-                    return PDU_MODE;
+                    return SMS_PDU_MODE;
                 }
             }
         }

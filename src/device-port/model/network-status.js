@@ -1,4 +1,4 @@
-import {NETWORK_STATUS_RESPONSE_LINE_CONTENT} from '../../util/matcher';
+import {LAST_DIGITS} from '../../util/matcher';
 
 export const NOT_REGISTERED = 0;
 export const REGISTERED_HOME = 1;
@@ -29,7 +29,7 @@ const networkStatusName = {
 export const getNetworkStatusName = networkStatus => networkStatusName[networkStatus];
 
 export const createNetworkStatus = networkStatusLine => {
-    const networkStatusId = parseInt(networkStatusLine.match(NETWORK_STATUS_RESPONSE_LINE_CONTENT)[0]);
+    const networkStatusId = parseInt(networkStatusLine.match(LAST_DIGITS)[0]);
     return {
         id: networkStatusId,
         name: getNetworkStatusName(networkStatusId),

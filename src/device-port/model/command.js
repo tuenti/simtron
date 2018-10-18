@@ -5,14 +5,15 @@ import {
     ENCODINGS_LINE_PREFIX,
     SIM_CARD_ICC_LINE_PREFIX,
 } from './parser-token';
-import {NON_DIGITS, ALLOWED_ENCODING_RESPONSE_GROUPS, QUOTES} from '../../util/matcher';
+import {NON_DIGITS, QUOTED_TEXTS, QUOTES} from '../../util/matcher';
+import {SMS_TEXT_MODE} from '../../sim-status-handler';
+import decodeUtf16 from '../encoding/utf16';
+import decodePdu from '../encoding/pdu';
+
+const SMS_METADATA_SENDER_INDEX = 1;
 
 export const createSetEchoModeCommand = () => ({
     command: 'ATE1',
-});
-
-export const createEnableSmsNotificationsCommand = () => ({
-    command: 'AT+CNMI=2,1,0,0,0',
 });
 
 export const createReadIccCommand = () => ({
@@ -53,9 +54,7 @@ export const createGetAllowedEncodingsCommand = () => ({
         });
         if (encodingsLine) {
             return {
-                encodings: encodingsLine
-                    .match(ALLOWED_ENCODING_RESPONSE_GROUPS)
-                    .map(item => item.replace(QUOTES, '')),
+                encodings: encodingsLine.match(QUOTED_TEXTS).map(item => item.replace(QUOTES, '')),
             };
         }
         return {};
@@ -80,6 +79,10 @@ export const createGetNetworkStatusCommand = () => ({
     },
 });
 
+export const createEnableSmsNotificationsCommand = () => ({
+    command: 'AT+CNMI=2,1,0,0,0',
+});
+
 export const createSetSmsPduModeCommand = () => ({
     command: 'AT+CMGF=0',
 });
@@ -90,4 +93,26 @@ export const createSetSmsTextModeCommand = () => ({
 
 export const createDeleteAllSmsCommand = () => ({
     command: 'AT+CMGD=1,4',
+});
+
+export const createReadSmsCommand = (smsIndex, smsMode) => ({
+    command: `AT+CMGR=${smsIndex}`,
+    responseParser: responseLines => {
+        const [, smsMetaDataLine, smsTextLine] = responseLines;
+        if (smsMode === SMS_TEXT_MODE) {
+            const smsMetaData = smsMetaDataLine.match(QUOTED_TEXTS).map(item => item.replace(QUOTES, ''));
+            return {
+                senderMsisdn: decodeUtf16(smsMetaData[SMS_METADATA_SENDER_INDEX]),
+                time: +new Date(),
+                smsText: decodeUtf16(smsTextLine),
+            };
+        } else {
+            const parsedSms = decodePdu(smsTextLine);
+            return {
+                senderMsisdn: parsedSms.sender,
+                time: +new Date(),
+                smsText: parsedSms.text,
+            };
+        }
+    },
 });

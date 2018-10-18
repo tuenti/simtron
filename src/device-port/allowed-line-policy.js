@@ -4,7 +4,8 @@ const allowedLinePrefixes = [
     'ERROR',
     '+CMS ERROR',
     '+CME ERROR',
-    '+CMT',
+    '+CMTI:',
+    '+CMGR:',
     '+CREG:',
     '+CCID',
     '+ICCID',
@@ -14,7 +15,7 @@ const allowedLinePrefixes = [
     '+CPIN: READY',
 ];
 
-const previousLinesExceptionPrefixes = ['AT+CCID', '+CMT'];
+const previousLinesExceptionPrefixes = ['AT+CCID', '+CMGR:'];
 
 const someStartsWith = (lines, prefix) => lines.some(line => line.startsWith(prefix));
 

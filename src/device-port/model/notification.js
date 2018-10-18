@@ -1,8 +1,8 @@
-import decodePdu from '../encoding/pdu';
 import {NETWORK_STATUS_LINE_PREFIX} from './parser-token';
 import {createNetworkStatus} from './network-status';
+import {LAST_DIGITS} from '../../util/matcher';
 
-export const NEW_SMS_NOTIFICATION_ID = '+CMT';
+export const NEW_SMS_NOTIFICATION_ID = '+CMTI:';
 export const NETWORK_STATUS_NOTIFICATION_ID = '+CREG:';
 export const SIM_RETURNED_TO_MAIN_MENU_ID = '+STIN: 25';
 export const SIM_PIN_READY_ID = '+CPIN: READY';
@@ -10,15 +10,12 @@ export const MODEM_RESTART_ID = 'START';
 
 const createSmsReceivedNotification = () => ({
     id: NEW_SMS_NOTIFICATION_ID,
-    lineCount: 2,
+    lineCount: 1,
     notificationParser: notificationLines => {
-        const [, ...smsLines] = notificationLines;
-        const parsedSms = decodePdu(smsLines[0]);
-
+        const [smsLocationLine] = notificationLines;
+        console.log({l: smsLocationLine, a: smsLocationLine.match(LAST_DIGITS)});
         return {
-            senderMsisdn: parsedSms.sender,
-            time: parsedSms.time,
-            smsText: parsedSms.text,
+            smsIndex: parseInt(smsLocationLine.match(LAST_DIGITS)[0]),
         };
     },
 });

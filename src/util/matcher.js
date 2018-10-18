@@ -1,5 +1,5 @@
 export const NULL_UNICODE_CHAR = /[\u0000]/g;
 export const NON_DIGITS = /\D/g;
-export const ALLOWED_ENCODING_RESPONSE_GROUPS = /\"([^"]+)\"/g;
+export const QUOTED_TEXTS = /\"([^"]*)\"/g;
 export const QUOTES = /\"/g;
-export const NETWORK_STATUS_RESPONSE_LINE_CONTENT = /\d+$/g;
+export const LAST_DIGITS = /\d+$/g;
