@@ -1,5 +1,5 @@
 import {RTMClient, WebClient} from '@slack/client';
-import logger from '../../logger';
+import logger from '../../util/logger';
 import {getDevelopmentSlackChannelName, getSlackBotNames, getSlackBotAdminUserIds} from '../../config';
 import adaptMessage, {MESSAGE_TYPE_RICH, MESSAGE_TYPE_PLAIN} from '../message-adapter/slack';
 
@@ -10,24 +10,23 @@ const isMessageToChannel = message => typeof message.channel === 'string';
 const isFromUser = (event, userId) => event.user === userId;
 
 export const sanitize = text =>
-  text
-    .toLowerCase()
-    .replace(",", "")
-    .replace(".", "")
-    .replace(";", "");
+    text
+        .toLowerCase()
+        .replace(',', '')
+        .replace('.', '')
+        .replace(';', '');
 
 export const getValueFromMessage = (message, possibleTexts) => {
-  const messageText = sanitize(message.text);
-  const texts = Array.isArray(possibleTexts) ? possibleTexts : [possibleTexts];
-  const tokens = messageText.split(" ");
-  return texts.find(text => tokens.includes(text.toLowerCase()));
+    const messageText = sanitize(message.text);
+    const texts = Array.isArray(possibleTexts) ? possibleTexts : [possibleTexts];
+    const tokens = messageText.split(' ');
+    return texts.find(text => tokens.includes(text.toLowerCase()));
 };
 
 const messageContainsAnyText = (event, possibleTexts) => !!getValueFromMessage(event, possibleTexts);
 
 const canAccessToChannel = channel =>
-    channel.is_member
-    && (!process.env.DEVELOPMENT || channel.name === getDevelopmentSlackChannelName());
+    channel.is_member && (!process.env.DEVELOPMENT || channel.name === getDevelopmentSlackChannelName());
 
 const createSlackBot = botToken => {
     let botId;
@@ -54,29 +53,28 @@ const createSlackBot = botToken => {
 
     const getChannels = async () => {
         const conversations = await slackBotWebClient.conversations.list({
-            types: 'public_channel,private_channel'
+            types: 'public_channel,private_channel',
         });
-        return conversations.channels
-            .filter(canAccessToChannel)
-            .map(channel => channel.id);
-    }
+        return conversations.channels.filter(canAccessToChannel).map(channel => channel.id);
+    };
 
-    const sendMessage = async (message) => {
+    const sendMessage = async message => {
         const recipients = message.replyOn ? [message.replyOn] : await getChannels();
         postMessageToRecipients(message, recipients);
     };
 
-    const isValidUser = userInfo => userInfo.ok
-        && !userInfo.is_bot
-        && !userInfo.deleted
-        && !userInfo.is_restricted
-        && !userInfo.is_ultra_restricted;
+    const isValidUser = userInfo =>
+        userInfo.ok &&
+        !userInfo.is_bot &&
+        !userInfo.deleted &&
+        !userInfo.is_restricted &&
+        !userInfo.is_ultra_restricted;
 
     const triggerMessageReceived = (listeners, bot, messageData) => {
         listeners.forEach(listener => {
             listener(bot, messageData);
-        })
-    }
+        });
+    };
 
     const bot = {
         listeners: [],
@@ -115,9 +113,7 @@ const createSlackBot = botToken => {
                 const channel = event.channel;
                 const messageText = event.text;
                 const messageData = {userName, userId, isFromAdmin, channel, messageText};
-                logger.debug(
-                    `Receiving event on slackBot, with botId: ${botId}, content: ${messageText}`
-                );
+                logger.debug(`Receiving event on slackBot, with botId: ${botId}, content: ${messageText}`);
                 triggerMessageReceived(bot.listeners, bot, messageData);
             }
         }

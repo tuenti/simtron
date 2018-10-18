@@ -1,6 +1,6 @@
 import SerialPort from 'serialport';
 import createDataChunkReader from './data-chunk';
-import logger from '../logger';
+import logger from '../util/logger';
 import {getDevicesCommandsTimeout, getDevicesCommandsResolveDelay} from '../config';
 import notifications from './model/notification';
 import isValidLine from './allowed-line-policy';

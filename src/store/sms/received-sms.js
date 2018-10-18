@@ -1,5 +1,5 @@
-import logger from '../../logger';
-import Error, {MISSING_SMS_FIELDS} from '../../error';
+import logger from '../../util/logger';
+import Error, {MISSING_SMS_FIELDS} from '../../util/error';
 import {getSmsMemoryMaxCount} from '../../config';
 
 const createSms = (senderMsisdn, time, smsText) => {
@@ -30,7 +30,10 @@ const createSmsStore = () => ({
             }
         } else {
             logger.error(
-                Error(MISSING_SMS_FIELDS, `Check sms fields, senderMsisdn: '${senderMsisdn}', time: '${time}', smsText '${smsText}'`)
+                Error(
+                    MISSING_SMS_FIELDS,
+                    `Check sms fields, senderMsisdn: '${senderMsisdn}', time: '${time}', smsText '${smsText}'`
+                )
             );
         }
     },

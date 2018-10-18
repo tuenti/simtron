@@ -1,6 +1,6 @@
 import JsonDB from 'node-json-db';
-import logger from '../../logger';
-import Error, {INVALID_ICC} from '../../error';
+import logger from '../../util/logger';
+import Error, {INVALID_ICC} from '../../util/error';
 
 const DB_FILE = 'data/sim-catalog';
 const SIM_CATALOG_PATH = '/catalog';
@@ -64,7 +64,7 @@ const createSimStore = () => ({
             const sim = findSimByIcc(icc, this.catalog);
             this.inUse[portId] = sim
                 ? createKnownSimInUse(sim, networkStatus, smsMode, portId)
-                : createUnknownSimInUse(icc, networkStatus, smsMode, portId); 
+                : createUnknownSimInUse(icc, networkStatus, smsMode, portId);
         } else {
             logger.error(Error(INVALID_ICC, `Invalid icc: ${icc}`));
         }
@@ -77,7 +77,7 @@ const createSimStore = () => ({
     updateSimNetworkStatus(networkStatus, portId) {
         const sim = this.inUse[portId];
         if (sim) {
-            this.setSimInUse(sim.icc, networkStatus, portId);
+            this.setSimInUse(sim.icc, networkStatus, sim.smsMode, portId);
         }
     },
 });

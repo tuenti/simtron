@@ -5,11 +5,11 @@ import {
     SIM_PIN_READY_ID,
     MODEM_RESTART_ID,
 } from './device-port/model/notification';
-import logger from './logger';
-import Error, {SIM_NOT_PRESENT, NOTIFICATION_HANDLER_NOT_FOUND} from './error';
+import logger from './util/logger';
+import Error, {SIM_NOT_PRESENT, NOTIFICATION_HANDLER_NOT_FOUND} from './util/error';
 import {createReadSmsCommand, createDeleteAllSmsCommand} from './device-port/model/command';
 import {createNewSmsNotificationMessage} from './bot/model/message';
-import simStatusHandler from './device-configuration-handler';
+import scheduleDeviceConfiguration from './device-configuration-handler';
 import {getSimStatusRequestScheduleTime} from './config';
 
 const notificationHandlers = [
@@ -44,9 +44,9 @@ const notificationHandlers = [
     },
     {
         notificationIds: [SIM_RETURNED_TO_MAIN_MENU_ID, SIM_PIN_READY_ID, MODEM_RESTART_ID],
-        action: port => {
+        action: (port, notification, store) => {
             const {portId} = port;
-            simStatusHandler.scheduleDeviceConfiguration(port, store.sim, getSimStatusRequestScheduleTime());
+            scheduleDeviceConfiguration(port, store.sim, getSimStatusRequestScheduleTime());
             logger.debug(`Sim ready notification received on port: ${portId}`);
         },
     },

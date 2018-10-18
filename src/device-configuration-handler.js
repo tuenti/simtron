@@ -11,7 +11,7 @@ import {
     createReadIccDirectCardAccessCommand,
 } from './device-port/model/command';
 import {UTF16_ENCODING} from './device-port/model/parser-token';
-import logger from './logger';
+import logger from './util/logger';
 
 export const SMS_TEXT_MODE = 'text';
 export const SMS_PDU_MODE = 'pdu';

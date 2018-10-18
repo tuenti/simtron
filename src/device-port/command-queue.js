@@ -1,5 +1,5 @@
-import logger from '../logger';
-import Error, { COMMAND_NOT_RESPONDING } from '../error';
+import logger from '../util/logger';
+import Error, {COMMAND_NOT_RESPONDING} from '../util/error';
 
 const createCommandQueue = portHandler => {
     const commandQueue = {
@@ -17,15 +17,20 @@ const createCommandQueue = portHandler => {
         },
 
         sendCommand(commandHandler) {
-            const result = new Promise((resolve) => {
+            const result = new Promise(resolve => {
                 this.lastCommandToExecute
                     .finally(() => {
                         this.portHandler
                             .sendCommand(commandHandler)
                             .then(resolve)
-                            .catch((commandResponse) => {
-                                resolve(commandResponse)
-                                logger.error(Error(COMMAND_NOT_RESPONDING, `Command ${commandResponse.command} is not responding`));
+                            .catch(commandResponse => {
+                                resolve(commandResponse);
+                                logger.error(
+                                    Error(
+                                        COMMAND_NOT_RESPONDING,
+                                        `Command ${commandResponse.command} is not responding`
+                                    )
+                                );
                             });
                     })
                     .catch(({command}) => {

@@ -1,8 +1,8 @@
 import SerialPort from 'serialport';
 import serialPortBindings from '@serialport/bindings';
 import createDataChunkReader from './data-chunk';
-import Error, {NON_RESPONSIVE_PORTS} from '../error';
-import logger from '../logger';
+import Error, {NON_RESPONSIVE_PORTS} from '../util/error';
+import logger from '../util/logger';
 import {getVendorIds, getPortScanMaxRetriesCount} from '../config';
 import createPortHandler from './port-handler';
 import createMessageQueue from './command-queue';
@@ -133,7 +133,11 @@ export default {
         }
 
         return connectedPorts.map(portData => {
-            logger.debug(`Creating instance of port with id: '${portData.portName}' and baud rate: ${portData.baudRate}`);
+            logger.debug(
+                `Creating instance of port with id: '${portData.portName}' and baud rate: ${
+                    portData.baudRate
+                }`
+            );
             const portHandler = createPortHandler(portData);
             return createMessageQueue(portHandler);
         });
