@@ -13,8 +13,6 @@ const createOngoingCommandResolver = (commandHandler, resolve, reject, timeoutCa
     timeoutCallback,
 });
 
-const createOngoingNotification = notification => ({...notification});
-
 const parseCommandResponse = (isSuccessful, responseLines, responseParser) =>
     responseParser && isSuccessful ? responseParser(responseLines) : {};
 
@@ -29,19 +27,13 @@ const createCommandTimeoutResponse = command => ({
     command,
 });
 
-const createNotificationFromLines = ({id, notificationParser}, notificationLines) => ({
+const createNotificationFromLine = ({id, notificationParser}, notificationLine) => ({
     id,
-    ...(notificationParser ? notificationParser(notificationLines) : {}),
+    ...(notificationParser ? notificationParser(notificationLine) : {}),
 });
 
-const isNotificationStartLine = (line, ongoingNotification) =>
-    !ongoingNotification && notifications.find(notification => line.startsWith(notification.id));
-
-const isNotificationLine = (line, ongoingCommand, ongoingNotification) =>
-    !ongoingCommand && (ongoingNotification || isNotificationStartLine(line));
-
-const isNotificationEndLine = ongoingNotification =>
-    ongoingNotification && ongoingNotification.lineCount === 1;
+const isNotificationLine = (line, ongoingCommand) =>
+    !ongoingCommand && notifications.find(notification => line.startsWith(notification.id));
 
 const isCommandExecutionStatusLine = line =>
     line === 'OK' || line === 'ERROR' || line.startsWith('+CMS ERROR') || line.startsWith('+CME ERROR');
@@ -54,7 +46,7 @@ const triggerNotificationReceived = (portHandler, notification) => {
     });
 };
 
-const debugCompleteMessageReceived = (portId, lines) => {
+const debugCommandResponseReceived = (portId, lines) => {
     lines.forEach(responseLine => {
         logger.debug(`Receiving command response line '${responseLine}' on port '${portId}'`);
     });
@@ -64,28 +56,9 @@ const resolveCommand = (commandHandler, commandResponse) =>
     setTimeout(() => commandHandler.resolve(commandResponse), getDevicesCommandsResolveDelay());
 
 const handleNotificationLine = (line, portHandler) => {
-    if (isValidLine(line, portHandler.notificationLines)) {
-        portHandler.notificationLines.push(line);
-        if (isNotificationStartLine(line, portHandler.ongoingNotification)) {
-            portHandler.ongoingNotification = createOngoingNotification(
-                notifications.find(n => line.startsWith(n.id))
-            );
-        }
-        if (isNotificationEndLine(portHandler.ongoingNotification)) {
-            const notification = createNotificationFromLines(
-                portHandler.ongoingNotification,
-                portHandler.notificationLines
-            );
-            debugCompleteMessageReceived(portHandler.portId, portHandler.notificationLines);
-            triggerNotificationReceived(portHandler, notification);
-            portHandler.ongoingNotification = null;
-            portHandler.notificationLines = [];
-        } else {
-            portHandler.ongoingNotification.lineCount--;
-        }
-    } else {
-        logger.debug(`Receiving unsupported line '${line}' in notification.`);
-    }
+    const notification = createNotificationFromLine(notifications.find(n => line.startsWith(n.id)), line);
+    logger.debug(`Receiving notification line '${line}' on port '${portHandler.portId}'`);
+    triggerNotificationReceived(portHandler, notification);
 };
 
 const handleCommandResponseLine = (line, portHandler) => {
@@ -98,7 +71,7 @@ const handleCommandResponseLine = (line, portHandler) => {
                     portHandler.ongoingCommand.commandHandler,
                     portHandler.commandResponseLines
                 );
-                debugCompleteMessageReceived(portHandler.portId, portHandler.commandResponseLines);
+                debugCommandResponseReceived(portHandler.portId, portHandler.commandResponseLines);
                 resolveCommand(portHandler.ongoingCommand, commandResponse);
                 portHandler.ongoingCommand = null;
                 portHandler.commandResponseLines = [];
@@ -119,7 +92,6 @@ const createPortHandler = ({portName, baudRate}) => {
         portId: portName,
 
         ongoingCommand: null,
-        ongoingNotification: null,
         commandResponseLines: [],
         notificationLines: [],
 
@@ -155,7 +127,7 @@ const createPortHandler = ({portName, baudRate}) => {
     port.on('data', async data => {
         const decodedData = data.toString('utf8');
         dataReader.read(decodedData, line => {
-            if (isNotificationLine(line, portHandler.ongoingCommand, portHandler.ongoingNotification)) {
+            if (isNotificationLine(line, portHandler.ongoingCommand)) {
                 handleNotificationLine(line, portHandler);
             } else {
                 handleCommandResponseLine(line, portHandler);
