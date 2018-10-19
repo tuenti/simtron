@@ -8,4 +8,7 @@ export const START_SIM_IDENTIFICATION = 'start-sim-id';
 export const NOTIFY_SMS_RECEIVED = 'notify-sms-received';
 export const STOP_QUESTIONARY = 'stop-questionary';
 export const FILL_QUESTIONARY = 'fill-questionary';
+export const FREE_TEXT_QUESTION = 'free-text-question';
+export const SINGLE_SELECTION_QUESTION = 'single-selection-question';
+export const SUCCESS = 'success';
 export const ERROR = 'error';

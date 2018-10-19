@@ -5,7 +5,10 @@ import {
     ANSWER_CATALOG_MESSAGE,
     NOTIFY_SMS_RECEIVED,
     NOTIFY_UNKNOWN_SIM_EXISTENCE,
+    FREE_TEXT_QUESTION,
+    SINGLE_SELECTION_QUESTION,
     ERROR,
+    SUCCESS,
 } from '../model/message-type';
 import {USER_MENTION} from '../model/message';
 import {getBotDisplayName} from '../../config';
@@ -68,6 +71,28 @@ const adaptMessage = (message, repliedMessage) => {
                         text: message.textLines[1],
                     },
                 ],
+            };
+        case FREE_TEXT_QUESTION:
+            const [question] = message.textLines;
+            return {
+                container: MESSAGE_TYPE_PLAIN,
+                text: question,
+            };
+        case SINGLE_SELECTION_QUESTION:
+            const [questionText, ...options] = message.textLines;
+            return {
+                container: MESSAGE_TYPE_RICH,
+                text: questionText,
+                attachments: options.map((option, index) => ({
+                    color: '#D3D3D3',
+                    text: `${index}) ${option}`,
+                })),
+            };
+        case SUCCESS:
+            return {
+                container: MESSAGE_TYPE_PLAIN,
+                isPrivate: true,
+                text: `:+1: ${message.text.replace(USER_MENTION, `@${repliedMessage.userName}`)}`,
             };
         case ERROR:
             return {

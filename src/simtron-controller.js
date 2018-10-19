@@ -21,7 +21,7 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
     let devicePortHandlers = [];
 
     const handleBotIncomingMessage = async (bot, incomingMessage) => {
-        const messageSpeech = getMessageSpeech(incomingMessage);
+        const messageSpeech = getMessageSpeech(incomingMessage, store);
         if (messageSpeech) {
             if (messageSpeech.isAdmin && !incomingMessage.isFromAdmin) {
                 bot.sendMessage(

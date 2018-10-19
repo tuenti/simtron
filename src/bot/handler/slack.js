@@ -112,7 +112,7 @@ const createSlackBot = botToken => {
                 const isFromAdmin = getSlackBotAdminUserIds().some(id => userId === id);
                 const channel = event.channel;
                 const messageText = event.text;
-                const messageData = {userName, userId, isFromAdmin, channel, messageText};
+                const messageData = {botId, userName, userId, isFromAdmin, channel, messageText};
                 logger.debug(`Receiving event on slackBot, with botId: ${botId}, content: ${messageText}`);
                 triggerMessageReceived(bot.listeners, bot, messageData);
             }

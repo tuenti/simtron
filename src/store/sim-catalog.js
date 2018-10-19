@@ -1,11 +1,19 @@
 import JsonDB from 'node-json-db';
 import logger from '../util/logger';
-import Error, {INVALID_ICC} from '../util/error';
+import Error, {INVALID_SIM_STATUS_DATA} from '../util/error';
 
 const DB_FILE = 'data/sim-catalog';
 const SIM_CATALOG_PATH = '/catalog';
 
 const catalogDb = new JsonDB(DB_FILE, true, true);
+
+const createSim = (icc, msisdn, brand, country, lineType) => ({
+    msisdn,
+    icc,
+    brand,
+    country,
+    lineType,
+});
 
 /**
  * @typedef {Object} Sim
@@ -29,15 +37,8 @@ const readSimCatalog = () => {
 
 const findSimByIcc = (icc, catalog) => catalog.find(sim => sim.icc === icc);
 
-const createUnknownSimInUse = (icc, networkStatus, smsMode, portId) => ({
+const createSimInUse = (icc, networkStatus, smsMode, portId) => ({
     icc,
-    networkStatus,
-    smsMode,
-    portId,
-});
-
-const createKnownSimInUse = (sim, networkStatus, smsMode, portId) => ({
-    ...sim,
     networkStatus,
     smsMode,
     portId,
@@ -47,18 +48,27 @@ const createSimStore = () => ({
     catalog: readSimCatalog(),
     inUse: {},
 
-    getAllSims() {
+    getSimCatalog() {
         return this.catalog;
     },
 
+    registerSimInCatalog(icc, msisdn, brand, country, lineType) {
+        catalogDb.push(SIM_CATALOG_PATH, [createSim(icc, msisdn, brand, country, lineType)], false);
+        this.catalog = readSimCatalog();
+    },
+
     getAllSimsInUse() {
-        return this.inUse;
+        return Object.keys(this.inUse).map(portId => {
+            const inUseSim = this.inUse[portId];
+            const simData = findSimByIcc(inUseSim.icc, this.catalog);
+            return {...this.inUse[portId], ...(simData ? simData : {})};
+        });
     },
 
     getAllUnknownSimsInUse() {
         return Object.keys(this.inUse)
             .map(portId => this.inUse[portId])
-            .filter(sim => !sim.msisdn);
+            .filter(sim => !findSimByIcc(sim.icc, this.catalog));
     },
 
     findSimInUseByPortId(portId) {
@@ -67,12 +77,16 @@ const createSimStore = () => ({
 
     setSimInUse(icc, networkStatus, smsMode, portId) {
         if (icc && networkStatus && smsMode) {
-            const sim = findSimByIcc(icc, this.catalog);
-            this.inUse[portId] = sim
-                ? createKnownSimInUse(sim, networkStatus, smsMode, portId)
-                : createUnknownSimInUse(icc, networkStatus, smsMode, portId);
+            this.inUse[portId] = createSimInUse(icc, networkStatus, smsMode, portId);
         } else {
-            logger.error(Error(INVALID_ICC, `Invalid icc: ${icc}`));
+            logger.error(
+                Error(
+                    INVALID_SIM_STATUS_DATA,
+                    `Invalid sim data icc: ${icc}, network status: ${
+                        networkStatus ? networkStatus.name : undefined
+                    }, sms mode: ${smsMode}`
+                )
+            );
         }
     },
 

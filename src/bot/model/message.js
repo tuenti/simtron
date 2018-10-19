@@ -6,8 +6,12 @@ import {
     NOTIFY_SMS_RECEIVED,
     NOTIFY_UNKNOWN_SIM_EXISTENCE,
     ERROR,
+    SUCCESS,
+    FREE_TEXT_QUESTION,
+    SINGLE_SELECTION_QUESTION,
 } from './message-type';
 import {getCountryFlag} from '../../config';
+import * as Questionary from '../../questionary/question-type';
 
 export const USER_MENTION = '[USER_MENTION]';
 
@@ -64,6 +68,28 @@ export const createNewSmsNotificationMessage = (sim, smsText) => {
         textLines: [`${getCountryFlag(sim.country)} *${simData}*`, smsText],
     };
 };
+
+export const createQuestionMessage = question => {
+    switch (question.type) {
+        case Questionary.FREE_TEXT_QUESTION:
+            return {
+                type: FREE_TEXT_QUESTION,
+                textLines: [question.text],
+            };
+        case Questionary.SINGLE_SELECTION_QUESTION:
+            return {
+                type: SINGLE_SELECTION_QUESTION,
+                textLines: [question.text, ...question.options],
+            };
+        default:
+            return {};
+    }
+};
+
+export const createSuccessFeedbackMessage = text => ({
+    type: SUCCESS,
+    text,
+});
 
 export const createErrorMessage = text => ({
     type: ERROR,

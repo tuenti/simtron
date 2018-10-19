@@ -14,7 +14,7 @@
     "babel-node": "babel-node --presets=env",
     "compile": "rm -rf dist && babel --presets=env src --out-dir dist",
     "start": "npm run compile && pm2 start ./dist/index.js --name simtron",
-    "dev": "DEVELOPMENT=1 DEBUG=app nodemon --exec npm run babel-node -- ./src/index.js"
+    "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch src --exec npm run babel-node -- ./src/index.js"
   },
   "dependencies": {
     "@slack/client": "^4.6.0",
