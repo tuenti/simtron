@@ -1,4 +1,9 @@
-import {createBootingMessage, createBootDoneMessage} from './bot/model/message';
+import {
+    createBootingMessage,
+    createBootDoneMessage,
+    createErrorMessage,
+    USER_MENTION,
+} from './bot/model/message';
 import {
     NEW_SMS_NOTIFICATION_ID,
     NETWORK_STATUS_NOTIFICATION_ID,
@@ -17,7 +22,14 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
 
     const handleBotIncomingMessage = async (bot, incomingMessage) => {
         const messageSpeech = getMessageSpeech(incomingMessage);
-        messageSpeech.action(bot, incomingMessage, store);
+        if (messageSpeech.isAdmin && !incomingMessage.isFromAdmin) {
+            bot.sendMessage(
+                createErrorMessage(`*${USER_MENTION}* admin actions are restricted.`),
+                incomingMessage
+            );
+        } else {
+            messageSpeech.action(bot, incomingMessage, store);
+        }
     };
 
     const startBots = bots =>

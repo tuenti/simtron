@@ -5,9 +5,10 @@ import {
     ANSWER_CATALOG_MESSAGE,
     NOTIFY_SMS_RECEIVED,
     NOTIFY_UNKNOWN_SIM_EXISTENCE,
+    ERROR,
 } from '../model/message-type';
 import {USER_MENTION} from '../model/message';
-import {getSlackBotDisplayName} from '../../config';
+import {getBotDisplayName} from '../../config';
 
 export const MESSAGE_TYPE_PLAIN = 'plain';
 export const MESSAGE_TYPE_RICH = 'rich';
@@ -51,7 +52,9 @@ const adaptMessage = (message, repliedMessage) => {
                 attachments: message.textLines.map((line, index) => ({
                     color: '#D3D3D3',
                     text: line,
-                    footer: `To identify this sim, type: *${getSlackBotDisplayName()} id ${index + 1}*`,
+                    footer: `To identify this sim, type: *${getBotDisplayName()} id ${
+                        message.textLines.length > 1 ? index + 1 : ''
+                    }*`,
                 })),
             };
         case NOTIFY_SMS_RECEIVED:
@@ -65,6 +68,12 @@ const adaptMessage = (message, repliedMessage) => {
                         text: message.textLines[1],
                     },
                 ],
+            };
+        case ERROR:
+            return {
+                container: MESSAGE_TYPE_PLAIN,
+                isPrivate: true,
+                text: `:-1: ${message.text.replace(USER_MENTION, `@${repliedMessage.userName}`)}`,
             };
         default:
             return undefined;

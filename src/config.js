@@ -21,11 +21,11 @@ const DEFAULT_SIM_STATUS_POLLING_TIME_MS = 600000; // 10 min
 
 const SLACK_BOT_TOKEN_PATH = '/bot/slack/token';
 const DEVELOPMENT_SLACK_CHANNEL_NAME_PATH = '/bot/slack/developmentChannelName';
-const SLACK_BOT_NAMES_PATH = '/bot/slack/names';
-const DEFAULT_SLACK_BOT_NAMES = ['simtron', '@simtron', '<@U9EEFTDKL>'];
 const SLACK_BOT_ADMIN_USER_IDS_PATH = '/bot/slack/adminUserIds';
 const DEFAULT_SLACK_BOT_ADMIN_USER_IDS = ['U6XTUAV7X', 'U41NYS5EZ'];
 
+const BOT_NAMES_PATH = '/bot/names';
+const DEFAULT_BOT_NAMES = ['simtron', '@simtron', '<@U9EEFTDKL>'];
 const BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH = '/bot/sequenceWaitTime';
 const DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME = 500;
 const BOT_FLAG_REPRESENTATION_PATH = '/bot/flags';
@@ -59,11 +59,11 @@ export const getSimStatusPollingTime = () =>
 
 export const getSlackBotToken = () => readPath(SLACK_BOT_TOKEN_PATH, undefined);
 export const getDevelopmentSlackChannelName = () => readPath(DEVELOPMENT_SLACK_CHANNEL_NAME_PATH, undefined);
-export const getSlackBotNames = () => readPath(SLACK_BOT_NAMES_PATH, DEFAULT_SLACK_BOT_NAMES);
-export const getSlackBotDisplayName = () => getSlackBotNames()[0];
 export const getSlackBotAdminUserIds = () =>
     readPath(SLACK_BOT_ADMIN_USER_IDS_PATH, DEFAULT_SLACK_BOT_ADMIN_USER_IDS);
 
+export const getBotNames = () => readPath(BOT_NAMES_PATH, DEFAULT_BOT_NAMES);
+export const getBotDisplayName = () => getBotNames()[0];
 export const getBotMessageSequenceEnsuringTime = () =>
     readPath(BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH, DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME);
 export const getCountryFlag = country =>

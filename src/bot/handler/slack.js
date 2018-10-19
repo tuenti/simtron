@@ -1,6 +1,6 @@
 import {RTMClient, WebClient} from '@slack/client';
 import logger from '../../util/logger';
-import {getDevelopmentSlackChannelName, getSlackBotNames, getSlackBotAdminUserIds} from '../../config';
+import {getDevelopmentSlackChannelName, getBotNames, getSlackBotAdminUserIds} from '../../config';
 import adaptMessage, {MESSAGE_TYPE_RICH, MESSAGE_TYPE_PLAIN} from '../message-adapter/slack';
 
 const isMessage = event => event.type === 'message' && event.text;
@@ -108,7 +108,7 @@ const createSlackBot = botToken => {
             isMessage(event) &&
             isMessageToChannel(event) &&
             !isFromUser(event, botId) &&
-            messageContainsAnyText(event, getSlackBotNames())
+            messageContainsAnyText(event, getBotNames())
         ) {
             const userInfo = await slackBotWebClient.users.info({user: event.user});
             if (isValidUser(userInfo)) {

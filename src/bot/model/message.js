@@ -5,6 +5,7 @@ import {
     ANSWER_SIM_STATUS,
     NOTIFY_SMS_RECEIVED,
     NOTIFY_UNKNOWN_SIM_EXISTENCE,
+    ERROR,
 } from './message-type';
 import {getCountryFlag} from '../../config';
 
@@ -63,3 +64,8 @@ export const createNewSmsNotificationMessage = (sim, smsText) => {
         textLines: [`${getCountryFlag(sim.country)} *${simData}*`, smsText],
     };
 };
+
+export const createErrorMessage = text => ({
+    type: ERROR,
+    text,
+});

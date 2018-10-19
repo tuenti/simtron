@@ -1,6 +1,6 @@
 import JsonDB from 'node-json-db';
-import logger from '../../util/logger';
-import Error, {INVALID_ICC} from '../../util/error';
+import logger from '../util/logger';
+import Error, {INVALID_ICC} from '../util/error';
 
 const DB_FILE = 'data/sim-catalog';
 const SIM_CATALOG_PATH = '/catalog';

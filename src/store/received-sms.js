@@ -1,6 +1,6 @@
-import logger from '../../util/logger';
-import Error, {MISSING_SMS_FIELDS} from '../../util/error';
-import {getSmsMemoryMaxCount} from '../../config';
+import logger from '../util/logger';
+import Error, {MISSING_SMS_FIELDS} from '../util/error';
+import {getSmsMemoryMaxCount} from '../config';
 
 const createSms = (senderMsisdn, time, smsText) => {
     return {
