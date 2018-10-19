@@ -12,6 +12,7 @@ import {
 } from './bot/model/message';
 import {getBotMessageSequenceEnsuringTime, getBotNames} from './config';
 import delayed from './util/delay';
+import {existSomeWordInText} from './util/text';
 
 const SIM_IDENTIFICATION_COMMAND = 'id';
 
@@ -59,7 +60,7 @@ const speeches = [
     },
     {
         messageType: REQUEST_CATALOG,
-        messageIdentifier: () => true,
+        messageIdentifier: receivedMessage => existSomeWordInText(getBotNames(), receivedMessage.messageText),
         action: (bot, receivedMessage, store) => {
             bot.sendMessage(createCatalogAnswerMessage(), receivedMessage);
             const allInUseSims = store.sim.getAllSimsInUse();

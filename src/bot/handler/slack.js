@@ -104,12 +104,7 @@ const createSlackBot = botToken => {
     };
 
     slackBot.on('message', async event => {
-        if (
-            isMessage(event) &&
-            isMessageToChannel(event) &&
-            !isFromUser(event, botId) &&
-            messageContainsAnyText(event, getBotNames())
-        ) {
+        if (isMessage(event) && isMessageToChannel(event) && !isFromUser(event, botId)) {
             const userInfo = await slackBotWebClient.users.info({user: event.user});
             if (isValidUser(userInfo)) {
                 const userName = userInfo.user.name;
