@@ -49,10 +49,15 @@ const speeches = [
             const questionary = store.questionary.getByBotUser(receivedMessage.botId, receivedMessage.userId);
             if (questionary) {
                 store.questionary.cancel(receivedMessage.botId, receivedMessage.userId);
-                bot.sendMessage(createSuccessFeedbackMessage('Ok, lets forget about this'), receivedMessage);
+                bot.sendMessage(
+                    createSuccessFeedbackMessage(':+1: Ok, lets forget about it.'),
+                    receivedMessage
+                );
             } else {
                 bot.sendMessage(
-                    createErrorMessage("Currently, you don't have any active questionary"),
+                    createErrorMessage(
+                        ":-1: I don't know what I need to forget about, but nevermind, it's ok."
+                    ),
                     receivedMessage
                 );
             }
@@ -99,7 +104,7 @@ const speeches = [
                 store.questionary.start(questionary, receivedMessage.botId, receivedMessage.userId);
                 bot.sendMessage(createQuestionMessage(questionary.getCurrentQuestion()), receivedMessage);
             } else {
-                bot.sendMessage(createErrorMessage('Invalid SIM index'), receivedMessage);
+                bot.sendMessage(createErrorMessage(':-1: Invalid SIM index'), receivedMessage);
             }
         },
     },

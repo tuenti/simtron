@@ -92,13 +92,13 @@ const adaptMessage = (message, repliedMessage) => {
             return {
                 container: MESSAGE_TYPE_PLAIN,
                 isPrivate: true,
-                text: `:+1: ${message.text.replace(USER_MENTION, `@${repliedMessage.userName}`)}`,
+                text: `${message.text.replace(USER_MENTION, `@${repliedMessage.userName}`)}`,
             };
         case ERROR:
             return {
                 container: MESSAGE_TYPE_PLAIN,
                 isPrivate: true,
-                text: `:-1: ${message.text.replace(USER_MENTION, `@${repliedMessage.userName}`)}`,
+                text: `${message.text.replace(USER_MENTION, `@${repliedMessage.userName}`)}`,
             };
         default:
             return undefined;
