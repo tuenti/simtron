@@ -20,14 +20,17 @@ const createQuestionaryStateMachine = (questions, initialData, finishFeedbackTex
         answerCurrentQuestion(answer) {
             const currentQuestion = questions[this.currentQuestionIndex];
             const validator = currentQuestion.validator ? currentQuestion.validator : () => NO_ERROR;
-            const errorCode = validator(answer);
+            const errorCode = validator(answer, this.answers);
             if (errorCode) {
                 this.errorMessage = currentQuestion.errorMessages[errorCode]
                     ? currentQuestion.errorMessages[errorCode]
                     : ':robot_face: No compute.';
                 return false;
             } else {
-                this.answers[currentQuestion.dataId] = answer;
+                const answerFormatter = currentQuestion.answerFormatter
+                    ? currentQuestion.answerFormatter
+                    : () => answer;
+                this.answers[currentQuestion.dataId] = answerFormatter(answer, this.answers);
                 this.currentQuestionIndex++;
                 return true;
             }

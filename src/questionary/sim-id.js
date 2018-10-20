@@ -1,6 +1,7 @@
 import createQuestionaryStateMachine from './state-machine';
 import {SINGLE_SELECTION_QUESTION, FREE_TEXT_QUESTION} from './question-type';
 import {NO_ERROR} from './state-machine';
+import libPhoneNumber from 'google-libphonenumber';
 
 export const ICC_DATA_KEY = 'icc';
 export const MSISDN_DATA_KEY = 'msisdn';
@@ -17,20 +18,9 @@ const createIdentifySimQuestionary = ({icc}) =>
     createQuestionaryStateMachine(
         [
             {
-                dataId: MSISDN_DATA_KEY,
-                type: FREE_TEXT_QUESTION,
-                text: "*Okay* let's start. Can you please tell me the *phone number* of the SIM card ?",
-                validator: msisdn => {
-                    return NO_ERROR;
-                },
-                errorMessages: {
-                    [INVALID_MSISDN_ERROR]: ':sleepy: Ops, you must enter a valid *phone number* dude !',
-                },
-            },
-            {
                 dataId: BRAND_DATA_KEY,
                 type: SINGLE_SELECTION_QUESTION,
-                text: 'Thanks dude! What about the *brand* ?',
+                text: "*Okay* let's start. Can you tell me the *brand* of the SIM card please ?",
                 options: ['una', 'dos', 'tres'],
                 validator: brandOption => {
                     return NO_ERROR;
@@ -54,9 +44,28 @@ const createIdentifySimQuestionary = ({icc}) =>
                 },
             },
             {
+                dataId: MSISDN_DATA_KEY,
+                type: FREE_TEXT_QUESTION,
+                text: 'Thanks dude! Can you please tell me the *phone number* ?',
+                validator: (msisdn, previousAnswers) => {
+                    const phoneUtil = libPhoneNumber.PhoneNumberUtil.getInstance();
+                    const number = phoneUtil.parseAndKeepRawInput(msisdn, previousAnswers[COUNTRY_DATA_KEY]);
+                    return phoneUtil.isValidNumber(number) ? NO_ERROR : INVALID_MSISDN_ERROR;
+                },
+                answerFormatter: (msisdn, previousAnswers) => {
+                    const phoneUtil = libPhoneNumber.PhoneNumberUtil.getInstance();
+                    const number = phoneUtil.parseAndKeepRawInput(msisdn, previousAnswers[COUNTRY_DATA_KEY]);
+                    const phoneNumberFormat = libPhoneNumber.PhoneNumberFormat;
+                    return phoneUtil.format(number, phoneNumberFormat.INTERNATIONAL);
+                },
+                errorMessages: {
+                    [INVALID_MSISDN_ERROR]: ':sleepy: Ops, you must enter a valid *phone number* dude !',
+                },
+            },
+            {
                 dataId: LINE_TYPE_DATA_KEY,
                 type: SINGLE_SELECTION_QUESTION,
-                text: 'Great, we are almost there! Can you please tell me the *line type* of the SIM card ?',
+                text: 'Great! finally ... I need to know the *line type*',
                 options: ['pre', 'post', 'control'],
                 validator: lineTypeOption => {
                     return NO_ERROR;
