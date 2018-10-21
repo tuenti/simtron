@@ -85,7 +85,7 @@ const adaptMessage = (message, repliedMessage) => {
                 text: questionText,
                 attachments: options.map((option, index) => ({
                     color: '#D3D3D3',
-                    text: `${index}) ${option}`,
+                    text: `${index + 1}) ${option}`,
                 })),
             };
         case SUCCESS:

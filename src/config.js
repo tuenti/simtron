@@ -28,7 +28,8 @@ const BOT_NAMES_PATH = '/bot/names';
 const DEFAULT_BOT_NAMES = ['simtron', '@simtron', '<@U9EEFTDKL>'];
 const BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH = '/bot/sequenceWaitTime';
 const DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME = 500;
-const BOT_FLAG_REPRESENTATION_PATH = '/bot/flags';
+
+const COUNTRIES_DATA_PATH = '/countries';
 const DEFAULT_FLAG_REPRESENTATION = ':waving_white_flag:';
 
 const db = new JsonDB(CONFIG_DB_FILE, true, true);
@@ -66,5 +67,11 @@ export const getBotNames = () => readPath(BOT_NAMES_PATH, DEFAULT_BOT_NAMES);
 export const getBotDisplayName = () => getBotNames()[0];
 export const getBotMessageSequenceEnsuringTime = () =>
     readPath(BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH, DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME);
+export const getCountryName = country => readPath(`${COUNTRIES_DATA_PATH}/${country}/name`, country);
 export const getCountryFlag = country =>
-    readPath(`${BOT_FLAG_REPRESENTATION_PATH}/${country}`, DEFAULT_FLAG_REPRESENTATION);
+    readPath(`${COUNTRIES_DATA_PATH}/${country}/flag`, DEFAULT_FLAG_REPRESENTATION);
+export const getSupportedCountries = () => Object.keys(readPath(COUNTRIES_DATA_PATH, {}));
+export const getSupportedBrands = country =>
+    Object.keys(readPath(`${COUNTRIES_DATA_PATH}/${country}/lineTypes`, {}));
+export const getSupportedLineTypes = (country, brand) =>
+    readPath(`${COUNTRIES_DATA_PATH}/${country}/lineTypes/${brand}`, []);

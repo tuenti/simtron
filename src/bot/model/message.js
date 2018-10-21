@@ -12,6 +12,7 @@ import {
 } from './message-type';
 import {getCountryFlag} from '../../config';
 import * as Questionary from '../../questionary/question-type';
+import {QUESTION_OPTION_TEXT} from '../../questionary/question-field';
 
 export const USER_MENTION = '[USER_MENTION]';
 
@@ -79,7 +80,7 @@ export const createQuestionMessage = question => {
         case Questionary.SINGLE_SELECTION_QUESTION:
             return {
                 type: SINGLE_SELECTION_QUESTION,
-                textLines: [question.text, ...question.options],
+                textLines: [question.text, ...question.options.map(option => option[QUESTION_OPTION_TEXT])],
             };
         default:
             return {};

@@ -1,7 +1,15 @@
-import createQuestionaryStateMachine from './state-machine';
+import createQuestionaryStateMachine, {INVALID_INDEX} from './state-machine';
 import {SINGLE_SELECTION_QUESTION, FREE_TEXT_QUESTION} from './question-type';
 import {NO_ERROR} from './state-machine';
 import libPhoneNumber from 'google-libphonenumber';
+import {
+    getSupportedCountries,
+    getCountryFlag,
+    getCountryName,
+    getSupportedBrands,
+    getSupportedLineTypes,
+} from '../config';
+import {QUESTION_OPTION_TEXT, QUESTION_OPTION_VALUE} from './question-field';
 
 export const ICC_DATA_KEY = 'icc';
 export const MSISDN_DATA_KEY = 'msisdn';
@@ -10,37 +18,49 @@ export const COUNTRY_DATA_KEY = 'country';
 export const LINE_TYPE_DATA_KEY = 'line-type';
 
 const INVALID_MSISDN_ERROR = 'invalid-msisdn';
-const INVALID_BRAND_OPTION_ERROR = 'invalid-brand';
-const INVALID_COUNTRY_OPTION_ERROR = 'invalid-brand';
-const INVALID_LINE_TYPE_OPTION_ERROR = 'invalid-line-type';
+
+const getCountryQuestionOptions = () =>
+    getSupportedCountries().map(country => ({
+        [QUESTION_OPTION_TEXT]: `${getCountryFlag(country)} ${getCountryName(country)}`,
+        [QUESTION_OPTION_VALUE]: country,
+    }));
+
+const getBrandQuestionOptions = country =>
+    getSupportedBrands(country).map(brand => ({
+        [QUESTION_OPTION_TEXT]: brand,
+        [QUESTION_OPTION_VALUE]: brand,
+    }));
+
+const getLineTypeQuestionOptions = (country, brand) => {
+    console.log(country, brand);
+    console.log(getSupportedLineTypes(country, brand));
+    return getSupportedLineTypes(country, brand).map(lineType => ({
+        [QUESTION_OPTION_TEXT]: lineType,
+        [QUESTION_OPTION_VALUE]: lineType,
+    }));
+};
 
 const createIdentifySimQuestionary = ({icc}) =>
     createQuestionaryStateMachine(
         [
             {
-                dataId: BRAND_DATA_KEY,
+                dataId: COUNTRY_DATA_KEY,
                 type: SINGLE_SELECTION_QUESTION,
-                text: "*Okay* let's start. Can you tell me the *brand* of the SIM card please ?",
-                options: ['una', 'dos', 'tres'],
-                validator: brandOption => {
-                    return NO_ERROR;
-                },
+                text: "*Okay* let's start. Can you please select the *country* of the SIM card ?",
+                options: () => getCountryQuestionOptions(),
                 errorMessages: {
-                    [INVALID_BRAND_OPTION_ERROR]:
-                        ':unamused: Select one please ... type the number of the selected option !',
+                    [INVALID_INDEX]:
+                        ':face_with_rolling_eyes: Select an option please ... type the number of the selected option !',
                 },
             },
             {
-                dataId: COUNTRY_DATA_KEY,
+                dataId: BRAND_DATA_KEY,
                 type: SINGLE_SELECTION_QUESTION,
-                text: '... of what *country* ?',
-                options: ['pais1', 'pais2', 'pais3'],
-                validator: countryOption => {
-                    return NO_ERROR;
-                },
+                text: '... and the *brand* is ?',
+                options: previousAnswers => getBrandQuestionOptions(previousAnswers[COUNTRY_DATA_KEY]),
                 errorMessages: {
-                    [INVALID_COUNTRY_OPTION_ERROR]:
-                        ':face_with_rolling_eyes: Select an option please ... type the number of the selected option !',
+                    [INVALID_INDEX]:
+                        ':unamused: Select one please ... type the number of the selected option !',
                 },
             },
             {
@@ -66,12 +86,13 @@ const createIdentifySimQuestionary = ({icc}) =>
                 dataId: LINE_TYPE_DATA_KEY,
                 type: SINGLE_SELECTION_QUESTION,
                 text: 'Great! finally ... I need to know the *line type*',
-                options: ['pre', 'post', 'control'],
-                validator: lineTypeOption => {
-                    return NO_ERROR;
-                },
+                options: previousAnswers =>
+                    getLineTypeQuestionOptions(
+                        previousAnswers[COUNTRY_DATA_KEY],
+                        previousAnswers[BRAND_DATA_KEY]
+                    ),
                 errorMessages: {
-                    [INVALID_LINE_TYPE_OPTION_ERROR]:
+                    [INVALID_INDEX]:
                         ":tired_face: I can't accept that! It must be one of these options ... type the number of the selected option !",
                 },
             },

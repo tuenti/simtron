@@ -63,7 +63,7 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
 
     const startSimStatusPolling = (devicePortHandlers, pollingTime) => {
         setInterval(() => {
-            Promise.all(devicePortHandlers.map(port => scheduleDeviceConfiguration(port, store)));
+            Promise.all(devicePortHandlers.map(port => scheduleDeviceConfiguration(port, store.sim)));
         }, pollingTime);
     };
 
