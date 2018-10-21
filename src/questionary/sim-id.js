@@ -10,11 +10,11 @@ import {
 } from '../config';
 import {QUESTION_OPTION_TEXT, QUESTION_OPTION_VALUE} from './question-field';
 
-export const ICC_DATA_KEY = 'icc';
-export const MSISDN_DATA_KEY = 'msisdn';
-export const BRAND_DATA_KEY = 'brand';
-export const COUNTRY_DATA_KEY = 'country';
-export const LINE_TYPE_DATA_KEY = 'line-type';
+const ICC_DATA_KEY = 'icc';
+const MSISDN_DATA_KEY = 'msisdn';
+const BRAND_DATA_KEY = 'brand';
+const COUNTRY_DATA_KEY = 'country';
+const LINE_TYPE_DATA_KEY = 'line-type';
 
 const INVALID_MSISDN_ERROR = 'invalid-msisdn';
 
@@ -36,7 +36,7 @@ const getLineTypeQuestionOptions = (country, brand) =>
         [QUESTION_OPTION_VALUE]: lineType,
     }));
 
-const createIdentifySimQuestionary = ({icc}) =>
+const createIdentifySimQuestionary = ({icc}, store) =>
     createQuestionaryStateMachine(
         [
             {
@@ -99,6 +99,14 @@ const createIdentifySimQuestionary = ({icc}) =>
                 value: icc,
             },
         ],
+        responses =>
+            store.sim.registerSimInCatalog(
+                responses[ICC_DATA_KEY],
+                responses[MSISDN_DATA_KEY],
+                responses[BRAND_DATA_KEY],
+                responses[COUNTRY_DATA_KEY],
+                responses[LINE_TYPE_DATA_KEY]
+            ),
         '*Sim* successfully registered :tada:'
     );
 

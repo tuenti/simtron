@@ -18,9 +18,8 @@ const createQuestionaryStore = () => ({
     finish(botId, userId) {
         const key = quesitonaryKey(botId, userId);
         const questionary = this.ongoingQuesitonaries[key];
-        const answers = questionary.getAnswers();
+        questionary.finish();
         delete this.ongoingQuesitonaries[key];
-        return answers;
     },
 });
 

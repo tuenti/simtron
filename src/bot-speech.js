@@ -15,13 +15,7 @@ import {
 import {getBotMessageSequenceEnsuringTime, getBotNames} from './config';
 import delayed from './util/delay';
 import {existSomeWordInText} from './util/text';
-import createIdentifySimQuestionary, {
-    ICC_DATA_KEY,
-    MSISDN_DATA_KEY,
-    BRAND_DATA_KEY,
-    COUNTRY_DATA_KEY,
-    LINE_TYPE_DATA_KEY,
-} from './questionary/sim-id';
+import createIdentifySimQuestionary from './questionary/sim-id';
 
 const SIM_IDENTIFICATION_COMMAND = 'id';
 const QUESIONARY_CANCEL_COMMAND = 'forget';
@@ -69,17 +63,10 @@ const speeches = [
             !!store.questionary.getByBotUser(receivedMessage.botId, receivedMessage.userId),
         action: (bot, receivedMessage, store) => {
             const questionary = store.questionary.getByBotUser(receivedMessage.botId, receivedMessage.userId);
-            const responceAccepted = questionary.answerCurrentQuestion(receivedMessage.messageText);
-            if (responceAccepted) {
+            const responseAccepted = questionary.answerCurrentQuestion(receivedMessage.messageText);
+            if (responseAccepted) {
                 if (questionary.isFullfilled()) {
-                    const simData = store.questionary.finish(receivedMessage.botId, receivedMessage.userId);
-                    store.sim.registerSimInCatalog(
-                        simData[ICC_DATA_KEY],
-                        simData[MSISDN_DATA_KEY],
-                        simData[BRAND_DATA_KEY],
-                        simData[COUNTRY_DATA_KEY],
-                        simData[LINE_TYPE_DATA_KEY]
-                    );
+                    store.questionary.finish(receivedMessage.botId, receivedMessage.userId);
                     bot.sendMessage(
                         createSuccessFeedbackMessage(questionary.getFinishFeedbackText()),
                         receivedMessage
@@ -100,7 +87,7 @@ const speeches = [
             const simIndex = getSimIdentificationIndex(receivedMessage.messageText);
             const allUnknownSims = store.sim.getAllUnknownSimsInUse();
             if (simIndex >= 0 && simIndex < allUnknownSims.length) {
-                const questionary = createIdentifySimQuestionary(allUnknownSims[simIndex]);
+                const questionary = createIdentifySimQuestionary(allUnknownSims[simIndex], store);
                 store.questionary.start(questionary, receivedMessage.botId, receivedMessage.userId);
                 bot.sendMessage(createQuestionMessage(questionary.getCurrentQuestion()), receivedMessage);
             } else {
