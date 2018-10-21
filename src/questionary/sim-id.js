@@ -1,4 +1,4 @@
-import createQuestionaryStateMachine, {INVALID_INDEX, NO_ERROR} from './handler';
+import createQuestionaryHandler, {INVALID_INDEX, NO_ERROR} from './handler';
 import {SINGLE_SELECTION_QUESTION, FREE_TEXT_QUESTION} from './handler/question-type';
 import libPhoneNumber from 'google-libphonenumber';
 import {
@@ -37,7 +37,7 @@ const getLineTypeQuestionOptions = (country, brand) =>
     }));
 
 const createIdentifySimQuestionary = ({icc}, store) =>
-    createQuestionaryStateMachine({
+    createQuestionaryHandler({
         questions: [
             {
                 dataId: COUNTRY_DATA_KEY,
