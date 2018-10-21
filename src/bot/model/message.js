@@ -11,8 +11,8 @@ import {
     SINGLE_SELECTION_QUESTION,
 } from './message-type';
 import {getCountryFlag} from '../../config';
-import * as Questionary from '../../questionary/question-type';
-import {QUESTION_OPTION_TEXT} from '../../questionary/question-field';
+import * as Questionary from '../../questionary/handler/question-type';
+import {QUESTION_OPTION_TEXT} from '../../questionary/handler/question-field';
 
 export const USER_MENTION = '[USER_MENTION]';
 

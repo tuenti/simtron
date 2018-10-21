@@ -1,5 +1,5 @@
 import createQuestionaryStateMachine, {INVALID_INDEX, NO_ERROR} from './handler';
-import {SINGLE_SELECTION_QUESTION, FREE_TEXT_QUESTION} from './question-type';
+import {SINGLE_SELECTION_QUESTION, FREE_TEXT_QUESTION} from './handler/question-type';
 import libPhoneNumber from 'google-libphonenumber';
 import {
     getSupportedCountries,
@@ -8,7 +8,7 @@ import {
     getSupportedBrands,
     getSupportedLineTypes,
 } from '../config';
-import {QUESTION_OPTION_TEXT, QUESTION_OPTION_VALUE} from './question-field';
+import {QUESTION_OPTION_TEXT, QUESTION_OPTION_VALUE} from './handler/question-field';
 
 const ICC_DATA_KEY = 'icc';
 const MSISDN_DATA_KEY = 'msisdn';

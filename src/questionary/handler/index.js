@@ -1,5 +1,5 @@
-import {FREE_TEXT_QUESTION, SINGLE_SELECTION_QUESTION} from '../question-type';
-import {QUESTION_OPTION_VALUE} from '../question-field';
+import {FREE_TEXT_QUESTION, SINGLE_SELECTION_QUESTION} from './question-type';
+import {QUESTION_OPTION_VALUE} from './question-field';
 
 export const NO_ERROR = '';
 export const INVALID_INDEX = 'invalid-index';

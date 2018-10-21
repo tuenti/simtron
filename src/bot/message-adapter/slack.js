@@ -77,12 +77,14 @@ const adaptMessage = (message, repliedMessage) => {
             return {
                 container: MESSAGE_TYPE_PLAIN,
                 text: question,
+                replyOn: repliedMessage.channel,
             };
         case SINGLE_SELECTION_QUESTION:
             const [questionText, ...options] = message.textLines;
             return {
                 container: MESSAGE_TYPE_RICH,
                 text: questionText,
+                replyOn: repliedMessage.channel,
                 attachments: options.map((option, index) => ({
                     color: '#D3D3D3',
                     text: `${index + 1}) ${option}`,
@@ -92,12 +94,14 @@ const adaptMessage = (message, repliedMessage) => {
             return {
                 container: MESSAGE_TYPE_PLAIN,
                 isPrivate: true,
+                replyOn: repliedMessage.channel,
                 text: `${message.text.replace(USER_MENTION, `@${repliedMessage.userName}`)}`,
             };
         case ERROR:
             return {
                 container: MESSAGE_TYPE_PLAIN,
                 isPrivate: true,
+                replyOn: repliedMessage.channel,
                 text: `${message.text.replace(USER_MENTION, `@${repliedMessage.userName}`)}`,
             };
         default:
