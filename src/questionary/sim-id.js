@@ -1,6 +1,5 @@
-import createQuestionaryStateMachine, {INVALID_INDEX} from './state-machine';
+import createQuestionaryStateMachine, {INVALID_INDEX, NO_ERROR} from './handler';
 import {SINGLE_SELECTION_QUESTION, FREE_TEXT_QUESTION} from './question-type';
-import {NO_ERROR} from './state-machine';
 import libPhoneNumber from 'google-libphonenumber';
 import {
     getSupportedCountries,
@@ -31,14 +30,11 @@ const getBrandQuestionOptions = country =>
         [QUESTION_OPTION_VALUE]: brand,
     }));
 
-const getLineTypeQuestionOptions = (country, brand) => {
-    console.log(country, brand);
-    console.log(getSupportedLineTypes(country, brand));
-    return getSupportedLineTypes(country, brand).map(lineType => ({
+const getLineTypeQuestionOptions = (country, brand) =>
+    getSupportedLineTypes(country, brand).map(lineType => ({
         [QUESTION_OPTION_TEXT]: lineType,
         [QUESTION_OPTION_VALUE]: lineType,
     }));
-};
 
 const createIdentifySimQuestionary = ({icc}) =>
     createQuestionaryStateMachine(

@@ -1,6 +1,9 @@
 import {FREE_TEXT_QUESTION, SINGLE_SELECTION_QUESTION} from '../question-type';
 import {QUESTION_OPTION_VALUE} from '../question-field';
 
+export const NO_ERROR = '';
+export const INVALID_INDEX = 'invalid-index';
+
 const createInitialAnswers = initialData =>
     initialData.reduce((answers, {dataId, value}) => ({...answers, [dataId]: value}), {});
 
@@ -15,9 +18,6 @@ const createQuestion = (questionData, previousAnswers) => {
             };
     }
 };
-
-export const NO_ERROR = '';
-export const INVALID_INDEX = 'invalid-index';
 
 const getDefaultValidatorForQuestion = currentQuestion => {
     switch (currentQuestion.type) {
