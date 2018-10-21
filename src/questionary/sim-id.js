@@ -37,8 +37,8 @@ const getLineTypeQuestionOptions = (country, brand) =>
     }));
 
 const createIdentifySimQuestionary = ({icc}, store) =>
-    createQuestionaryStateMachine(
-        [
+    createQuestionaryStateMachine({
+        questions: [
             {
                 dataId: COUNTRY_DATA_KEY,
                 type: SINGLE_SELECTION_QUESTION,
@@ -93,13 +93,13 @@ const createIdentifySimQuestionary = ({icc}, store) =>
                 },
             },
         ],
-        [
+        initialData: [
             {
                 dataId: ICC_DATA_KEY,
                 value: icc,
             },
         ],
-        responses =>
+        finishCallback: responses =>
             store.sim.registerSimInCatalog(
                 responses[ICC_DATA_KEY],
                 responses[MSISDN_DATA_KEY],
@@ -107,7 +107,7 @@ const createIdentifySimQuestionary = ({icc}, store) =>
                 responses[COUNTRY_DATA_KEY],
                 responses[LINE_TYPE_DATA_KEY]
             ),
-        '*Sim* successfully registered :tada:'
-    );
+        finishFeedbackText: '*Sim* successfully registered :tada:',
+    });
 
 export default createIdentifySimQuestionary;

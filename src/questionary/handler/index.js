@@ -44,7 +44,7 @@ const getDefaultFormatterForQuestion = currentQuestion => {
     }
 };
 
-const createQuestionaryStateMachine = (questions, initialData, finishCallback, finishFeedbackText) => {
+const createQuestionaryStateMachine = ({questions, initialData, finishCallback, finishFeedbackText}) => {
     const stateMachine = {
         currentQuestionIndex: 0,
         answers: createInitialAnswers(initialData),
