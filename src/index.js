@@ -1,5 +1,5 @@
 import portsFactory from './device-port/port-factory';
-import botFactory from './bot/bot-factory';
+import botFactory from './bot';
 import createSimtronController from './simtron-controller';
 import createStore from './store';
 

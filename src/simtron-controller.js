@@ -12,8 +12,8 @@ import {
     MODEM_RESTART_ID,
 } from './device-port/model/notification';
 import getMessageSpeech from './bot/speech';
-import scheduleDeviceConfiguration from './device-configuration-handler';
-import handleNotification from './port-notification-handler';
+import scheduleDeviceConfiguration from './device-config';
+import handleNotification from './port-notification';
 import {getSimStatusPollingTime} from './config';
 
 const createSimtronController = (botFactory, devicePortsFactory, store) => {

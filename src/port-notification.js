@@ -9,7 +9,7 @@ import logger from './util/logger';
 import Error, {SIM_NOT_PRESENT, NOTIFICATION_HANDLER_NOT_FOUND} from './util/error';
 import {createReadSmsCommand, createDeleteAllSmsCommand} from './device-port/model/command';
 import {createNewSmsNotificationMessage} from './bot/model/message';
-import scheduleDeviceConfiguration from './device-configuration-handler';
+import scheduleDeviceConfiguration from './device-config';
 import {getSimStatusRequestScheduleTime} from './config';
 
 const notificationHandlers = [
