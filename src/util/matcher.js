@@ -3,3 +3,5 @@ export const NON_DIGITS = /\D/g;
 export const QUOTED_TEXTS = /\"([^"]*)\"/g;
 export const QUOTES = /\"/g;
 export const LAST_DIGITS = /\d+$/g;
+
+export const SPACES = / /g;

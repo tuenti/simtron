@@ -9,6 +9,7 @@ import {
     getSupportedLineTypes,
 } from '../config';
 import {QUESTION_OPTION_TEXT, QUESTION_OPTION_VALUE} from './handler/question-field';
+import {SPACES} from '../util/matcher';
 
 const ICC_DATA_KEY = 'icc';
 const MSISDN_DATA_KEY = 'msisdn';
@@ -42,7 +43,7 @@ const createIdentifySimQuestionary = ({icc}, store) =>
             {
                 dataId: COUNTRY_DATA_KEY,
                 type: SINGLE_SELECTION_QUESTION,
-                text: "*Okay* let's start. Can you please select the *country* of the SIM card ?",
+                text: "Let's start. Can you please select the *country* of the SIM card ?",
                 options: () => getCountryQuestionOptions(),
                 errorMessages: {
                     [INVALID_INDEX]:
@@ -72,7 +73,7 @@ const createIdentifySimQuestionary = ({icc}, store) =>
                     const phoneUtil = libPhoneNumber.PhoneNumberUtil.getInstance();
                     const number = phoneUtil.parseAndKeepRawInput(msisdn, previousAnswers[COUNTRY_DATA_KEY]);
                     const phoneNumberFormat = libPhoneNumber.PhoneNumberFormat;
-                    return phoneUtil.format(number, phoneNumberFormat.INTERNATIONAL);
+                    return phoneUtil.format(number, phoneNumberFormat.INTERNATIONAL).replace(SPACES, '');
                 },
                 errorMessages: {
                     [INVALID_MSISDN_ERROR]: ':sleepy: Ops, you must enter a valid *phone number* dude !',
@@ -100,7 +101,7 @@ const createIdentifySimQuestionary = ({icc}, store) =>
             },
         ],
         finishCallback: responses =>
-            store.sim.registerSimInCatalog(
+            store.sim.saveSimInCatalog(
                 responses[ICC_DATA_KEY],
                 responses[MSISDN_DATA_KEY],
                 responses[BRAND_DATA_KEY],

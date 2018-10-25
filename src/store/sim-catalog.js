@@ -52,8 +52,24 @@ const createSimStore = () => ({
         return this.catalog;
     },
 
-    registerSimInCatalog(icc, msisdn, brand, country, lineType) {
-        catalogDb.push(SIM_CATALOG_PATH, [createSim(icc, msisdn, brand, country, lineType)], false);
+    findSimInCatalogByIcc(icc) {
+        return this.catalog.find(sim => sim.icc === icc);
+    },
+
+    findSimInCatalogByMsisdn(msisdn) {
+        return this.catalog.find(
+            sim => (msisdn.startsWith('+') ? sim.msisdn === msisdn : sim.msisdn.substring(1) === msisdn)
+        );
+    },
+
+    saveSimInCatalog(icc, msisdn, brand, country, lineType) {
+        const newSimData = createSim(icc, msisdn, brand, country, lineType);
+        if (this.findSimInCatalogByIcc(icc)) {
+            const updatedSims = readSimCatalog().map(sim => (sim.icc === icc ? newSimData : sim));
+            catalogDb.push(SIM_CATALOG_PATH, updatedSims, true);
+        } else {
+            catalogDb.push(SIM_CATALOG_PATH, [newSimData], false);
+        }
         this.catalog = readSimCatalog();
     },
 

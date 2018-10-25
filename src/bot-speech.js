@@ -1,6 +1,7 @@
 import {
     REQUEST_CATALOG,
     START_SIM_IDENTIFICATION,
+    START_SIM_DATA_EDIT,
     STOP_QUESTIONARY,
     FILL_QUESTIONARY,
 } from './bot/model/message-type';
@@ -12,12 +13,13 @@ import {
     createQuestionMessage,
     createSuccessFeedbackMessage,
 } from './bot/model/message';
-import {getBotMessageSequenceEnsuringTime, getBotNames} from './config';
+import {getBotMessageSequenceEnsuringTime, getBotNames, getBotDisplayName} from './config';
 import delayed from './util/delay';
 import {existSomeWordInText} from './util/text';
 import createIdentifySimQuestionary from './questionary/sim-id';
 
 const SIM_IDENTIFICATION_COMMAND = 'id';
+const SIM_DATA_EDIT_COMMAND = 'edit';
 const QUESIONARY_CANCEL_COMMAND = 'forget';
 
 const getSimIdentificationIndex = messageText => {
@@ -34,6 +36,14 @@ const isQuestionaryCancelMessage = messageText => {
 };
 
 const isSimIdentificationStartMessage = messageText => getSimIdentificationIndex(messageText) !== null;
+
+const getSimDataEditMsisdn = messageText => {
+    const words = messageText.split(' ');
+    const [botName, command, msisdn] = words;
+    return getBotNames().includes(botName) && command === SIM_DATA_EDIT_COMMAND && !!msisdn ? msisdn : null;
+};
+
+const isSimDataEditStartMessage = messageText => getSimDataEditMsisdn(messageText) !== null;
 
 const speeches = [
     {
@@ -87,11 +97,58 @@ const speeches = [
             const simIndex = getSimIdentificationIndex(receivedMessage.messageText);
             const allUnknownSims = store.sim.getAllUnknownSimsInUse();
             if (simIndex >= 0 && simIndex < allUnknownSims.length) {
-                const questionary = createIdentifySimQuestionary(allUnknownSims[simIndex], store);
+                const sim = allUnknownSims[simIndex];
+                bot.sendMessage(
+                    createSuccessFeedbackMessage(
+                        `*Ok*, lets identify the sim card with icc: *${
+                            sim.icc
+                        }*\nTo cancel, just type *${getBotDisplayName()} forget it, please* :wink:`
+                    ),
+                    receivedMessage
+                );
+                const questionary = createIdentifySimQuestionary(sim, store);
                 store.questionary.start(questionary, receivedMessage.botId, receivedMessage.userId);
-                bot.sendMessage(createQuestionMessage(questionary.getCurrentQuestion()), receivedMessage);
+                delayed(
+                    () =>
+                        bot.sendMessage(
+                            createQuestionMessage(questionary.getCurrentQuestion()),
+                            receivedMessage
+                        ),
+                    getBotMessageSequenceEnsuringTime()
+                );
             } else {
-                bot.sendMessage(createErrorMessage(':-1: Invalid SIM index'), receivedMessage);
+                bot.sendMessage(createErrorMessage(':-1: Invalid SIM index.'), receivedMessage);
+            }
+        },
+    },
+    {
+        messageType: START_SIM_DATA_EDIT,
+        messageIdentifier: receivedMessage => isSimDataEditStartMessage(receivedMessage.messageText),
+        isAdmin: true,
+        action: (bot, receivedMessage, store) => {
+            const msisdn = getSimDataEditMsisdn(receivedMessage.messageText);
+            const sim = store.sim.findSimInCatalogByMsisdn(msisdn);
+            if (sim) {
+                bot.sendMessage(
+                    createSuccessFeedbackMessage(
+                        `*Ok*, lets edit the sim card with icc: *${
+                            sim.icc
+                        }*\nTo cancel, just type *${getBotDisplayName()} forget it, please* :wink:`
+                    ),
+                    receivedMessage
+                );
+                const questionary = createIdentifySimQuestionary(sim, store);
+                store.questionary.start(questionary, receivedMessage.botId, receivedMessage.userId);
+                delayed(
+                    () =>
+                        bot.sendMessage(
+                            createQuestionMessage(questionary.getCurrentQuestion()),
+                            receivedMessage
+                        ),
+                    getBotMessageSequenceEnsuringTime()
+                );
+            } else {
+                bot.sendMessage(createErrorMessage(":-1: I don't know this phone number."), receivedMessage);
             }
         },
     },

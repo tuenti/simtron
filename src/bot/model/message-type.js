@@ -5,6 +5,7 @@ export const ANSWER_CATALOG_MESSAGE = 'answer-catalog';
 export const ANSWER_SIM_STATUS = 'answer-sim-status';
 export const NOTIFY_UNKNOWN_SIM_EXISTENCE = 'notify-unknown-sim-existence';
 export const START_SIM_IDENTIFICATION = 'start-sim-id';
+export const START_SIM_DATA_EDIT = 'start-sim-data-edit';
 export const NOTIFY_SMS_RECEIVED = 'notify-sms-received';
 export const STOP_QUESTIONARY = 'stop-questionary';
 export const FILL_QUESTIONARY = 'fill-questionary';
