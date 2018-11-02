@@ -88,7 +88,9 @@ const createSimStore = () => ({
     },
 
     findSimInUseByPortId(portId) {
-        return this.inUse[portId];
+        const sim = this.inUse[portId];
+        const simData = findSimByIcc(sim.icc, this.catalog);
+        return {...sim, ...(simData ? simData : {})};
     },
 
     setSimInUse(icc, networkStatus, smsMode, portId) {
