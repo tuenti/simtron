@@ -9,7 +9,7 @@ import {
     getSupportedLineTypes,
 } from '../config';
 import {QUESTION_OPTION_TEXT, QUESTION_OPTION_VALUE} from './handler/question-field';
-import {SPACES} from '../util/matcher';
+import {NON_DIGITS} from '../util/matcher';
 
 const ICC_DATA_KEY = 'icc';
 const MSISDN_DATA_KEY = 'msisdn';
@@ -73,7 +73,7 @@ const createIdentifySimQuestionary = ({icc}, store) =>
                     const phoneUtil = libPhoneNumber.PhoneNumberUtil.getInstance();
                     const number = phoneUtil.parseAndKeepRawInput(msisdn, previousAnswers[COUNTRY_DATA_KEY]);
                     const phoneNumberFormat = libPhoneNumber.PhoneNumberFormat;
-                    return phoneUtil.format(number, phoneNumberFormat.INTERNATIONAL).replace(SPACES, '');
+                    return phoneUtil.format(number, phoneNumberFormat.INTERNATIONAL).replace(NON_DIGITS, '');
                 },
                 errorMessages: {
                     [INVALID_MSISDN_ERROR]: ':sleepy: Ops, you must enter a valid *phone number* dude !',

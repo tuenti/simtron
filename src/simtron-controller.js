@@ -4,13 +4,6 @@ import {
     createErrorMessage,
     USER_MENTION,
 } from './bot/model/message';
-import {
-    NEW_SMS_NOTIFICATION_ID,
-    NETWORK_STATUS_NOTIFICATION_ID,
-    SIM_RETURNED_TO_MAIN_MENU_ID,
-    SIM_PIN_READY_ID,
-    MODEM_RESTART_ID,
-} from './device-port/model/notification';
 import getMessageSpeech from './bot/speech';
 import scheduleDeviceConfiguration from './device-config';
 import handleNotification from './port-notification';

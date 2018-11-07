@@ -1,17 +1,20 @@
 import {
     NOTIFY_BOOTING,
     NOTIFY_BOOT_DONE,
-    ANSWER_SIM_STATUS,
-    ANSWER_CATALOG_MESSAGE,
+    ANSWER_CATALOG,
+    ANSWER_CATALOG_CONTENT,
     NOTIFY_SMS_RECEIVED,
     NOTIFY_UNKNOWN_SIM_EXISTENCE,
     FREE_TEXT_QUESTION,
     SINGLE_SELECTION_QUESTION,
     ERROR,
     SUCCESS,
+    ANSWER_SIM_DETAILS,
+    ANSWER_SIM_DETAILS_CONTENT,
 } from '../model/message-type';
 import {USER_MENTION} from '../model/message';
 import {getBotDisplayName} from '../../config';
+import {SIM_IDENTIFICATION_COMMAND} from '../speech/sim-identification';
 
 export const MESSAGE_TYPE_PLAIN = 'plain';
 export const MESSAGE_TYPE_RICH = 'rich';
@@ -24,14 +27,13 @@ const adaptMessage = (message, repliedMessage) => {
                 container: MESSAGE_TYPE_PLAIN,
                 text: `:rocket: ${message.text}`,
             };
-        case ANSWER_CATALOG_MESSAGE:
-            const text = message.text.replace(USER_MENTION, `@${repliedMessage.userName}`);
+        case ANSWER_CATALOG:
             return {
                 container: MESSAGE_TYPE_RICH,
-                text: text,
+                text: message.text.replace(USER_MENTION, `@${repliedMessage.userName}`),
                 replyOn: repliedMessage.channel,
             };
-        case ANSWER_SIM_STATUS:
+        case ANSWER_CATALOG_CONTENT:
             const messageText =
                 message.textLines.length > 0
                     ? message.textLines.reduce((text, line) => `${text}\n${line}`, '')
@@ -39,6 +41,25 @@ const adaptMessage = (message, repliedMessage) => {
             return {
                 container: MESSAGE_TYPE_PLAIN,
                 text: messageText,
+                replyOn: repliedMessage.channel,
+            };
+        case ANSWER_SIM_DETAILS:
+            return {
+                container: MESSAGE_TYPE_RICH,
+                text: message.text.replace(USER_MENTION, `@${repliedMessage.userName}`),
+                replyOn: repliedMessage.channel,
+            };
+        case ANSWER_SIM_DETAILS_CONTENT:
+            return {
+                container: MESSAGE_TYPE_RICH,
+                text: message.text,
+                attachments: message.attachments.map(attachment => ({
+                    fields: attachment.fields.map(field => ({
+                        title: field.name,
+                        value: field.value,
+                        short: true,
+                    })),
+                })),
                 replyOn: repliedMessage.channel,
             };
         case NOTIFY_UNKNOWN_SIM_EXISTENCE:
@@ -55,7 +76,7 @@ const adaptMessage = (message, repliedMessage) => {
                 attachments: message.textLines.map((line, index) => ({
                     color: '#D3D3D3',
                     text: line,
-                    footer: `To identify this sim, type: *${getBotDisplayName()} id ${
+                    footer: `To identify this sim, type: *${getBotDisplayName()} ${SIM_IDENTIFICATION_COMMAND} ${
                         message.textLines.length > 1 ? index + 1 : ''
                     }*`,
                 })),

@@ -4,7 +4,7 @@ import {createSuccessFeedbackMessage, createQuestionMessage, createErrorMessage}
 import createIdentifySimQuestionary from '../../questionary/sim-id';
 import delayed from '../../util/delay';
 
-const SIM_IDENTIFICATION_COMMAND = 'id';
+export const SIM_IDENTIFICATION_COMMAND = 'register';
 
 const getSimIdentificationIndex = messageText => {
     const words = messageText.split(' ');

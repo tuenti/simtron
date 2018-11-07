@@ -57,9 +57,7 @@ const createSimStore = () => ({
     },
 
     findSimInCatalogByMsisdn(msisdn) {
-        return this.catalog.find(
-            sim => (msisdn.startsWith('+') ? sim.msisdn === msisdn : sim.msisdn.substring(1) === msisdn)
-        );
+        return this.catalog.find(sim => sim.msisdn === msisdn);
     },
 
     saveSimInCatalog(icc, msisdn, brand, country, lineType) {
@@ -79,6 +77,10 @@ const createSimStore = () => ({
             const simData = findSimByIcc(inUseSim.icc, this.catalog);
             return {...this.inUse[portId], ...(simData ? simData : {})};
         });
+    },
+
+    findSimInUseByMsisdn(msisdn) {
+        return this.getAllSimsInUse().find(sim => sim.msisdn === msisdn);
     },
 
     getAllUnknownSimsInUse() {

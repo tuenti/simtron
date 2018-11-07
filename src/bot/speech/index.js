@@ -1,6 +1,7 @@
 import {createRequestCatalogSpeech} from './request-catalog';
 import {createStartSimDataEditSpeech} from './sim-data-edit';
 import {createStartSimIdentificationSpeech} from './sim-identification';
+import {createRequestSimDetails} from './request-sim-details';
 import {createStopQuestionarySpeech, createFillQuestionSpeech} from './questionary';
 
 const speeches = [
@@ -8,6 +9,7 @@ const speeches = [
     createFillQuestionSpeech(),
     createStartSimIdentificationSpeech(),
     createStartSimDataEditSpeech(),
+    createRequestSimDetails(),
     createRequestCatalogSpeech(),
 ];
 

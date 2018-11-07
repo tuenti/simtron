@@ -1,8 +1,11 @@
 export const NOTIFY_BOOTING = 'notify-booting';
 export const NOTIFY_BOOT_DONE = 'notify-boot-done';
 export const REQUEST_CATALOG = 'request-catalog';
-export const ANSWER_CATALOG_MESSAGE = 'answer-catalog';
-export const ANSWER_SIM_STATUS = 'answer-sim-status';
+export const REQUEST_SIM_DETAILS = 'request-sim-details';
+export const ANSWER_CATALOG = 'answer-catalog';
+export const ANSWER_SIM_DETAILS = 'answer-sim-details';
+export const ANSWER_CATALOG_CONTENT = 'answer-sim-status';
+export const ANSWER_SIM_DETAILS_CONTENT = 'answer-sim-details-content';
 export const NOTIFY_UNKNOWN_SIM_EXISTENCE = 'notify-unknown-sim-existence';
 export const START_SIM_IDENTIFICATION = 'start-sim-id';
 export const START_SIM_DATA_EDIT = 'start-sim-data-edit';

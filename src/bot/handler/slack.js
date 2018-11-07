@@ -1,6 +1,6 @@
 import {RTMClient, WebClient} from '@slack/client';
 import logger from '../../util/logger';
-import {getDevelopmentSlackChannelName, getBotNames, getSlackBotAdminUserIds} from '../../config';
+import {getDevelopmentSlackChannelName, getSlackBotAdminUserIds} from '../../config';
 import adaptMessage, {MESSAGE_TYPE_RICH, MESSAGE_TYPE_PLAIN} from '../message-adapter/slack';
 
 const isMessage = event => event.type === 'message' && event.text;
@@ -22,8 +22,6 @@ export const getValueFromMessage = (message, possibleTexts) => {
     const tokens = messageText.split(' ');
     return texts.find(text => tokens.includes(text.toLowerCase()));
 };
-
-const messageContainsAnyText = (event, possibleTexts) => !!getValueFromMessage(event, possibleTexts);
 
 const canAccessToChannel = channel =>
     channel.is_member && (!process.env.DEVELOPMENT || channel.name === getDevelopmentSlackChannelName());

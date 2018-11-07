@@ -1,14 +1,16 @@
 import {
     NOTIFY_BOOTING,
     NOTIFY_BOOT_DONE,
-    ANSWER_CATALOG_MESSAGE,
-    ANSWER_SIM_STATUS,
+    ANSWER_CATALOG,
+    ANSWER_CATALOG_CONTENT,
     NOTIFY_SMS_RECEIVED,
     NOTIFY_UNKNOWN_SIM_EXISTENCE,
     ERROR,
     SUCCESS,
     FREE_TEXT_QUESTION,
     SINGLE_SELECTION_QUESTION,
+    ANSWER_SIM_DETAILS,
+    ANSWER_SIM_DETAILS_CONTENT,
 } from './message-type';
 import {getCountryFlag} from '../../config';
 import * as Questionary from '../../questionary/handler/question-type';
@@ -27,31 +29,54 @@ export const createBootDoneMessage = () => ({
 });
 
 export const createCatalogAnswerMessage = () => ({
-    type: ANSWER_CATALOG_MESSAGE,
+    type: ANSWER_CATALOG,
     text: `:+1: *${USER_MENTION}* getting catalog info.`,
 });
 
-const createSimIdentityLine = ({
-    icc,
-    msisdn = undefined,
-    brand = undefined,
-    country = undefined,
-    lineType = undefined,
-}) =>
-    msisdn && brand && country && lineType
-        ? `${msisdn} ${brand} ${country} ${lineType}`
-        : `Unknown sim with icc ${icc}`;
+export const createSimDetailsAnswerMessage = sim => ({
+    type: ANSWER_SIM_DETAILS,
+    text: `:+1: *${USER_MENTION}* getting details.`,
+});
 
-export const createSimStatusAnswerMessage = sims => {
+const createSimIdentityLine = ({icc, msisdn}) => (msisdn ? msisdn : `Unknown sim with icc ${icc}`);
+
+const createLineInfo = ({brand, lineType}) => (brand && lineType ? `${brand} ${lineType}` : '');
+
+export const createCatalogAnswerContentMessage = sims => {
     return {
-        type: ANSWER_SIM_STATUS,
+        type: ANSWER_CATALOG_CONTENT,
         textLines: Object.keys(sims).map(portId => {
             const sim = sims[portId];
-            const simData = createSimIdentityLine(sim);
+            const simId = createSimIdentityLine(sim);
+            const lineInfo = createLineInfo(sim);
             return sim.networkStatus.isWorking
-                ? `${getCountryFlag(sim.country)} *${simData}* ${sim.networkStatus.name}`
-                : `${getCountryFlag(sim.country)} *~${simData}~* ${sim.networkStatus.name}`;
+                ? `${getCountryFlag(sim.country)} *${simId}* ${lineInfo}`
+                : `${getCountryFlag(sim.country)} *~${simId}~* ${lineInfo}`;
         }),
+    };
+};
+
+export const createSimDetailsAnswerContentMessage = sim => {
+    const simId = createSimIdentityLine(sim);
+    return {
+        type: ANSWER_SIM_DETAILS_CONTENT,
+        text: sim.networkStatus.isWorking
+            ? `${getCountryFlag(sim.country)} *${simId}* icc: ${sim.icc}`
+            : `${getCountryFlag(sim.country)} *~${simId}~* icc: ${sim.icc}`,
+        attachments: [
+            {
+                fields: [
+                    {
+                        name: 'Line Info',
+                        value: createLineInfo(sim),
+                    },
+                    {
+                        name: 'Network Status',
+                        value: sim.networkStatus.name,
+                    },
+                ],
+            },
+        ],
     };
 };
 
@@ -63,10 +88,11 @@ export const createUnknownSimsExistenceNotificationMessage = unknownSims => {
 };
 
 export const createNewSmsNotificationMessage = (sim, smsText) => {
-    const simData = createSimIdentityLine(sim);
+    const simId = createSimIdentityLine(sim);
+    const lineInfo = createLineInfo(sim);
     return {
         type: NOTIFY_SMS_RECEIVED,
-        textLines: [`${getCountryFlag(sim.country)} *${simData}*`, smsText],
+        textLines: [`${getCountryFlag(sim.country)} *${simId}* ${lineInfo}`, smsText],
     };
 };
 

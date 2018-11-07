@@ -3,7 +3,7 @@ import {existSomeWordInText} from '../../util/text';
 import {getBotNames, getBotMessageSequenceEnsuringTime} from '../../config';
 import {
     createCatalogAnswerMessage,
-    createSimStatusAnswerMessage,
+    createCatalogAnswerContentMessage,
     createUnknownSimsExistenceNotificationMessage,
 } from '../model/message';
 import delayed from '../../util/delay';
@@ -15,7 +15,7 @@ export const createRequestCatalogSpeech = () => ({
         bot.sendMessage(createCatalogAnswerMessage(), receivedMessage);
         const allInUseSims = store.sim.getAllSimsInUse();
         delayed(
-            () => bot.sendMessage(createSimStatusAnswerMessage(allInUseSims), receivedMessage),
+            () => bot.sendMessage(createCatalogAnswerContentMessage(allInUseSims), receivedMessage),
             getBotMessageSequenceEnsuringTime()
         ).then(() =>
             delayed(() => {
