@@ -1,4 +1,4 @@
-const delayed = (func, delayMs) =>
+const delayed = (func: () => void, delayMs: number): Promise<void> =>
     new Promise(resolve => {
         setTimeout(() => {
             func();

@@ -13,8 +13,11 @@ import {
 import {UTF16_ENCODING} from './device-port/model/parser-token';
 import logger from './util/logger';
 
-export const SMS_TEXT_MODE = 'text';
-export const SMS_PDU_MODE = 'pdu';
+export enum SmsMode {
+    NONE = 0,
+    SMS_TEXT_MODE,
+    SMS_PDU_MODE,
+}
 
 let pendingRequests = {};
 
@@ -50,7 +53,7 @@ const getSimStatus = async portHandler => {
     return null;
 };
 
-const configureSmsMode = async portHandler => {
+const configureSmsMode = async (portHandler): Promise<SmsMode> => {
     const supportedEncodingsResponse = await portHandler.sendCommand(createGetAllowedEncodingsCommand());
     if (supportedEncodingsResponse.isSuccessful) {
         if (supportedEncodingsResponse.encodings.includes(UTF16_ENCODING)) {
@@ -63,16 +66,16 @@ const configureSmsMode = async portHandler => {
             const textModeConfigured =
                 enableTextModeCommandResponse.isSuccessful && setUtf16EncodingCommandResponse.isSuccessful;
             if (textModeConfigured) {
-                return SMS_TEXT_MODE;
+                return SmsMode.SMS_TEXT_MODE;
             }
         } else {
             const enablePduModeCommandResponse = await portHandler.sendCommand(createSetSmsPduModeCommand());
             if (enablePduModeCommandResponse.isSuccessful) {
-                return SMS_PDU_MODE;
+                return SmsMode.SMS_PDU_MODE;
             }
         }
     }
-    return null;
+    return SmsMode.NONE;
 };
 
 const configureDevice = async (portHandler, simStore) => {
@@ -84,7 +87,7 @@ const configureDevice = async (portHandler, simStore) => {
         const simStatus = await getSimStatus(portHandler);
         if (enableNetworkStatusNotificationsResponse.isSuccessful && simStatus) {
             const smsMode = await configureSmsMode(portHandler);
-            if (smsMode) {
+            if (smsMode !== SmsMode.NONE) {
                 const enableSmsNotificationsResponse = await portHandler.sendCommand(
                     createEnableSmsNotificationsCommand()
                 );
