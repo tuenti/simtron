@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import portsFactory from './device-port/port-factory';
 import botFactory from './bot';
 import createSimtronController from './simtron-controller';

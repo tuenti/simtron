@@ -1,0 +1,7 @@
+{
+    "extends": ["tslint-config-prettier"],
+    "rules": {
+        "indent": [true, "spaces", 4],
+        "no-unused-variable": [true, {"ignore-pattern": "^_"}]
+    }
+}

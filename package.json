@@ -1,20 +1,12 @@
 {
   "name": "simtron",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
-  "babel": {
-    "presets": [
-      "env"
-    ],
-    "plugins": [
-      "transform-object-rest-spread"
-    ]
-  },
   "scripts": {
-    "babel-node": "babel-node --presets=env",
-    "compile": "rm -rf dist && babel --presets=env src --out-dir dist",
+    "compile": "rm -rf dist && babel --extensions '.ts,.js' src --out-dir dist",
     "start": "npm run compile && pm2 start ./dist/index.js --name simtron",
-    "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch src --exec npm run babel-node -- ./src/index.js"
+    "babel-node": "babel-node --extensions '.ts,.js' src/index.ts",
+    "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch src --exec npm run babel-node --"
   },
   "dependencies": {
     "@slack/client": "^4.6.0",
@@ -27,10 +19,15 @@
     "winston": "^3.0.0"
   },
   "devDependencies": {
-    "babel": "^6.23.0",
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0"
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.1.0",
+    "@babel/node": "^7.0.0",
+    "@babel/plugin-transform-async-to-generator": "^7.1.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-typescript": "^7.0.0",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "typescript": "^3.0.3"
   }
 }
