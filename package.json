@@ -13,7 +13,7 @@
     "debug": "~2.6.9",
     "google-libphonenumber": "^3.1.15",
     "node-json-db": "^0.9.0",
-    "nodemon": "^1.18.3",
+    "nodemon": "^1.18.7",
     "pdu": "^1.1.0",
     "serialport": "^7.0.2",
     "winston": "^3.0.0"
