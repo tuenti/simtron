@@ -10,4 +10,6 @@ const Error = (reason, description) => ({
     description,
 });
 
+export const throwableError = (reason, description) => JSON.stringify(Error(reason, description));
+
 export default Error;

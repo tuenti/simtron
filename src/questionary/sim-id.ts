@@ -1,5 +1,4 @@
-import createQuestionaryHandler, {INVALID_INDEX, NO_ERROR} from './handler';
-import {SINGLE_SELECTION_QUESTION, FREE_TEXT_QUESTION} from './handler/question-type';
+import createQuestionaryHandler, {INVALID_INDEX, NO_ERROR, Answers} from './handler';
 import libPhoneNumber from 'google-libphonenumber';
 import {
     getSupportedCountries,
@@ -8,8 +7,8 @@ import {
     getSupportedBrands,
     getSupportedLineTypes,
 } from '../config';
-import {QUESTION_OPTION_TEXT, QUESTION_OPTION_VALUE} from './handler/question-field';
 import {NON_DIGITS} from '../util/matcher';
+import {Store} from '../store';
 
 const ICC_DATA_KEY = 'icc';
 const MSISDN_DATA_KEY = 'msisdn';
@@ -21,30 +20,30 @@ const INVALID_MSISDN_ERROR = 'invalid-msisdn';
 
 const getCountryQuestionOptions = () =>
     getSupportedCountries().map(country => ({
-        [QUESTION_OPTION_TEXT]: `${getCountryFlag(country)} ${getCountryName(country)}`,
-        [QUESTION_OPTION_VALUE]: country,
+        text: `${getCountryFlag(country)} ${getCountryName(country)}`,
+        value: country,
     }));
 
-const getBrandQuestionOptions = country =>
+const getBrandQuestionOptions = (country: string) =>
     getSupportedBrands(country).map(brand => ({
-        [QUESTION_OPTION_TEXT]: brand,
-        [QUESTION_OPTION_VALUE]: brand,
+        text: brand,
+        value: brand,
     }));
 
-const getLineTypeQuestionOptions = (country, brand) =>
-    getSupportedLineTypes(country, brand).map(lineType => ({
-        [QUESTION_OPTION_TEXT]: lineType,
-        [QUESTION_OPTION_VALUE]: lineType,
+const getLineTypeQuestionOptions = (country: string, brand: string) =>
+    getSupportedLineTypes(country, brand).map((lineType: string) => ({
+        text: lineType,
+        value: lineType,
     }));
 
-const createIdentifySimQuestionary = ({icc}, store) =>
+const createIdentifySimQuestionary = ({icc}: {icc: string}, store: Store) =>
     createQuestionaryHandler({
         questions: [
             {
                 dataId: COUNTRY_DATA_KEY,
-                type: SINGLE_SELECTION_QUESTION,
+                type: 'single-selection',
                 text: "Let's start. Can you please select the *country* of the SIM card ?",
-                options: () => getCountryQuestionOptions(),
+                optionsCreator: () => getCountryQuestionOptions(),
                 errorMessages: {
                     [INVALID_INDEX]:
                         ':face_with_rolling_eyes: Select an option please ... type the number of the selected option !',
@@ -52,9 +51,10 @@ const createIdentifySimQuestionary = ({icc}, store) =>
             },
             {
                 dataId: BRAND_DATA_KEY,
-                type: SINGLE_SELECTION_QUESTION,
+                type: 'single-selection',
                 text: '... and the *brand* is ?',
-                options: previousAnswers => getBrandQuestionOptions(previousAnswers[COUNTRY_DATA_KEY]),
+                optionsCreator: (previousAnswers: Answers) =>
+                    getBrandQuestionOptions(previousAnswers[COUNTRY_DATA_KEY]),
                 errorMessages: {
                     [INVALID_INDEX]:
                         ':unamused: Select one please ... type the number of the selected option !',
@@ -62,7 +62,7 @@ const createIdentifySimQuestionary = ({icc}, store) =>
             },
             {
                 dataId: MSISDN_DATA_KEY,
-                type: FREE_TEXT_QUESTION,
+                type: 'free-text',
                 text: 'Thanks dude! Can you please tell me the *phone number* ?',
                 validator: (msisdn, previousAnswers) => {
                     const phoneUtil = libPhoneNumber.PhoneNumberUtil.getInstance();
@@ -81,9 +81,9 @@ const createIdentifySimQuestionary = ({icc}, store) =>
             },
             {
                 dataId: LINE_TYPE_DATA_KEY,
-                type: SINGLE_SELECTION_QUESTION,
+                type: 'single-selection',
                 text: 'Great! finally ... I need to know the *line type*',
-                options: previousAnswers =>
+                optionsCreator: (previousAnswers: Answers) =>
                     getLineTypeQuestionOptions(
                         previousAnswers[COUNTRY_DATA_KEY],
                         previousAnswers[BRAND_DATA_KEY]

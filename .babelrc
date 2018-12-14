@@ -1,13 +1,14 @@
 {
     "presets": [
+        "@babel/preset-typescript",
         [
-            "@babel/env",
+            "@babel/preset-env",
             {
                 "targets": {
-                    "node":  "current"
+                    "node": "current"
                 }
             }
-        ],
-        "@babel/typescript"
-    ]
+        ]
+    ],
+    "plugins": ["@babel/plugin-proposal-class-properties"]
 }

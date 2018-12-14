@@ -13,8 +13,6 @@ import {
     ANSWER_SIM_DETAILS_CONTENT,
 } from './message-type';
 import {getCountryFlag} from '../../config';
-import * as Questionary from '../../questionary/handler/question-type';
-import {QUESTION_OPTION_TEXT} from '../../questionary/handler/question-field';
 
 export const USER_MENTION = '[USER_MENTION]';
 
@@ -98,15 +96,15 @@ export const createNewSmsNotificationMessage = (sim, smsText) => {
 
 export const createQuestionMessage = question => {
     switch (question.type) {
-        case Questionary.FREE_TEXT_QUESTION:
+        case 'free-text':
             return {
                 type: FREE_TEXT_QUESTION,
                 textLines: [question.text],
             };
-        case Questionary.SINGLE_SELECTION_QUESTION:
+        case 'single-selection':
             return {
                 type: SINGLE_SELECTION_QUESTION,
-                textLines: [question.text, ...question.options.map(option => option[QUESTION_OPTION_TEXT])],
+                textLines: [question.text, ...question.options.map(option => option['text'])],
             };
         default:
             return {};

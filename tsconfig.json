@@ -16,7 +16,8 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": true
+        "noUnusedParameters": true,
+        "skipLibCheck": true
     },
     "include": ["src"]
 }

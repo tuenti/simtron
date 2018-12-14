@@ -6,7 +6,6 @@ import {
     SIM_CARD_ICC_LINE_PREFIX,
 } from './parser-token';
 import {NON_DIGITS, QUOTED_TEXTS, QUOTES} from '../../util/matcher';
-import {SMS_TEXT_MODE} from '../../device-config';
 import decodeUtf16 from '../encoding/utf16';
 import decodePdu from '../encoding/pdu';
 
@@ -99,7 +98,8 @@ export const createReadSmsCommand = (smsIndex, smsMode) => ({
     command: `AT+CMGR=${smsIndex}`,
     responseParser: responseLines => {
         const [, smsMetaDataLine, smsTextLine] = responseLines;
-        if (smsMode === SMS_TEXT_MODE) {
+        // fixme use Enum
+        if (smsMode === 1) {
             const smsMetaData = smsMetaDataLine.match(QUOTED_TEXTS).map(item => item.replace(QUOTES, ''));
             return {
                 senderMsisdn: decodeUtf16(smsMetaData[SMS_METADATA_SENDER_INDEX]),

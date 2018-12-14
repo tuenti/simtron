@@ -2,7 +2,7 @@ import logger from '../util/logger';
 import Error, {MISSING_SMS_FIELDS} from '../util/error';
 import {getSmsMemoryMaxCount} from '../config';
 
-const createSms = (senderMsisdn, time, smsText) => {
+const createSms = (senderMsisdn: string, time: string, smsText: string) => {
     return {
         senderMsisdn,
         time,
@@ -10,23 +10,34 @@ const createSms = (senderMsisdn, time, smsText) => {
     };
 };
 
-const createSmsStore = () => ({
-    store: {},
+interface Sms {
+    senderMsisdn: string;
+    time: string;
+    smsText: string;
+}
 
-    getAllSms(portId) {
-        return this.store[portId];
+export interface SmsStore {
+    getAllSms: (portId: string) => Sms[];
+    addSms: (senderMsisdn: string, time: string, smsText: string, portId: string) => void;
+}
+
+let store: {[key: string]: Sms[]} = {};
+
+const createSmsStore = (): SmsStore => ({
+    getAllSms(portId: string) {
+        return store[portId];
     },
 
     addSms(senderMsisdn, time, smsText, portId) {
         if (senderMsisdn && time && smsText) {
             const sms = createSms(senderMsisdn, time, smsText);
-            if (this.store[portId]) {
-                this.store[portId].push(sms);
+            if (store[portId]) {
+                store[portId].push(sms);
             } else {
-                this.store[portId] = [sms];
+                store[portId] = [sms];
             }
-            if (this.store[portId].length > getSmsMemoryMaxCount()) {
-                this.store[portId].shift();
+            if (store[portId].length > getSmsMemoryMaxCount()) {
+                store[portId].shift();
             }
         } else {
             logger.error(

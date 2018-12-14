@@ -12,6 +12,7 @@ import {
 } from './device-port/model/command';
 import {UTF16_ENCODING} from './device-port/model/parser-token';
 import logger from './util/logger';
+import {SimStore} from './store/sim-catalog';
 
 export enum SmsMode {
     NONE = 0,
@@ -19,9 +20,9 @@ export enum SmsMode {
     SMS_PDU_MODE,
 }
 
-let pendingRequests = {};
+let pendingRequests: {[key: string]: any} = {};
 
-const getSimIcc = async portHandler => {
+const getSimIcc = async (portHandler: any) => {
     try {
         const readIccFromSimCommandResponse = await portHandler.sendCommand(
             createReadIccDirectCardAccessCommand()
@@ -37,7 +38,7 @@ const getSimIcc = async portHandler => {
     return null;
 };
 
-const getSimStatus = async portHandler => {
+const getSimStatus = async (portHandler: any) => {
     const icc = await getSimIcc(portHandler);
     if (icc) {
         const getNetworkStatusCommandResponse = await portHandler.sendCommand(
@@ -53,7 +54,7 @@ const getSimStatus = async portHandler => {
     return null;
 };
 
-const configureSmsMode = async (portHandler): Promise<SmsMode> => {
+const configureSmsMode = async (portHandler: any): Promise<SmsMode> => {
     const supportedEncodingsResponse = await portHandler.sendCommand(createGetAllowedEncodingsCommand());
     if (supportedEncodingsResponse.isSuccessful) {
         if (supportedEncodingsResponse.encodings.includes(UTF16_ENCODING)) {
@@ -78,7 +79,7 @@ const configureSmsMode = async (portHandler): Promise<SmsMode> => {
     return SmsMode.NONE;
 };
 
-const configureDevice = async (portHandler, simStore) => {
+const configureDevice = async (portHandler: any, simStore: SimStore) => {
     const enableEchoResponse = await portHandler.sendCommand(createSetEchoModeCommand());
     if (enableEchoResponse.isSuccessful) {
         const enableNetworkStatusNotificationsResponse = await portHandler.sendCommand(
@@ -108,7 +109,7 @@ const configureDevice = async (portHandler, simStore) => {
     return false;
 };
 
-const scheduleDeviceConfiguration = (portHandler, simStore, timeOutMs = 0) => {
+const scheduleDeviceConfiguration = (portHandler: any, simStore: SimStore, timeOutMs = 0) => {
     if (!pendingRequests[portHandler.portId] || timeOutMs === 0) {
         pendingRequests[portHandler.portId] = setTimeout(() => {
             configureDevice(portHandler, simStore);
