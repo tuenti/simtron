@@ -16,5 +16,5 @@ const createGetAllSimsResolver = (store: Store): AllSimsResolver => () =>
         },
         isOnline: sim.networkStatus.isWorking,
     }));
-
+ 
 export default createGetAllSimsResolver;

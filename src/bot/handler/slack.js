@@ -89,10 +89,10 @@ const createSlackBot = botToken => {
             this.listeners = [];
         },
 
-        sendMessage(message, repliedMessage = {}) {
-            const slackMessage = adaptMessage(message, repliedMessage);
+        sendMessage(message, incomingMessage = {}) {
+            const slackMessage = adaptMessage(message, incomingMessage);
             if (slackMessage) {
-                sendMessage(slackMessage, slackMessage.isPrivate ? repliedMessage.userId : undefined);
+                sendMessage(slackMessage, slackMessage.isPrivate ? incomingMessage.userId : undefined);
             }
         },
 

@@ -1,17 +1,21 @@
-import {REQUEST_CATALOG} from '../model/message-type';
+import {MessageType} from '../model/message-type';
 import {existSomeWordInText} from '../../util/text';
 import {getBotNames, getBotMessageSequenceEnsuringTime} from '../../config';
 import {
     createCatalogAnswerMessage,
     createCatalogAnswerContentMessage,
     createUnknownSimsExistenceNotificationMessage,
+    IncomingMessage,
 } from '../model/message';
 import delayed from '../../util/delay';
+import {Bot} from '..';
+import {Store} from '../../store';
 
 export const createRequestCatalogSpeech = () => ({
-    messageType: REQUEST_CATALOG,
-    messageIdentifier: receivedMessage => existSomeWordInText(getBotNames(), receivedMessage.messageText),
-    action: (bot, receivedMessage, store) => {
+    messageType: MessageType.REQUEST_CATALOG,
+    messageIdentifier: (receivedMessage: IncomingMessage) =>
+        existSomeWordInText(getBotNames(), receivedMessage.messageText),
+    action: (bot: Bot, receivedMessage: IncomingMessage, store: Store) => {
         bot.sendMessage(createCatalogAnswerMessage(), receivedMessage);
         const allInUseSims = store.sim.getAllSimsInUse();
         delayed(

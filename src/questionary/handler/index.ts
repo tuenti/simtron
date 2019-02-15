@@ -8,7 +8,7 @@ interface QuestionOption {
     text: string;
 }
 
-interface Question {
+export interface Question {
     dataId: string;
     type: QuestionType;
     text: string;
@@ -19,9 +19,9 @@ interface Question {
 
 export type Answers = {[key: string]: string};
 
-interface TextQuestion extends Question {}
+export interface TextQuestion extends Question {}
 
-interface SelectionQuestion extends Question {
+export interface SelectionQuestion extends Question {
     optionsCreator: (previousAnswers: Answers) => QuestionOption[];
     options?: QuestionOption[];
 }
@@ -48,7 +48,7 @@ export interface Questionary {
     finish: () => void;
 }
 
-const isSelectionQuestion = (question: Question): question is SelectionQuestion => {
+export const isSelectionQuestion = (question: Question): question is SelectionQuestion => {
     return question.type === 'single-selection';
 };
 
