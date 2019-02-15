@@ -13,6 +13,7 @@ import {
 import {UTF16_ENCODING} from './device-port/model/parser-token';
 import logger from './util/logger';
 import {SimStore} from './store/sim-catalog';
+import Error, {DEVICE_CONFIGURATION_ERROR} from './util/error';
 
 export enum SmsMode {
     NONE = 0,
@@ -102,7 +103,9 @@ const configureDevice = async (portHandler: any, simStore: SimStore) => {
                     return true;
                 }
             }
-            logger.error(`Device configuration error on port: ${portHandler.portId}`);
+            logger.error(
+                Error(DEVICE_CONFIGURATION_ERROR, `Device configuration error on port: ${portHandler.portId}`)
+            );
         }
     }
     simStore.setSimRemoved(portHandler.portId);

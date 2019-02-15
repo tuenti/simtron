@@ -30,11 +30,11 @@ const BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH = '/bot/sequenceWaitTime';
 const DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME = 750;
 
 const COUNTRIES_DATA_PATH = '/countries';
-const DEFAULT_FLAG_REPRESENTATION = ':waving_white_flag:';
+const DEFAULT_FLAG_REPRESENTATION = ':flag-aq:';
 
 const db = new JsonDB(CONFIG_DB_FILE, true, true);
 
-const readPath = (path, defaultValue) => {
+const readPath = (path: string, defaultValue: any) => {
     try {
         return db.getData(path);
     } catch (e) {
@@ -67,11 +67,12 @@ export const getBotNames = () => readPath(BOT_NAMES_PATH, DEFAULT_BOT_NAMES);
 export const getBotDisplayName = () => getBotNames()[0];
 export const getBotMessageSequenceEnsuringTime = () =>
     readPath(BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH, DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME);
-export const getCountryName = country => readPath(`${COUNTRIES_DATA_PATH}/${country}/name`, country);
-export const getCountryFlag = country =>
-    readPath(`${COUNTRIES_DATA_PATH}/${country}/flag`, DEFAULT_FLAG_REPRESENTATION);
+export const getCountryName = (country: string) =>
+    readPath(`${COUNTRIES_DATA_PATH}/${country}/name`, country);
+export const getCountryFlag = (country: string | undefined) =>
+    readPath(`${COUNTRIES_DATA_PATH}/${country ? country : 'none'}/flag`, DEFAULT_FLAG_REPRESENTATION);
 export const getSupportedCountries = () => Object.keys(readPath(COUNTRIES_DATA_PATH, {}));
-export const getSupportedBrands = country =>
+export const getSupportedBrands = (country: string) =>
     Object.keys(readPath(`${COUNTRIES_DATA_PATH}/${country}/lineTypes`, {}));
-export const getSupportedLineTypes = (country, brand) =>
+export const getSupportedLineTypes = (country: string, brand: string) =>
     readPath(`${COUNTRIES_DATA_PATH}/${country}/lineTypes/${brand}`, []);

@@ -15,22 +15,22 @@ const logger = createLogger({
 });
 
 export default {
-    error: error => {
+    error: (error: {reason: string; description: string}) => {
         logger.error(error);
         if (process.env.DEVELOPMENT) {
             throw error;
         }
     },
 
-    warning: message => {
+    warning: (message: string) => {
         logger.warn(message);
     },
 
-    info: message => {
+    info: (message: string) => {
         logger.info(message);
     },
 
-    debug: message => {
+    debug: (message: string) => {
         debug(message);
     },
 };
