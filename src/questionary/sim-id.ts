@@ -76,7 +76,7 @@ const createIdentifySimQuestionary = ({icc}: {icc: string}, store: Store) =>
                     return phoneUtil.format(number, phoneNumberFormat.INTERNATIONAL).replace(NON_DIGITS, '');
                 },
                 errorMessages: {
-                    [INVALID_MSISDN_ERROR]: ':sleepy: Ops, you must enter a valid *phone number* dude !',
+                    [INVALID_MSISDN_ERROR]: ':sleepy: Ops, you must enter a valid *phone number*.',
                 },
             },
             {
