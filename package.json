@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "compile": "rm -rf dist && babel --extensions '.ts,.js' src --out-dir dist",
-    "start": "npm run compile && pm2 start ./dist/index.js --name wref-server",
+    "start": "npm run compile && pm2 start ./dist/index.js --name simtron",
     "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch src --exec babel-node --extensions '.ts,.js' src/index.ts --",
     "generate-types": "gql-gen --require ts-node/register --schema ./src/graphql/types-generator-schema.ts --template graphql-codegen-typescript-template --out ./src/graphql/types.ts",
     "test": "jest"
