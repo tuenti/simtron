@@ -45,7 +45,9 @@ export const createStartSimIdentificationSpeech = () => ({
             store.questionary.start(questionary, receivedMessage.botId, receivedMessage.userId);
             delayed(
                 () =>
-                    bot.sendMessage(createQuestionMessage(questionary.getCurrentQuestion()), receivedMessage),
+                    questionary
+                        .getCurrentQuestion()
+                        .then(question => bot.sendMessage(createQuestionMessage(question), receivedMessage)),
                 getBotMessageSequenceEnsuringTime()
             );
         } else {

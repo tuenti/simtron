@@ -19,7 +19,7 @@ const getMsisdnOfSimToForceOperator = (messageText: string) => {
 const isStartForceSimOperatorMessage = (messageText: string) =>
     getMsisdnOfSimToForceOperator(messageText) !== null;
 
-export const createForceSimOperatorSpeech = () => ({
+export const createStartForceSimOperatorSpeech = () => ({
     messageType: MessageType.START_FORCE_SIM_OPERATOR,
     messageIdentifier: (receivedMessage: IncomingMessage) =>
         isStartForceSimOperatorMessage(receivedMessage.messageText),

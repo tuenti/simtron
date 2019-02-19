@@ -21,10 +21,10 @@ export const createFillQuestionSpeech = () => ({
     messageType: MessageType.FILL_QUESTIONARY,
     messageIdentifier: (receivedMessage: IncomingMessage, store: Store) =>
         !!store.questionary.getByBotUser(receivedMessage.botId, receivedMessage.userId),
-    action: (bot: Bot, receivedMessage: IncomingMessage, store: Store) => {
+    action: async (bot: Bot, receivedMessage: IncomingMessage, store: Store) => {
         const questionary = store.questionary.getByBotUser(receivedMessage.botId, receivedMessage.userId);
         if (questionary) {
-            const responseAccepted = questionary.answerCurrentQuestion(receivedMessage.messageText);
+            const responseAccepted = await questionary.answerCurrentQuestion(receivedMessage.messageText);
             if (responseAccepted) {
                 if (questionary.isFullfilled()) {
                     store.questionary.finish(receivedMessage.botId, receivedMessage.userId);
@@ -33,7 +33,8 @@ export const createFillQuestionSpeech = () => ({
                         receivedMessage
                     );
                 } else {
-                    bot.sendMessage(createQuestionMessage(questionary.getCurrentQuestion()), receivedMessage);
+                    const question = await questionary.getCurrentQuestion();
+                    bot.sendMessage(createQuestionMessage(question), receivedMessage);
                 }
             } else {
                 bot.sendMessage(createErrorMessage(questionary.getValidationErrorText()), receivedMessage);

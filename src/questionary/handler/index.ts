@@ -22,7 +22,7 @@ export type Answers = {[key: string]: string};
 export interface TextQuestion extends Question {}
 
 export interface SelectionQuestion extends Question {
-    optionsCreator: (previousAnswers: Answers) => QuestionOption[];
+    optionsCreator: (previousAnswers: Answers) => QuestionOption[] | Promise<QuestionOption[]>;
     options?: QuestionOption[];
 }
 interface Answer {
@@ -37,9 +37,9 @@ export interface Questionary {
     answers: Answers;
     errorMessage: string;
     getFinishFeedbackText: () => string;
-    getCurrentQuestion: () => Question;
+    getCurrentQuestion: () => Promise<Question>;
 
-    answerCurrentQuestion: (answer: string) => boolean;
+    answerCurrentQuestion: (answer: string) => Promise<boolean>;
 
     isFullfilled: () => boolean;
 
@@ -55,14 +55,29 @@ export const isSelectionQuestion = (question: Question): question is SelectionQu
 const createInitialAnswers = (initialData: Answer[]): Answers =>
     initialData.reduce((answers, {dataId, value}) => ({...answers, [dataId]: value}), {});
 
-const createQuestion = (questionData: Question, previousAnswers: Answers) => {
+const createQuestion = (
+    questionData: Question,
+    previousAnswers: Answers
+): Promise<TextQuestion | SelectionQuestion> => {
     if (isSelectionQuestion(questionData)) {
-        return {
-            ...questionData,
-            options: questionData.optionsCreator(previousAnswers),
-        };
+        const optionsCreatorResult = questionData.optionsCreator(previousAnswers);
+        return optionsCreatorResult instanceof Promise
+            ? new Promise((resolve, reject) => {
+                  optionsCreatorResult
+                      .then(options =>
+                          resolve({
+                              ...questionData,
+                              options,
+                          })
+                      )
+                      .catch(reject);
+              })
+            : Promise.resolve({
+                  ...questionData,
+                  options: optionsCreatorResult,
+              });
     } else {
-        return questionData;
+        return Promise.resolve(questionData);
     }
 };
 
@@ -111,12 +126,12 @@ const createQuestionaryHandler = ({
             return finishFeedbackText;
         },
 
-        getCurrentQuestion() {
+        async getCurrentQuestion() {
             return createQuestion(questions[this.currentQuestionIndex], this.answers);
         },
 
-        answerCurrentQuestion(answer: string) {
-            const currentQuestion = this.getCurrentQuestion();
+        async answerCurrentQuestion(answer: string) {
+            const currentQuestion = await this.getCurrentQuestion();
             const validator = currentQuestion.validator
                 ? currentQuestion.validator
                 : getDefaultValidatorForQuestion(currentQuestion);

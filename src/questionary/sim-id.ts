@@ -43,7 +43,7 @@ const createIdentifySimQuestionary = ({icc}: {icc: string}, store: Store) =>
                 dataId: COUNTRY_DATA_KEY,
                 type: 'single-selection',
                 text: "Let's start. Can you please select the *country* of the SIM card ?",
-                optionsCreator: () => getCountryQuestionOptions(),
+                optionsCreator: getCountryQuestionOptions,
                 errorMessages: {
                     [INVALID_INDEX]:
                         ':face_with_rolling_eyes: Select an option please ... type the number of the selected option !',
