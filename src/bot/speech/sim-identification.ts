@@ -8,8 +8,8 @@ import {
 } from '../model/message';
 import createIdentifySimQuestionary from '../../questionary/sim-id';
 import delayed from '../../util/delay';
-import {Bot} from '..';
 import {Store} from '../../store';
+import {AnswerMessageCallback} from '.';
 
 export const SIM_IDENTIFICATION_COMMAND = 'register';
 
@@ -28,12 +28,12 @@ export const createStartSimIdentificationSpeech = () => ({
     messageIdentifier: (receivedMessage: IncomingMessage) =>
         isSimIdentificationStartMessage(receivedMessage.messageText),
     isAdmin: true,
-    action: (bot: Bot, receivedMessage: IncomingMessage, store: Store) => {
+    action: (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
         const simIndex = getSimIdentificationIndex(receivedMessage.messageText);
         const allUnknownSims = store.sim.getAllUnknownSimsInUse();
-        if (simIndex && simIndex >= 0 && simIndex < allUnknownSims.length) {
-            const sim = allUnknownSims[simIndex];
-            bot.sendMessage(
+        if (!simIndex || (simIndex >= 0 && simIndex < allUnknownSims.length)) {
+            const sim = allUnknownSims[simIndex || 0];
+            answerMessage(
                 createSuccessFeedbackMessage(
                     `*Ok*, lets identify the sim card with icc: *${
                         sim.icc
@@ -47,11 +47,11 @@ export const createStartSimIdentificationSpeech = () => ({
                 () =>
                     questionary
                         .getCurrentQuestion()
-                        .then(question => bot.sendMessage(createQuestionMessage(question), receivedMessage)),
+                        .then(question => answerMessage(createQuestionMessage(question), receivedMessage)),
                 getBotMessageSequenceEnsuringTime()
             );
         } else {
-            bot.sendMessage(createErrorMessage(':-1: Invalid SIM index.'), receivedMessage);
+            answerMessage(createErrorMessage(':-1: Invalid SIM index.'), receivedMessage);
         }
     },
 });

@@ -11,13 +11,18 @@ import decodePdu from '../encoding/pdu';
 
 const SMS_METADATA_SENDER_INDEX = 1;
 
+export interface Command {
+    command: string;
+    responseParser?: (responseLines: string[]) => {[key: string]: any};
+}
+
 export const createSetEchoModeCommand = () => ({
     command: 'ATE1',
 });
 
 export const createReadIccCommand = () => ({
     command: 'AT+CCID',
-    responseParser: responseLines => {
+    responseParser: (responseLines: string[]) => {
         const iccLine = responseLines.find(line => {
             return line.startsWith(ICC_LINE_PREFIX) || line.length > 18;
         });
@@ -32,7 +37,7 @@ export const createReadIccCommand = () => ({
 
 export const createReadIccDirectCardAccessCommand = () => ({
     command: 'AT+CICCID',
-    responseParser: responseLines => {
+    responseParser: (responseLines: string[]) => {
         const iccLine = responseLines.find(line => {
             return line.startsWith(SIM_CARD_ICC_LINE_PREFIX) || line.length > 18;
         });
@@ -47,14 +52,17 @@ export const createReadIccDirectCardAccessCommand = () => ({
 
 export const createGetAllowedEncodingsCommand = () => ({
     command: 'AT+CSCS=?',
-    responseParser: responseLines => {
+    responseParser: (responseLines: string[]) => {
         const encodingsLine = responseLines.find(line => {
             return line.startsWith(ENCODINGS_LINE_PREFIX);
         });
         if (encodingsLine) {
-            return {
-                encodings: encodingsLine.match(QUOTED_TEXTS).map(item => item.replace(QUOTES, '')),
-            };
+            const matches = encodingsLine.match(QUOTED_TEXTS);
+            return matches
+                ? {
+                      encodings: matches.map(item => item.replace(QUOTES, '')),
+                  }
+                : {};
         }
         return {};
     },
@@ -70,7 +78,7 @@ export const createEnableNetworkStatusNotificationsCommand = () => ({
 
 export const createGetNetworkStatusCommand = () => ({
     command: 'AT+CREG?',
-    responseParser: responseLines => {
+    responseParser: (responseLines: string[]) => {
         const statusLine = responseLines.find(line => {
             return line.startsWith(NETWORK_STATUS_LINE_PREFIX);
         });
@@ -94,18 +102,27 @@ export const createDeleteAllSmsCommand = () => ({
     command: 'AT+CMGD=1,4',
 });
 
-export const createReadSmsCommand = (smsIndex, smsMode) => ({
+export const createSearchOperatorsCommand = () => ({
+    command: 'AT+COPS=?',
+});
+
+export const createReadSmsCommand = (smsIndex: number, smsMode: number) => ({
     command: `AT+CMGR=${smsIndex}`,
-    responseParser: responseLines => {
+    responseParser: (responseLines: string[]) => {
         const [, smsMetaDataLine, smsTextLine] = responseLines;
         // fixme use Enum
         if (smsMode === 1) {
-            const smsMetaData = smsMetaDataLine.match(QUOTED_TEXTS).map(item => item.replace(QUOTES, ''));
-            return {
-                senderMsisdn: decodeUtf16(smsMetaData[SMS_METADATA_SENDER_INDEX]),
-                time: +new Date(),
-                smsText: decodeUtf16(smsTextLine),
-            };
+            const matches = smsMetaDataLine.match(QUOTED_TEXTS);
+            if (matches) {
+                const smsMetaData = matches.map(item => item.replace(QUOTES, ''));
+                return {
+                    senderMsisdn: decodeUtf16(smsMetaData[SMS_METADATA_SENDER_INDEX]),
+                    time: +new Date(),
+                    smsText: decodeUtf16(smsTextLine),
+                };
+            } else {
+                return {};
+            }
         } else {
             const parsedSms = decodePdu(smsTextLine);
             return {

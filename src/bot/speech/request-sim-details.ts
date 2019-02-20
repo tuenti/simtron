@@ -7,8 +7,8 @@ import {
     IncomingMessage,
 } from '../model/message';
 import delayed from '../../util/delay';
-import {Bot} from '..';
 import {Store} from '../../store';
+import {AnswerMessageCallback} from '.';
 
 const SIM_DETAILS_COMMAND = 'details';
 
@@ -23,20 +23,20 @@ export const createRequestSimDetails = () => ({
     messageType: MessageType.REQUEST_SIM_DETAILS,
     messageIdentifier: (receivedMessage: IncomingMessage) =>
         isRequestSimDetailsMessage(receivedMessage.messageText),
-    action: (bot: Bot, receivedMessage: IncomingMessage, store: Store) => {
-        bot.sendMessage(createSimDetailsAnswerMessage(), receivedMessage);
+    action: (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
+        answerMessage(createSimDetailsAnswerMessage(), receivedMessage);
         const msisdn = getRequestDetailsMsisdn(receivedMessage.messageText);
         if (msisdn) {
             const sim = store.sim.findSimInUseByMsisdn(msisdn);
             if (sim) {
                 delayed(
-                    () => bot.sendMessage(createSimDetailsAnswerContentMessage(sim), receivedMessage),
+                    () => answerMessage(createSimDetailsAnswerContentMessage(sim), receivedMessage),
                     getBotMessageSequenceEnsuringTime()
                 );
             } else {
                 delayed(
                     () =>
-                        bot.sendMessage(
+                        answerMessage(
                             createErrorMessage(`:-1: Sim not found with msisdn *${msisdn}*`),
                             receivedMessage
                         ),

@@ -11,10 +11,25 @@ import handleNotification from './port-notification';
 import {getSimStatusPollingTime} from './config';
 import createGraphqlServer from './graphql';
 import logger from './util/logger';
+import Error, {PORT_NOT_FOUND} from './util/error';
 
 const createSimtronController = (botFactory, devicePortsFactory, store) => {
     let bots = [];
     let devicePortHandlers = [];
+
+    const answerMessageToBot = bot => (message, receivedMessage) => {
+        bot.sendMessage(message, receivedMessage);
+    };
+
+    const sendCommandToPort = (command, portId) => {
+        const port = devicePortHandlers.find(portHandler => portHandler.portId === portId);
+        if (port) {
+            return port.sendCommand(command);
+        } else {
+            logger.error(Error(PORT_NOT_FOUND, `Port[${portId}] not found`));
+            return Promise.reject(Error(PORT_NOT_FOUND, `Port[${portId}] not found`));
+        }
+    };
 
     const handleBotIncomingMessage = async (bot, incomingMessage) => {
         const messageSpeech = getMessageSpeech(incomingMessage, store);
@@ -25,7 +40,7 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
                     incomingMessage
                 );
             } else {
-                messageSpeech.action(bot, incomingMessage, store);
+                messageSpeech.action(incomingMessage, store, answerMessageToBot(bot), sendCommandToPort);
             }
         }
     };

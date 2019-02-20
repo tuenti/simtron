@@ -1,6 +1,16 @@
 import {MessageType} from '../model/message-type';
-import {getBotNames} from '../../config';
-import {IncomingMessage} from '../model/message';
+import {getBotNames, getBotDisplayName, getBotMessageSequenceEnsuringTime} from '../../config';
+import {
+    IncomingMessage,
+    createSuccessFeedbackMessage,
+    createQuestionMessage,
+    createErrorMessage,
+} from '../model/message';
+import {Store} from '../../store';
+import delayed from '../../util/delay';
+import {Question} from '../../questionary/handler';
+import createForceSimOperatorQuestionary from '../../questionary/force-sim-operator';
+import {AnswerMessageCallback, SendCommandCallback} from '.';
 
 const FORCE_OPERATOR_COMMAND1 = 'force';
 const FORCE_OPERATOR_COMMAND2 = 'operator';
@@ -23,5 +33,40 @@ export const createStartForceSimOperatorSpeech = () => ({
     messageType: MessageType.START_FORCE_SIM_OPERATOR,
     messageIdentifier: (receivedMessage: IncomingMessage) =>
         isStartForceSimOperatorMessage(receivedMessage.messageText),
-    action: () => {},
+    action: (
+        receivedMessage: IncomingMessage,
+        store: Store,
+        answerMessage: AnswerMessageCallback,
+        sendCommand: SendCommandCallback
+    ) => {
+        const msisdn = getMsisdnOfSimToForceOperator(receivedMessage.messageText);
+        if (msisdn) {
+            const simInUse = store.sim.findSimInUseByMsisdn(msisdn);
+            if (simInUse) {
+                answerMessage(
+                    createSuccessFeedbackMessage(
+                        `*Ok*, lets search for available operators for the sim with icc: *${
+                            simInUse.icc
+                        }*\nTo cancel, just type *${getBotDisplayName()} forget it, please* :wink:`
+                    ),
+                    receivedMessage
+                );
+
+                const questionary = createForceSimOperatorQuestionary(simInUse, store);
+                store.questionary.start(questionary, receivedMessage.botId, receivedMessage.userId);
+
+                delayed(
+                    () =>
+                        questionary
+                            .getCurrentQuestion()
+                            .then((question: Question) =>
+                                answerMessage(createQuestionMessage(question), receivedMessage)
+                            ),
+                    getBotMessageSequenceEnsuringTime()
+                );
+            } else {
+                answerMessage(createErrorMessage(":-1: I don't know this phone number."), receivedMessage);
+            }
+        }
+    },
 });

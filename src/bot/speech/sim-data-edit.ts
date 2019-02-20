@@ -8,8 +8,8 @@ import {
 } from '../model/message';
 import createIdentifySimQuestionary from '../../questionary/sim-id';
 import delayed from '../../util/delay';
-import {Bot} from '..';
 import {Store} from '../../store';
+import {AnswerMessageCallback} from '.';
 
 const SIM_DATA_EDIT_COMMAND = 'edit';
 
@@ -26,12 +26,12 @@ export const createStartSimDataEditSpeech = () => ({
     messageIdentifier: (receivedMessage: IncomingMessage) =>
         isSimDataEditStartMessage(receivedMessage.messageText),
     isAdmin: true,
-    action: (bot: Bot, receivedMessage: IncomingMessage, store: Store) => {
+    action: (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
         const msisdn = getSimDataEditMsisdn(receivedMessage.messageText);
         if (msisdn) {
             const sim = store.sim.findSimInCatalogByMsisdn(msisdn);
             if (sim) {
-                bot.sendMessage(
+                answerMessage(
                     createSuccessFeedbackMessage(
                         `*Ok*, lets edit the sim card with icc: *${
                             sim.icc
@@ -46,12 +46,12 @@ export const createStartSimDataEditSpeech = () => ({
                         questionary
                             .getCurrentQuestion()
                             .then(question =>
-                                bot.sendMessage(createQuestionMessage(question), receivedMessage)
+                                answerMessage(createQuestionMessage(question), receivedMessage)
                             ),
                     getBotMessageSequenceEnsuringTime()
                 );
             } else {
-                bot.sendMessage(createErrorMessage(":-1: I don't know this phone number."), receivedMessage);
+                answerMessage(createErrorMessage(":-1: I don't know this phone number."), receivedMessage);
             }
         }
     },

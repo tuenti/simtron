@@ -8,24 +8,24 @@ import {
     IncomingMessage,
 } from '../model/message';
 import delayed from '../../util/delay';
-import {Bot} from '..';
 import {Store} from '../../store';
+import {AnswerMessageCallback} from '.';
 
 export const createRequestCatalogSpeech = () => ({
     messageType: MessageType.REQUEST_CATALOG,
     messageIdentifier: (receivedMessage: IncomingMessage) =>
         existSomeWordInText(getBotNames(), receivedMessage.messageText),
-    action: (bot: Bot, receivedMessage: IncomingMessage, store: Store) => {
-        bot.sendMessage(createCatalogAnswerMessage(), receivedMessage);
+    action: (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
+        answerMessage(createCatalogAnswerMessage(), receivedMessage);
         const allInUseSims = store.sim.getAllSimsInUse();
         delayed(
-            () => bot.sendMessage(createCatalogAnswerContentMessage(allInUseSims), receivedMessage),
+            () => answerMessage(createCatalogAnswerContentMessage(allInUseSims), receivedMessage),
             getBotMessageSequenceEnsuringTime()
         ).then(() =>
             delayed(() => {
                 const allUnknownSims = store.sim.getAllUnknownSimsInUse();
                 if (receivedMessage.isFromAdmin && allUnknownSims.length > 0) {
-                    bot.sendMessage(
+                    answerMessage(
                         createUnknownSimsExistenceNotificationMessage(allUnknownSims),
                         receivedMessage
                     );

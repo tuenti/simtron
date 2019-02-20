@@ -5,9 +5,26 @@ import {createStartSimIdentificationSpeech} from './sim-identification';
 import {createRequestSimDetails} from './request-sim-details';
 import {createStopQuestionarySpeech, createFillQuestionSpeech} from './questionary';
 import {Store} from '../../store';
-import {IncomingMessage} from '../model/message';
+import {IncomingMessage, OutgoingMessage} from '../model/message';
+import {MessageType} from '../model/message-type';
+import {Command} from '../../device-port/model/command';
 
-const speeches = [
+export type AnswerMessageCallback = (message: OutgoingMessage, receivedMessage: IncomingMessage) => void;
+
+export type SendCommandCallback = (command: Command, portId: string) => Promise<{[key: string]: any}>;
+
+export interface Speech {
+    messageType: MessageType;
+    messageIdentifier: (receivedMessage: IncomingMessage, store: Store) => boolean;
+    action: (
+        receivedMessage: IncomingMessage,
+        store: Store,
+        answerMessage: AnswerMessageCallback,
+        sendCommand: SendCommandCallback
+    ) => void;
+}
+
+const speeches: Speech[] = [
     createStopQuestionarySpeech(),
     createFillQuestionSpeech(),
     createStartSimIdentificationSpeech(),
