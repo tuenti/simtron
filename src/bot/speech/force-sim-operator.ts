@@ -52,16 +52,16 @@ export const createStartForceSimOperatorSpeech = () => ({
                     receivedMessage
                 );
 
-                const questionary = createForceSimOperatorQuestionary(simInUse, store);
+                const questionary = createForceSimOperatorQuestionary(simInUse, sendCommand);
                 store.questionary.start(questionary, receivedMessage.botId, receivedMessage.userId);
 
                 delayed(
                     () =>
-                        questionary
-                            .getCurrentQuestion()
-                            .then((question: Question) =>
-                                answerMessage(createQuestionMessage(question), receivedMessage)
-                            ),
+                        questionary.getCurrentQuestion().then((question: Question) => {
+                            if (!questionary.isCanceled()) {
+                                answerMessage(createQuestionMessage(question), receivedMessage);
+                            }
+                        }),
                     getBotMessageSequenceEnsuringTime()
                 );
             } else {

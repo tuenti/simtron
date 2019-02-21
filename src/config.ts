@@ -7,7 +7,9 @@ const DEFAULT_PORTS_SCAN_MAX_RETRIES = 5;
 const PORT_VENDORS_IDS_PATH = '/ports/vendors';
 const DEFAULT_PORT_VENDORS_IDS = ['FTDI'];
 const DEVICES_COMMANDS_TIMEOUT_MS_PATH = '/ports/commands/timeout';
+const DEVICES_SEARCH_OPERATORS_COMMAND_TIMEOUT_MS_PATH = '/ports/commands/searchOperatorTimeout';
 const DEFAULT_DEVICES_COMMANDS_TIMEOUT_MS = 7000;
+const DEFAULT_SEARCH_OPERATORS_COMMAND_TIMEOUT_MS = 120000;
 const DEVICES_COMMANDS_RESOLVE_DELAY_PATH = '/ports/commands/resolveDelay';
 const DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY = 100;
 
@@ -47,6 +49,8 @@ export const getPortScanMaxRetriesCount = () =>
 export const getVendorIds = () => readPath(PORT_VENDORS_IDS_PATH, DEFAULT_PORT_VENDORS_IDS);
 export const getDevicesCommandsTimeout = () =>
     readPath(DEVICES_COMMANDS_TIMEOUT_MS_PATH, DEFAULT_DEVICES_COMMANDS_TIMEOUT_MS);
+export const getSearchOperatorsCommandsTimeout = () =>
+    readPath(DEVICES_SEARCH_OPERATORS_COMMAND_TIMEOUT_MS_PATH, DEFAULT_SEARCH_OPERATORS_COMMAND_TIMEOUT_MS);
 export const getDevicesCommandsResolveDelay = () =>
     readPath(DEVICES_COMMANDS_RESOLVE_DELAY_PATH, DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY);
 

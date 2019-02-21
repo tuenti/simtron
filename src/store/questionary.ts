@@ -21,7 +21,12 @@ const createQuestionaryStore = (): QuestionaryStore => ({
     },
 
     cancel(botId, userId) {
-        delete ongoingQuesitonaries[quesitonaryKey(botId, userId)];
+        const key = quesitonaryKey(botId, userId);
+        const questionary = ongoingQuesitonaries[key];
+        if (questionary) {
+            questionary.cancel();
+        }
+        delete ongoingQuesitonaries[key];
     },
 
     finish(botId, userId) {

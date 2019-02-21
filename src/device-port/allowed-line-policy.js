@@ -9,6 +9,7 @@ const allowedLinePrefixes = [
     '+CREG:',
     '+CCID',
     '+ICCID',
+    '+COPS:',
     '+CSCS:',
     'START',
     '+STIN: 25',

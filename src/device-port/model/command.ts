@@ -4,15 +4,18 @@ import {
     NETWORK_STATUS_LINE_PREFIX,
     ENCODINGS_LINE_PREFIX,
     SIM_CARD_ICC_LINE_PREFIX,
+    OPERATORS_LINE_PREFIX,
 } from './parser-token';
 import {NON_DIGITS, QUOTED_TEXTS, QUOTES} from '../../util/matcher';
 import decodeUtf16 from '../encoding/utf16';
 import decodePdu from '../encoding/pdu';
+import {getSearchOperatorsCommandsTimeout} from '../../config';
 
 const SMS_METADATA_SENDER_INDEX = 1;
 
 export interface Command {
     command: string;
+    timeout?: number;
     responseParser?: (responseLines: string[]) => {[key: string]: any};
 }
 
@@ -104,6 +107,21 @@ export const createDeleteAllSmsCommand = () => ({
 
 export const createSearchOperatorsCommand = () => ({
     command: 'AT+COPS=?',
+    timeout: getSearchOperatorsCommandsTimeout(),
+    responseParser: (responseLines: string[]) => {
+        const [, operatorsLine] = responseLines;
+        console.log(operatorsLine);
+        if (operatorsLine.startsWith(OPERATORS_LINE_PREFIX)) {
+            console.log(operatorsLine);
+            return {
+                operators: [operatorsLine],
+            };
+        } else {
+            return {
+                operators: [],
+            };
+        }
+    },
 });
 
 export const createReadSmsCommand = (smsIndex: number, smsMode: number) => ({

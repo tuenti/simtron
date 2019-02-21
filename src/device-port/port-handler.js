@@ -9,7 +9,7 @@ const createOngoingCommandResolver = (commandHandler, resolve, reject, timeoutCa
     commandHandler,
     resolve,
     reject,
-    timeoutHandler: setTimeout(timeoutCallback, getDevicesCommandsTimeout()),
+    timeoutHandler: setTimeout(timeoutCallback, commandHandler.timeout || getDevicesCommandsTimeout()),
     timeoutCallback,
 });
 

@@ -46,6 +46,10 @@ export interface Questionary {
     getValidationErrorText: () => string;
 
     finish: () => void;
+
+    cancel: () => void;
+
+    isCanceled: () => boolean;
 }
 
 export const isSelectionQuestion = (question: Question): question is SelectionQuestion => {
@@ -118,6 +122,7 @@ const createQuestionaryHandler = ({
     finishFeedbackText: string;
 }): Questionary => {
     const stateMachine = {
+        canceled: false,
         currentQuestionIndex: 0,
         answers: createInitialAnswers(initialData),
         errorMessage: '',
@@ -160,6 +165,14 @@ const createQuestionaryHandler = ({
 
         finish() {
             finishCallback(this.answers);
+        },
+
+        cancel() {
+            this.canceled = true;
+        },
+
+        isCanceled() {
+            return this.canceled;
         },
     };
 
