@@ -17,7 +17,7 @@ export interface Question {
     answerFormatter?: (answer: string, previousAnswers: Answers) => string;
 }
 
-export type Answers = {[key: string]: string};
+export type Answers = {[key: string]: any};
 
 export interface TextQuestion extends Question {}
 
@@ -59,32 +59,6 @@ export const isSelectionQuestion = (question: Question): question is SelectionQu
 const createInitialAnswers = (initialData: Answer[]): Answers =>
     initialData.reduce((answers, {dataId, value}) => ({...answers, [dataId]: value}), {});
 
-const createQuestion = (
-    questionData: Question,
-    previousAnswers: Answers
-): Promise<TextQuestion | SelectionQuestion> => {
-    if (isSelectionQuestion(questionData)) {
-        const optionsCreatorResult = questionData.optionsCreator(previousAnswers);
-        return optionsCreatorResult instanceof Promise
-            ? new Promise((resolve, reject) => {
-                  optionsCreatorResult
-                      .then(options =>
-                          resolve({
-                              ...questionData,
-                              options,
-                          })
-                      )
-                      .catch(reject);
-              })
-            : Promise.resolve({
-                  ...questionData,
-                  options: optionsCreatorResult,
-              });
-    } else {
-        return Promise.resolve(questionData);
-    }
-};
-
 const getDefaultValidatorForQuestion = (currentQuestion: Question) => {
     if (isSelectionQuestion(currentQuestion)) {
         return (answer: string) => {
@@ -122,6 +96,7 @@ const createQuestionaryHandler = ({
     finishFeedbackText: string;
 }): Questionary => {
     const stateMachine = {
+        questionOptionsCache: <QuestionOption[][]>[],
         canceled: false,
         currentQuestionIndex: 0,
         answers: createInitialAnswers(initialData),
@@ -132,6 +107,38 @@ const createQuestionaryHandler = ({
         },
 
         async getCurrentQuestion() {
+            const createQuestion = (
+                questionData: Question,
+                previousAnswers: Answers
+            ): Promise<TextQuestion | SelectionQuestion> => {
+                if (isSelectionQuestion(questionData)) {
+                    const optionsCreatorResult = this.questionOptionsCache[this.currentQuestionIndex]
+                        ? this.questionOptionsCache[this.currentQuestionIndex]
+                        : questionData.optionsCreator(previousAnswers);
+                    if (optionsCreatorResult instanceof Promise) {
+                        return new Promise((resolve, reject) => {
+                            optionsCreatorResult
+                                .then(options => {
+                                    this.questionOptionsCache[this.currentQuestionIndex] = options;
+                                    resolve({
+                                        ...questionData,
+                                        options,
+                                    });
+                                })
+                                .catch(reject);
+                        });
+                    } else {
+                        this.questionOptionsCache[this.currentQuestionIndex] = optionsCreatorResult;
+                        return Promise.resolve({
+                            ...questionData,
+                            options: optionsCreatorResult,
+                        });
+                    }
+                } else {
+                    return Promise.resolve(questionData);
+                }
+            };
+
             return createQuestion(questions[this.currentQuestionIndex], this.answers);
         },
 

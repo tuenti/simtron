@@ -6,7 +6,7 @@ import {
     SIM_CARD_ICC_LINE_PREFIX,
     OPERATORS_LINE_PREFIX,
 } from './parser-token';
-import {NON_DIGITS, QUOTED_TEXTS, QUOTES} from '../../util/matcher';
+import {NON_DIGITS, QUOTED_TEXTS, QUOTES, PARENTHESIS_GROUP} from '../../util/matcher';
 import decodeUtf16 from '../encoding/utf16';
 import decodePdu from '../encoding/pdu';
 import {getSearchOperatorsCommandsTimeout} from '../../config';
@@ -17,6 +17,49 @@ export interface Command {
     command: string;
     timeout?: number;
     responseParser?: (responseLines: string[]) => {[key: string]: any};
+}
+
+export enum OperatorStatus {
+    Unknown = 0,
+    Available = 1,
+    Current = 2,
+    Forbidden = 3,
+}
+
+enum AccessTechnology {
+    Gsm = 0,
+    GsmCompact = 1,
+    UTRAN = 2,
+}
+
+enum OperatorMode {
+    Automatic = 0,
+    Manual = 1,
+    forceDeregister = 2,
+    SetOnlyFormat = 3,
+    ManualAautomatic = 4,
+    manualNotChangeAccessTechnology = 5,
+}
+
+enum OperatorFormat {
+    LongName = 0,
+    ShortName = 1,
+    id = 2,
+}
+
+export interface Operator {
+    status: OperatorStatus;
+    longName: string;
+    shortName: string;
+    id: string;
+    accessTechnology: AccessTechnology;
+    format: OperatorFormat;
+    applicableId: string;
+}
+
+interface SupportedOperatorsMetadata {
+    modes: OperatorMode[];
+    formats: OperatorFormat[];
 }
 
 export const createSetEchoModeCommand = () => ({
@@ -105,6 +148,56 @@ export const createDeleteAllSmsCommand = () => ({
     command: 'AT+CMGD=1,4',
 });
 
+const removeContainerChars = (value: string): string => value.substring(1, value.length - 1);
+
+const parseSupportedOperatorsMetadata = (metadata: string): SupportedOperatorsMetadata => {
+    const metadataParts = metadata.match(PARENTHESIS_GROUP);
+    const [modes = [], formats = []] = metadataParts
+        ? metadataParts.map(part =>
+              removeContainerChars(part)
+                  .split(',')
+                  .map(parseInt)
+          )
+        : [];
+    return {
+        modes,
+        formats,
+    };
+};
+
+const selectPrefferedOperatorFormat = (
+    longName: string,
+    shortName: string,
+    id: string,
+    availableFormats: OperatorFormat[]
+) => {
+    if (availableFormats.includes(OperatorFormat.id) && id !== '') {
+        return {format: OperatorFormat.id, applicableId: id};
+    } else if (availableFormats.includes(OperatorFormat.ShortName) && shortName !== '') {
+        return {format: OperatorFormat.ShortName, applicableId: shortName};
+    } else if (id !== '') {
+        return {format: OperatorFormat.id, applicableId: id};
+    } else if (shortName !== '') {
+        return {format: OperatorFormat.ShortName, applicableId: shortName};
+    } else {
+        return {format: OperatorFormat.LongName, applicableId: longName};
+    }
+};
+
+const parseOperator = (metadata: SupportedOperatorsMetadata) => (operator: string): Operator => {
+    const [status, longName, shortName, id, accessTechnology] = removeContainerChars(operator).split(',');
+    const {format, applicableId} = selectPrefferedOperatorFormat(longName, shortName, id, metadata.formats);
+    return {
+        status: parseInt(status),
+        longName: removeContainerChars(longName),
+        shortName: removeContainerChars(shortName),
+        id: removeContainerChars(id),
+        accessTechnology: parseInt(accessTechnology),
+        format,
+        applicableId,
+    };
+};
+
 export const createSearchOperatorsCommand = () => ({
     command: 'AT+COPS=?',
     timeout: getSearchOperatorsCommandsTimeout(),
@@ -112,16 +205,25 @@ export const createSearchOperatorsCommand = () => ({
         const [, operatorsLine] = responseLines;
         console.log(operatorsLine);
         if (operatorsLine.startsWith(OPERATORS_LINE_PREFIX)) {
-            console.log(operatorsLine);
-            return {
-                operators: [operatorsLine],
-            };
+            const [operatorsPart, metadataPart] = operatorsLine
+                .substring(OPERATORS_LINE_PREFIX.length)
+                .trim()
+                .split(',,');
+            const metadata = parseSupportedOperatorsMetadata(metadataPart);
+            const operators = operatorsPart.match(PARENTHESIS_GROUP);
+            return operators ? {operators: operators.map(parseOperator(metadata))} : {operators: []};
         } else {
             return {
-                operators: [],
+                operators: null,
             };
         }
     },
+});
+
+export const createForceOperatorCommand = (operator: Operator) => ({
+    command: `AT+COPS=${OperatorMode.Manual},${operator.format},${operator.applicableId},${
+        operator.accessTechnology
+    }`,
 });
 
 export const createReadSmsCommand = (smsIndex: number, smsMode: number) => ({
