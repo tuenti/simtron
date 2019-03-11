@@ -33,6 +33,7 @@ export const createStartForceSimOperatorSpeech = () => ({
     messageType: MessageType.START_FORCE_SIM_OPERATOR,
     messageIdentifier: (receivedMessage: IncomingMessage) =>
         isStartForceSimOperatorMessage(receivedMessage.messageText),
+    isAdmin: true,
     action: (
         receivedMessage: IncomingMessage,
         store: Store,
@@ -41,7 +42,7 @@ export const createStartForceSimOperatorSpeech = () => ({
     ) => {
         const msisdn = getMsisdnOfSimToForceOperator(receivedMessage.messageText);
         if (msisdn) {
-            const simInUse = store.sim.findSimInUseByMsisdn(msisdn);
+            const simInUse = store.sim.findSimInUseByMsisdn(msisdn, receivedMessage.isFromAdmin);
             if (simInUse) {
                 answerMessage(
                     createSuccessFeedbackMessage(

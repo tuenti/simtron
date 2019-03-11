@@ -163,7 +163,7 @@ const createQuestionaryHandler = ({
         },
 
         isFullfilled() {
-            return !questions.find(({dataId}) => !this.answers[dataId]);
+            return !questions.find(({dataId}) => this.answers[dataId] === undefined);
         },
 
         getValidationErrorText() {

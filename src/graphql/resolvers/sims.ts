@@ -5,7 +5,7 @@ import {Sim} from '../types';
 type AllSimsResolver = () => Sim[];
 
 const createGetAllSimsResolver = (store: Store): AllSimsResolver => () =>
-    store.sim.getAllSimsInUse().map((sim: SimInUse) => ({
+    store.sim.getAllSimsInUse(false).map((sim: SimInUse) => ({
         msisdn: sim.msisdn,
         brand: sim.brand,
         country: sim.country,
@@ -16,5 +16,5 @@ const createGetAllSimsResolver = (store: Store): AllSimsResolver => () =>
         },
         isOnline: sim.networkStatus.isWorking,
     }));
- 
+
 export default createGetAllSimsResolver;

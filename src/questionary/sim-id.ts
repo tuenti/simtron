@@ -15,6 +15,7 @@ const MSISDN_DATA_KEY = 'msisdn';
 const BRAND_DATA_KEY = 'brand';
 const COUNTRY_DATA_KEY = 'country';
 const LINE_TYPE_DATA_KEY = 'line-type';
+const IS_VISIBLE_DATA_KEY = 'is-visible';
 
 const INVALID_MSISDN_ERROR = 'invalid-msisdn';
 
@@ -82,12 +83,25 @@ const createIdentifySimQuestionary = ({icc}: {icc: string}, store: Store) =>
             {
                 dataId: LINE_TYPE_DATA_KEY,
                 type: 'single-selection',
-                text: 'Great! finally ... I need to know the *line type*',
+                text: 'Great! Now I need to know the *line type*',
                 optionsCreator: (previousAnswers: Answers) =>
                     getLineTypeQuestionOptions(
                         previousAnswers[COUNTRY_DATA_KEY],
                         previousAnswers[BRAND_DATA_KEY]
                     ),
+                errorMessages: {
+                    [INVALID_INDEX]:
+                        ":tired_face: I can't accept that! It must be one of these options ... type the number of the selected option !",
+                },
+            },
+            {
+                dataId: IS_VISIBLE_DATA_KEY,
+                type: 'single-selection',
+                text: 'Finally ... Do you want to make this sim *available* to allowed users groups ?',
+                optionsCreator: () => [
+                    {text: 'Yes, make it available', value: true},
+                    {text: 'No, hide this sim by now', value: false},
+                ],
                 errorMessages: {
                     [INVALID_INDEX]:
                         ":tired_face: I can't accept that! It must be one of these options ... type the number of the selected option !",
@@ -106,7 +120,8 @@ const createIdentifySimQuestionary = ({icc}: {icc: string}, store: Store) =>
                 responses[MSISDN_DATA_KEY],
                 responses[BRAND_DATA_KEY],
                 responses[COUNTRY_DATA_KEY],
-                responses[LINE_TYPE_DATA_KEY]
+                responses[LINE_TYPE_DATA_KEY],
+                responses[IS_VISIBLE_DATA_KEY]
             ),
         finishFeedbackText: '*Sim* successfully registered :tada:',
     });

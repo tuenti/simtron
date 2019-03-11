@@ -27,7 +27,7 @@ export const createRequestSimDetails = () => ({
         answerMessage(createSimDetailsAnswerMessage(), receivedMessage);
         const msisdn = getRequestDetailsMsisdn(receivedMessage.messageText);
         if (msisdn) {
-            const sim = store.sim.findSimInUseByMsisdn(msisdn);
+            const sim = store.sim.findSimInUseByMsisdn(msisdn, receivedMessage.isFromAdmin);
             if (sim) {
                 delayed(
                     () => answerMessage(createSimDetailsAnswerContentMessage(sim), receivedMessage),

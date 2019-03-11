@@ -13,6 +13,7 @@ interface SimData extends Sim {
     brand: string;
     country: string;
     lineType: string;
+    isVisible: boolean;
 }
 
 export interface SimInUse extends Sim {
@@ -32,11 +33,18 @@ export interface SimStore {
 
     findSimInCatalogByMsisdn: (msisdn: string) => SimData | null;
 
-    saveSimInCatalog: (icc: string, msisdn: string, brand: string, country: string, lineType: string) => void;
+    saveSimInCatalog: (
+        icc: string,
+        msisdn: string,
+        brand: string,
+        country: string,
+        lineType: string,
+        isVisible: boolean
+    ) => void;
 
-    getAllSimsInUse: () => SimInUse[];
+    getAllSimsInUse: (showHiddenSims: boolean) => SimInUse[];
 
-    findSimInUseByMsisdn: (msisdn: string) => SimInUse | null;
+    findSimInUseByMsisdn: (msisdn: string, returnHiddenSim: boolean) => SimInUse | null;
 
     getAllUnknownSimsInUse: () => SimInUse[];
 
@@ -59,13 +67,15 @@ const createSimData = (
     msisdn: string,
     brand: string,
     country: string,
-    lineType: string
+    lineType: string,
+    isVisible: boolean
 ): SimData => ({
     msisdn,
     icc,
     brand,
     country,
     lineType,
+    isVisible,
 });
 
 const createSimInUse = (
@@ -110,8 +120,15 @@ const createSimStore = (): SimStore => ({
         return catalog.find(sim => sim.msisdn === msisdn) || null;
     },
 
-    saveSimInCatalog(icc: string, msisdn: string, brand: string, country: string, lineType: string) {
-        const newSimData = createSimData(icc, msisdn, brand, country, lineType);
+    saveSimInCatalog(
+        icc: string,
+        msisdn: string,
+        brand: string,
+        country: string,
+        lineType: string,
+        isVisible: boolean
+    ) {
+        const newSimData = createSimData(icc, msisdn, brand, country, lineType, isVisible);
         if (this.findSimInCatalogByIcc(icc)) {
             const updatedSims = readSimCatalog().map(sim => (sim.icc === icc ? newSimData : sim));
             catalogDb.push(SIM_CATALOG_PATH, updatedSims, true);
@@ -121,15 +138,19 @@ const createSimStore = (): SimStore => ({
         catalog = readSimCatalog();
     },
 
-    getAllSimsInUse(): SimInUse[] {
-        return [...Object.values(inUse)].map((simInUse: SimInUse) => {
-            const simData = findSimByIcc(simInUse.icc, catalog);
-            return {...simInUse, ...(simData ? simData : {})};
-        });
+    getAllSimsInUse(showHiddenSims: boolean): SimInUse[] {
+        return Object.values(inUse)
+            .map((simInUse: SimInUse) => {
+                const simData = findSimByIcc(simInUse.icc, catalog);
+                return showHiddenSims || !simData || simData.isVisible
+                    ? {...simInUse, ...(simData ? simData : {})}
+                    : undefined;
+            })
+            .filter(Boolean) as SimInUse[];
     },
 
-    findSimInUseByMsisdn(msisdn: string) {
-        return this.getAllSimsInUse().find((sim: SimInUse) => sim.msisdn === msisdn) || null;
+    findSimInUseByMsisdn(msisdn: string, returnHiddenSim: boolean) {
+        return this.getAllSimsInUse(returnHiddenSim).find((sim: SimInUse) => sim.msisdn === msisdn) || null;
     },
 
     getAllUnknownSimsInUse(): SimInUse[] {

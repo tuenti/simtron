@@ -17,7 +17,7 @@ export const createRequestCatalogSpeech = () => ({
         existSomeWordInText(getBotNames(), receivedMessage.messageText),
     action: (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
         answerMessage(createCatalogAnswerMessage(), receivedMessage);
-        const allInUseSims = store.sim.getAllSimsInUse();
+        const allInUseSims = store.sim.getAllSimsInUse(receivedMessage.isFromAdmin);
         delayed(
             () => answerMessage(createCatalogAnswerContentMessage(allInUseSims), receivedMessage),
             getBotMessageSequenceEnsuringTime()
