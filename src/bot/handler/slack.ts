@@ -45,13 +45,13 @@ const canAccessToChannel = (channel: ConversationChannel) =>
 
 const createSlackBot = (botToken: string) => {
     let botId: string;
-    const slackBot = new RTMClient(botToken, {
-        retryConfig: {
-            forever: true,
-            maxTimeout: 60000,
-        },
-    });
-    const slackBotWebClient = new WebClient(botToken);
+    const retryConfig = {
+        forever: true,
+        maxTimeout: 60000,
+    };
+
+    const slackBot = new RTMClient(botToken, {retryConfig});
+    const slackBotWebClient = new WebClient(botToken, {retryConfig});
 
     const postMessageToRecipients = (message: SlackMessage, channels: string[], userId: string | null) => {
         channels.map(channelId => {
