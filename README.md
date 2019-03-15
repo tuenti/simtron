@@ -133,7 +133,7 @@ Simtron register <unregistered sim index>
 
 This command starts a formulary to identify and then register all required sim data, just answer inline questions.
 
-## Register sim card in catalog
+## Edit sim card data in catalog
 
 ```
 Simtron edit <phone number>
