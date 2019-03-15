@@ -9,7 +9,7 @@
 
 We prefer pull request, but you can also open an issue.
 
-# Why do you need one simtron in your workflow:
+# Why do you need one simtron in your workflow
 
 Simtron can be extended to do whatever you need with a bunch of sim cards, imagine you have 16 mobile phones connected through USB to keep them charged and also to communicate with them. Then you need to listen to received SMS and react doing something usefull. Simtron can just automate that, avoiding all that mess of phones with sims you need to keep up and running.
 
