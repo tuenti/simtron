@@ -24,7 +24,7 @@ const DEFAULT_SIM_STATUS_POLLING_TIME_MS = 600000; // 10 min
 const SLACK_BOT_TOKEN_PATH = '/bot/slack/token';
 const DEVELOPMENT_SLACK_CHANNEL_NAME_PATH = '/bot/slack/developmentChannelName';
 const SLACK_BOT_ADMIN_USER_IDS_PATH = '/bot/slack/adminUserIds';
-const DEFAULT_SLACK_BOT_ADMIN_USER_IDS = ['U6XTUAV7X', 'U41NYS5EZ'];
+const DEFAULT_SLACK_BOT_ADMIN_USER_IDS: string[] = [];
 
 const BOT_NAMES_PATH = '/bot/names';
 const DEFAULT_BOT_NAMES = ['simtron', '@simtron', '<@U9EEFTDKL>'];
