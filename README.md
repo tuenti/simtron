@@ -54,6 +54,7 @@ To make this installation works, you will need to set a file with basic configur
         "names": ["Simtron"], // all the names the bot will respond to.
     	  "slack": {
             "token": "YOUR SLACK INTEGRATION TOKEN",
+            "adminUserIds": [...] // valid slack user ids.
         }
     },
     "countries": { // These entries are used to configure the sim card catalog, organized by country and operator.
@@ -99,3 +100,43 @@ To see logs:
 ```bash
 pm2 logs simtron
 ```
+
+# Available command on the bot
+
+For users:
+
+## Read sim catalog
+
+```
+Simtron
+```
+
+This command displays the simcards catalog. If there are unregistered sim cards in use, this command will show them too, allowing to register properly if needed.
+
+If some sim is not working properly, it will be ~~strikethrough~~
+
+## Read sim details
+
+```
+Simtron details <phone number>
+```
+
+This command will display the ICC and connection status of the sim identified by the given phone number.
+
+For Admins:
+
+## Register sim card in catalog
+
+```
+Simtron register <unregistered sim index>
+```
+
+This command starts a formulary to identify and then register all required sim data, just answer inline questions.
+
+## Register sim card in catalog
+
+```
+Simtron edit <phone number>
+```
+
+This command edits previously registered sim cards' data.
