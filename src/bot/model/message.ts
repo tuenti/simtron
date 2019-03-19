@@ -54,15 +54,18 @@ const createSimIdentityLine = ({icc, msisdn}: SimInUse) => (msisdn ? msisdn : `U
 
 const createLineInfo = ({brand, lineType}: SimInUse) => (brand && lineType ? `${brand} ${lineType}` : '');
 
-export const createCatalogAnswerContentMessage = (sims: SimInUse[]): OutgoingMessage => {
+export const createCatalogAnswerContentMessage = (
+    sims: {sim: SimInUse; isVisible: boolean}[]
+): OutgoingMessage => {
     return {
         type: MessageType.ANSWER_CATALOG_CONTENT,
-        textLines: sims.map(sim => {
+        textLines: sims.map(({sim, isVisible}) => {
             const simId = createSimIdentityLine(sim);
             const lineInfo = createLineInfo(sim);
+            const visibility = isVisible ? '' : ':no_entry_sign:';
             return sim.networkStatus.isWorking
-                ? `${getCountryFlag(sim.country)} *${simId}* ${lineInfo}`
-                : `${getCountryFlag(sim.country)} *~${simId}~* ${lineInfo}`;
+                ? `${getCountryFlag(sim.country)} *${simId}* ${lineInfo} ${visibility}`
+                : `${getCountryFlag(sim.country)} *~${simId}~* ${lineInfo}  ${visibility}`;
         }),
     };
 };

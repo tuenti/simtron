@@ -14,6 +14,8 @@ export enum MessageType {
     START_FORCE_SIM_OPERATOR = 'start-force-sim-operator',
     STOP_QUESTIONARY = 'stop-questionary',
     FILL_QUESTIONARY = 'fill-questionary',
+    SHOW_SIM = 'show-sim',
+    HIDE_SIM = 'hide-sim',
     FREE_TEXT_QUESTION = 'free-text-question',
     SINGLE_SELECTION_QUESTION = 'single-selection-question',
     SUCCESS = 'success',

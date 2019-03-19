@@ -19,7 +19,7 @@ const getRequestDetailsMsisdn = (messageText: string) => {
 };
 
 const isRequestSimDetailsMessage = (messageText: string) => getRequestDetailsMsisdn(messageText) !== null;
-export const createRequestSimDetails = () => ({
+export const createRequestSimDetailsSpeech = () => ({
     messageType: MessageType.REQUEST_SIM_DETAILS,
     messageIdentifier: (receivedMessage: IncomingMessage) =>
         isRequestSimDetailsMessage(receivedMessage.messageText),

@@ -2,8 +2,9 @@ import {createRequestCatalogSpeech} from './request-catalog';
 import {createStartSimDataEditSpeech} from './sim-data-edit';
 import {createStartForceSimOperatorSpeech} from './force-sim-operator';
 import {createStartSimIdentificationSpeech} from './sim-identification';
-import {createRequestSimDetails} from './request-sim-details';
+import {createRequestSimDetailsSpeech} from './request-sim-details';
 import {createStopQuestionarySpeech, createFillQuestionSpeech} from './questionary';
+import {createHideSimSpeech, createShowSimSpeech} from './sim-visibility';
 import {Store} from '../../store';
 import {IncomingMessage, OutgoingMessage} from '../model/message';
 import {MessageType} from '../model/message-type';
@@ -30,7 +31,9 @@ const speeches: Speech[] = [
     createStartSimIdentificationSpeech(),
     createStartForceSimOperatorSpeech(),
     createStartSimDataEditSpeech(),
-    createRequestSimDetails(),
+    createHideSimSpeech(),
+    createShowSimSpeech(),
+    createRequestSimDetailsSpeech(),
     createRequestCatalogSpeech(),
 ];
 

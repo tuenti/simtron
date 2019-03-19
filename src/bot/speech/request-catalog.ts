@@ -17,7 +17,14 @@ export const createRequestCatalogSpeech = () => ({
         existSomeWordInText(getBotNames(), receivedMessage.messageText),
     action: (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
         answerMessage(createCatalogAnswerMessage(), receivedMessage);
-        const allInUseSims = store.sim.getAllSimsInUse(receivedMessage.isFromAdmin);
+        const allSimData = store.sim.getSimCatalog();
+        const allInUseSims = store.sim.getAllSimsInUse(receivedMessage.isFromAdmin).map(simInUse => {
+            const foundSimData = allSimData.find(simData => simInUse.icc === simData.icc);
+            return {
+                sim: simInUse,
+                isVisible: !foundSimData || (foundSimData && foundSimData.isVisible),
+            };
+        });
         delayed(
             () => answerMessage(createCatalogAnswerContentMessage(allInUseSims), receivedMessage),
             getBotMessageSequenceEnsuringTime()
