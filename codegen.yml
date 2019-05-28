@@ -1,0 +1,13 @@
+schema:
+    - './src/graphql/types-generator-schema.ts'
+documents: []
+config: {}
+generates:
+    ./src/graphql/types.ts:
+        config: {}
+        plugins:
+            - 'typescript-common'
+            - 'typescript-client'
+            - 'typescript-server'
+require:
+    - 'ts-node/register'
