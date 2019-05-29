@@ -5,6 +5,8 @@ import adaptMessage, {SlackMessage, SlackMessageContainer} from '../message-adap
 import {OutgoingMessage, IncomingMessage} from '../model/message';
 import {IncomingMessageListener, Bot} from '..';
 
+const ALL_CHANNELS = 10000000;
+
 interface UserInfoPostMessageResult extends WebAPICallResult {
     ok: boolean;
     is_bot: boolean;
@@ -86,6 +88,8 @@ const createSlackBot = (botToken: string) => {
     const getChannels = async () => {
         const conversationsResult = await slackBotWebClient.conversations.list({
             types: 'public_channel,private_channel',
+            exclude_archived: true,
+            limit: ALL_CHANNELS,
         });
         const conversations = conversationsResult as ConversationsPostMessageResult;
         return conversations.channels.filter(canAccessToChannel).map(channel => channel.id);
