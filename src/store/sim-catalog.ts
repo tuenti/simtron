@@ -140,8 +140,7 @@ const createSimStore = (): SimStore => ({
     },
 
     getAllSimsInUse(showHiddenSims: boolean): SimInUse[] {
-        return Object.values(inUse)
-            .sort((simA, simB) => compareNullableStrings(simA.msisdn, simB.msisdn))
+        const sims = Object.values(inUse)
             .map((simInUse: SimInUse) => {
                 const simData = findSimByIcc(simInUse.icc, catalog);
                 return showHiddenSims || !simData || simData.isVisible
@@ -149,6 +148,7 @@ const createSimStore = (): SimStore => ({
                     : undefined;
             })
             .filter(Boolean) as SimInUse[];
+        return sims.sort((simA, simB) => compareNullableStrings(simA.msisdn, simB.msisdn));
     },
 
     findSimInUseByMsisdn(msisdn: string, returnHiddenSim: boolean) {
