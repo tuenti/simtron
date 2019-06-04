@@ -8,7 +8,7 @@ import {
 import logger from './util/logger';
 import Error, {SIM_NOT_PRESENT, NOTIFICATION_HANDLER_NOT_FOUND} from './util/error';
 import {createReadSmsCommand, createDeleteAllSmsCommand} from './device-port/model/command';
-import {createNewSmsNotificationMessage} from './bot/model/message';
+import {createNewSmsNotificationMessage, createPortActivityNotificationMessage} from './bot/model/message';
 import scheduleDeviceConfiguration from './device-config';
 import {getSimStatusRequestScheduleTime} from './config';
 
@@ -44,10 +44,14 @@ const notificationHandlers = [
     },
     {
         notificationIds: [SIM_RETURNED_TO_MAIN_MENU_ID, SIM_PIN_READY_ID, MODEM_RESTART_ID],
-        action: (port, notification, store) => {
+        action: (port, notification, store, sendMessage) => {
             const {portId} = port;
             scheduleDeviceConfiguration(port, store.sim, getSimStatusRequestScheduleTime());
-            logger.debug(`Sim ready notification received on port: ${portId}`);
+            const sim = store.sim.findSimInUseByPortId(portId);
+            if (sim) {
+                sendMessage(createPortActivityNotificationMessage(sim));
+            }
+            logger.debug(`Sim manipulation notification received on port: ${portId}`);
         },
     },
 ];

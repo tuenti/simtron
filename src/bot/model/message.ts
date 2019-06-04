@@ -110,6 +110,15 @@ export const createNewSmsNotificationMessage = (sim: SimInUse, smsText: string):
     };
 };
 
+export const createPortActivityNotificationMessage = (sim: SimInUse): OutgoingMessage => {
+    const simId = createSimIdentityLine(sim);
+    const lineInfo = createLineInfo(sim);
+    return {
+        type: MessageType.NOTIFY_PORT_ACTIVITY_DETECTED,
+        textLines: [`${getCountryFlag(sim.country)} *${simId}* ${lineInfo}`],
+    };
+};
+
 export const createQuestionMessage = (question: Question): OutgoingMessage => {
     if (isSelectionQuestion(question)) {
         return {

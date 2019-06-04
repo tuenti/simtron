@@ -131,6 +131,22 @@ const adaptMessage = (
                     },
                 ],
             };
+        case MessageType.NOTIFY_PORT_ACTIVITY_DETECTED:
+            return {
+                container: SlackMessageContainer.RICH,
+                text:
+                    message.textLines && message.textLines.length > 0
+                        ? message.textLines[0]
+                        : 'Activity detected on port.',
+                isPrivate: false,
+                attachments: [
+                    {
+                        color: '#D3D3D3',
+                        text:
+                            ':ballot_box_with_ballot: Activity detected on simtron device affecting this *SIM* card',
+                    },
+                ],
+            };
         case MessageType.FREE_TEXT_QUESTION:
             const [question] = message.textLines ? message.textLines : [''];
             return incomingMessage
