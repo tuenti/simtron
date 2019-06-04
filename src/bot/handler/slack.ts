@@ -1,4 +1,5 @@
-import {RTMClient, WebClient, WebAPICallResult} from '@slack/client';
+import {RTMClient} from '@slack/rtm-api';
+import {WebClient, WebAPICallResult} from '@slack/web-api';
 import logger from '../../util/logger';
 import {getDevelopmentSlackChannelName, getSlackBotAdminUserIds} from '../../config';
 import adaptMessage, {SlackMessage, SlackMessageContainer} from '../message-adapter/slack';

@@ -10,7 +10,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@slack/client": "^5.0.1",
+    "@slack/rtm-api": "^5.0.1",
+    "@slack/web-api": "^5.0.1",
     "apollo-server-express": "^2.5.0",
     "debug": "^4.1.1",
     "express": "^4.17.1",
