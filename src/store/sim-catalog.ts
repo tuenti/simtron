@@ -3,6 +3,7 @@ import logger from '../util/logger';
 import Error, {INVALID_SIM_STATUS_DATA} from '../util/error';
 import {NetworkStatus} from '../device-port/model/network-status';
 import {SmsMode} from '../device-config';
+import {compareNullableStrings} from '../util/text';
 
 interface Sim {
     icc: string;
@@ -140,6 +141,7 @@ const createSimStore = (): SimStore => ({
 
     getAllSimsInUse(showHiddenSims: boolean): SimInUse[] {
         return Object.values(inUse)
+            .sort((simA, simB) => compareNullableStrings(simA.msisdn, simB.msisdn))
             .map((simInUse: SimInUse) => {
                 const simData = findSimByIcc(simInUse.icc, catalog);
                 return showHiddenSims || !simData || simData.isVisible
