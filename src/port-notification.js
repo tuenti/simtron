@@ -47,9 +47,11 @@ const notificationHandlers = [
         action: (port, notification, store, sendMessage) => {
             const {portId} = port;
             scheduleDeviceConfiguration(port, store.sim, getSimStatusRequestScheduleTime());
-            const sim = store.sim.findSimInUseByPortId(portId);
-            if (sim) {
-                sendMessage(createPortActivityNotificationMessage(sim));
+            if (store.settings.arePortActivityNotificationsEnabled()) {
+                const sim = store.sim.findSimInUseByPortId(portId);
+                if (sim) {
+                    sendMessage(createPortActivityNotificationMessage(sim));
+                }
             }
             logger.debug(`Sim manipulation notification received on port: ${portId}`);
         },

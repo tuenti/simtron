@@ -17,6 +17,8 @@ export enum MessageType {
     FILL_QUESTIONARY = 'fill-questionary',
     SHOW_SIM = 'show-sim',
     HIDE_SIM = 'hide-sim',
+    ENABLE_PORT_ACTIVITY_NOTIFICATIONS = 'enable-port-activity-notifications',
+    DISABLE_PORT_ACTIVITY_NOTIFICATIONS = 'disable-port-activity-notifications',
     FREE_TEXT_QUESTION = 'free-text-question',
     SINGLE_SELECTION_QUESTION = 'single-selection-question',
     SUCCESS = 'success',

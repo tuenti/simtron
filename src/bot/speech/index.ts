@@ -9,6 +9,10 @@ import {Store} from '../../store';
 import {IncomingMessage, OutgoingMessage} from '../model/message';
 import {MessageType} from '../model/message-type';
 import {Command} from '../../device-port/model/command';
+import {
+    createEnablePortActivityNotifications,
+    createDisablePortActivityNotifications,
+} from './port-activity-notifications';
 
 export type AnswerMessageCallback = (message: OutgoingMessage, receivedMessage: IncomingMessage) => void;
 
@@ -34,6 +38,8 @@ const speeches: Speech[] = [
     createHideSimSpeech(),
     createShowSimSpeech(),
     createRequestSimDetailsSpeech(),
+    createEnablePortActivityNotifications(),
+    createDisablePortActivityNotifications(),
     createRequestCatalogSpeech(),
 ];
 

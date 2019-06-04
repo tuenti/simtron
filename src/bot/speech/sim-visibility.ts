@@ -1,10 +1,5 @@
 import {MessageType} from '../model/message-type';
-import {
-    createSuccessFeedbackMessage,
-    createQuestionMessage,
-    createErrorMessage,
-    IncomingMessage,
-} from '../model/message';
+import {createSuccessFeedbackMessage, createErrorMessage, IncomingMessage} from '../model/message';
 import {getBotNames} from '../../config';
 import {Store} from '../../store';
 import {AnswerMessageCallback} from '.';
