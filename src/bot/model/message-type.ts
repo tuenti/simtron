@@ -6,7 +6,7 @@ export enum MessageType {
     ANSWER_CATALOG = 'answer-catalog',
     ANSWER_SIM_DETAILS = 'answer-sim-details',
     ANSWER_CATALOG_CONTENT = 'answer-sim-status',
-    ANSWER_SIM_DETAILS_CONTENT = 'answer-sim-details-content',
+    SIM_DETAILS_CONTENT = 'sim-details-content',
     NOTIFY_UNKNOWN_SIM_EXISTENCE = 'notify-unknown-sim-existence',
     START_SIM_IDENTIFICATION = 'start-sim-id',
     START_SIM_DATA_EDIT = 'start-sim-data-edit',

@@ -12,8 +12,7 @@ const allowedLinePrefixes = [
     '+COPS:',
     '+CSCS:',
     'START',
-    '+STIN: 25',
-    '+CPIN: READY',
+    'PB DONE',
 ];
 
 const previousLinesExceptionPrefixes = ['AT+CCID', '+CMGR:'];

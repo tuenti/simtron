@@ -1,7 +1,7 @@
 import {MessageType} from '../model/message-type';
 import {getBotNames, getBotMessageSequenceEnsuringTime} from '../../config';
 import {
-    createSimDetailsAnswerContentMessage,
+    createSimDetailsContentMessage,
     createSimDetailsAnswerMessage,
     createErrorMessage,
     IncomingMessage,
@@ -30,7 +30,7 @@ export const createRequestSimDetailsSpeech = () => ({
             const sim = store.sim.findSimInUseByMsisdn(msisdn, receivedMessage.isFromAdmin);
             if (sim) {
                 delayed(
-                    () => answerMessage(createSimDetailsAnswerContentMessage(sim), receivedMessage),
+                    () => answerMessage(createSimDetailsContentMessage(sim), receivedMessage),
                     getBotMessageSequenceEnsuringTime()
                 );
             } else {

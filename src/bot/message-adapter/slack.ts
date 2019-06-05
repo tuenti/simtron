@@ -77,24 +77,22 @@ const adaptMessage = (
                       isPrivate: false,
                   }
                 : null;
-        case MessageType.ANSWER_SIM_DETAILS_CONTENT:
-            return incomingMessage
-                ? {
-                      container: SlackMessageContainer.RICH,
-                      text: message.text ? message.text : '',
-                      attachments: message.attachments
-                          ? message.attachments.map(attachment => ({
-                                fields: attachment.fields.map(field => ({
-                                    title: field.name,
-                                    value: field.value,
-                                    short: true,
-                                })),
-                            }))
-                          : [],
-                      replyOn: incomingMessage.channel,
-                      isPrivate: false,
-                  }
-                : null;
+        case MessageType.SIM_DETAILS_CONTENT:
+            return {
+                container: SlackMessageContainer.RICH,
+                text: message.text ? message.text : '',
+                attachments: message.attachments
+                    ? message.attachments.map(attachment => ({
+                          fields: attachment.fields.map(field => ({
+                              title: field.name,
+                              value: field.value,
+                              short: true,
+                          })),
+                      }))
+                    : [],
+                replyOn: incomingMessage ? incomingMessage.channel : undefined,
+                isPrivate: false,
+            };
         case MessageType.NOTIFY_UNKNOWN_SIM_EXISTENCE:
             return incomingMessage
                 ? {

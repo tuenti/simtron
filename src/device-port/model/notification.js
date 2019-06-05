@@ -3,8 +3,7 @@ import {LAST_DIGITS} from '../../util/matcher';
 
 export const NEW_SMS_NOTIFICATION_ID = '+CMTI:';
 export const NETWORK_STATUS_NOTIFICATION_ID = '+CREG:';
-export const SIM_RETURNED_TO_MAIN_MENU_ID = '+STIN: 25';
-export const SIM_PIN_READY_ID = '+CPIN: READY';
+export const SIM_READY_ID = 'PB DONE';
 export const MODEM_RESTART_ID = 'START';
 
 const createSmsReceivedNotification = () => ({
@@ -30,17 +29,12 @@ const createModemRestartNotification = () => ({
 });
 
 const createSimReadyNotification = () => ({
-    id: SIM_RETURNED_TO_MAIN_MENU_ID,
-});
-
-const createSimPinReadyNotification = () => ({
-    id: SIM_PIN_READY_ID,
+    id: SIM_READY_ID,
 });
 
 export default [
     createSmsReceivedNotification(),
     createNetworkStatusNotification(),
     createSimReadyNotification(),
-    createSimPinReadyNotification(),
     createModemRestartNotification(),
 ];

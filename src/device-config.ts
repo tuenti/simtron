@@ -12,8 +12,13 @@ import {
 } from './device-port/model/command';
 import {UTF16_ENCODING} from './device-port/model/parser-token';
 import logger from './util/logger';
-import {SimStore} from './store/sim-catalog';
+import {SimStore, SimInUse} from './store/sim-catalog';
 import Error, {DEVICE_CONFIGURATION_ERROR} from './util/error';
+
+export interface SimDiff {
+    oldSim: SimInUse | null;
+    newSim: SimInUse | null;
+}
 
 export enum SmsMode {
     NONE = 0,
@@ -112,13 +117,23 @@ const configureDevice = async (portHandler: any, simStore: SimStore) => {
     return false;
 };
 
-const scheduleDeviceConfiguration = (portHandler: any, simStore: SimStore, timeOutMs = 0) => {
-    if (!pendingRequests[portHandler.portId] || timeOutMs === 0) {
-        pendingRequests[portHandler.portId] = setTimeout(() => {
-            configureDevice(portHandler, simStore);
-            pendingRequests[portHandler.portId] = undefined;
-        }, timeOutMs);
-    }
-};
+const scheduleDeviceConfiguration = async (
+    portHandler: any,
+    simStore: SimStore,
+    timeOutMs = 0
+): Promise<SimDiff> =>
+    new Promise(resolve => {
+        if (!pendingRequests[portHandler.portId] || timeOutMs === 0) {
+            pendingRequests[portHandler.portId] = setTimeout(async () => {
+                const oldSim = simStore.findSimInUseByPortId(portHandler.portId);
+                await configureDevice(portHandler, simStore);
+                pendingRequests[portHandler.portId] = undefined;
+                resolve({oldSim, newSim: simStore.findSimInUseByPortId(portHandler.portId)});
+            }, timeOutMs);
+        } else {
+            const currentSim = simStore.findSimInUseByPortId(portHandler.portId);
+            resolve({oldSim: currentSim, newSim: currentSim});
+        }
+    });
 
 export default scheduleDeviceConfiguration;

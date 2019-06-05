@@ -70,29 +70,50 @@ export const createCatalogAnswerContentMessage = (
     };
 };
 
-export const createSimDetailsAnswerContentMessage = (sim: SimInUse): OutgoingMessage => {
+export const createSimDetailsContentMessage = (sim: SimInUse, notificationText?: string): OutgoingMessage => {
     const simId = createSimIdentityLine(sim);
+    const lineInfo = createLineInfo(sim);
+    const iccPart = lineInfo ? `icc: ${sim.icc} ` : '';
+    const fields = lineInfo
+        ? [
+              {
+                  name: 'Line Info',
+                  value: lineInfo,
+              },
+              {
+                  name: 'Network Status',
+                  value: sim.networkStatus.name,
+              },
+          ]
+        : [
+              {
+                  name: 'Network Status',
+                  value: sim.networkStatus.name,
+              },
+          ];
     return {
-        type: MessageType.ANSWER_SIM_DETAILS_CONTENT,
-        text: sim.networkStatus.isWorking
-            ? `${getCountryFlag(sim.country)} *${simId}* icc: ${sim.icc}`
-            : `${getCountryFlag(sim.country)} *~${simId}~* icc: ${sim.icc}`,
+        type: MessageType.SIM_DETAILS_CONTENT,
+        text: `${
+            sim.networkStatus.isWorking
+                ? `${getCountryFlag(sim.country)} *${simId}* ${iccPart}`
+                : `${getCountryFlag(sim.country)} *~${simId}~* ${iccPart}`
+        } ${notificationText ? notificationText : ''}`,
         attachments: [
             {
-                fields: [
-                    {
-                        name: 'Line Info',
-                        value: createLineInfo(sim),
-                    },
-                    {
-                        name: 'Network Status',
-                        value: sim.networkStatus.name,
-                    },
-                ],
+                fields,
             },
         ],
     };
 };
+
+export const createSimInsertedNotificationMessage = (sim: SimInUse): OutgoingMessage =>
+    createSimDetailsContentMessage(sim, 'inserted :+1:');
+
+export const createSimRemovedNotificationMessage = (sim: SimInUse): OutgoingMessage =>
+    createSimDetailsContentMessage(sim, 'removed :+1:');
+
+export const createSimNetworkStatusChangedNotificationMessage = (sim: SimInUse): OutgoingMessage =>
+    createSimDetailsContentMessage(sim, 'network status changed');
 
 export const createUnknownSimsExistenceNotificationMessage = (unknownSims: SimInUse[]): OutgoingMessage => {
     return {
