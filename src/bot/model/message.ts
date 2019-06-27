@@ -50,7 +50,8 @@ export const createSimDetailsAnswerMessage = (): OutgoingMessage => ({
     text: `:+1: *${USER_MENTION}* getting details.`,
 });
 
-const createSimIdentityLine = ({icc, msisdn}: SimInUse) => (msisdn ? msisdn : `Unknown sim with icc ${icc}`);
+const createSimIdentityLine = ({icc, displayNumber}: SimInUse) =>
+    displayNumber ? displayNumber : `Unknown sim with icc ${icc}`;
 
 const createLineInfo = ({brand, lineType}: SimInUse) => (brand && lineType ? `${brand} ${lineType}` : '');
 

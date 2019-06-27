@@ -11,6 +11,7 @@ interface Sim {
 
 interface SimData extends Sim {
     msisdn: string;
+    displayNumber: string;
     brand: string;
     country: string;
     lineType: string;
@@ -22,6 +23,7 @@ export interface SimInUse extends Sim {
     smsMode: SmsMode;
     portId: string;
     msisdn?: string;
+    displayNumber?: string;
     brand?: string;
     country?: string;
     lineType?: string;
@@ -37,6 +39,7 @@ export interface SimStore {
     saveSimInCatalog: (
         icc: string,
         msisdn: string,
+        displayNumber: string,
         brand: string,
         country: string,
         lineType: string,
@@ -66,12 +69,14 @@ const catalogDb = new JsonDB(DB_FILE, true, true);
 const createSimData = (
     icc: string,
     msisdn: string,
+    displayNumber: string,
     brand: string,
     country: string,
     lineType: string,
     isVisible: boolean
 ): SimData => ({
     msisdn,
+    displayNumber,
     icc,
     brand,
     country,
@@ -124,12 +129,13 @@ const createSimStore = (): SimStore => ({
     saveSimInCatalog(
         icc: string,
         msisdn: string,
+        displayNumber: string,
         brand: string,
         country: string,
         lineType: string,
         isVisible: boolean
     ) {
-        const newSimData = createSimData(icc, msisdn, brand, country, lineType, isVisible);
+        const newSimData = createSimData(icc, msisdn, displayNumber, brand, country, lineType, isVisible);
         if (this.findSimInCatalogByIcc(icc)) {
             const updatedSims = readSimCatalog().map(sim => (sim.icc === icc ? newSimData : sim));
             catalogDb.push(SIM_CATALOG_PATH, updatedSims, true);

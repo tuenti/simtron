@@ -14,7 +14,7 @@ export interface Question {
     text: string;
     errorMessages: Answers;
     validator?: (answer: string, previousAnswers: Answers) => string;
-    answerFormatter?: (answer: string, previousAnswers: Answers) => string;
+    answerFormatter?: (answer: string, previousAnswers: Answers) => any;
 }
 
 export type Answers = {[key: string]: any};

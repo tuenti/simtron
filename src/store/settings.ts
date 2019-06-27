@@ -4,7 +4,7 @@ export interface SettingsStore {
 }
 
 const createSettingsStore = (): SettingsStore => {
-    let portActivityNotificationsEnabled = false;
+    let portActivityNotificationsEnabled = true;
 
     return {
         setPortActivityNotificationsStatus: (isEnabled: boolean) => {

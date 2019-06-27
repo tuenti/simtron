@@ -19,6 +19,11 @@ const IS_VISIBLE_DATA_KEY = 'is-visible';
 
 const INVALID_MSISDN_ERROR = 'invalid-msisdn';
 
+interface PhoneNumberInfo {
+    national: string;
+    international: string;
+}
+
 const getCountryQuestionOptions = () =>
     getSupportedCountries().map(country => ({
         text: `${getCountryFlag(country)} ${getCountryName(country)}`,
@@ -70,11 +75,18 @@ const createIdentifySimQuestionary = ({icc}: {icc: string}, store: Store) =>
                     const number = phoneUtil.parseAndKeepRawInput(msisdn, previousAnswers[COUNTRY_DATA_KEY]);
                     return phoneUtil.isValidNumber(number) ? NO_ERROR : INVALID_MSISDN_ERROR;
                 },
-                answerFormatter: (msisdn, previousAnswers) => {
+                answerFormatter: (msisdn, previousAnswers): PhoneNumberInfo => {
                     const phoneUtil = libPhoneNumber.PhoneNumberUtil.getInstance();
                     const number = phoneUtil.parseAndKeepRawInput(msisdn, previousAnswers[COUNTRY_DATA_KEY]);
                     const phoneNumberFormat = libPhoneNumber.PhoneNumberFormat;
-                    return phoneUtil.format(number, phoneNumberFormat.INTERNATIONAL).replace(NON_DIGITS, '');
+                    return {
+                        national: phoneUtil
+                            .format(number, phoneNumberFormat.NATIONAL)
+                            .replace(NON_DIGITS, ''),
+                        international: phoneUtil
+                            .format(number, phoneNumberFormat.INTERNATIONAL)
+                            .replace(NON_DIGITS, ''),
+                    };
                 },
                 errorMessages: {
                     [INVALID_MSISDN_ERROR]: ':sleepy: Ops, you must enter a valid *phone number*.',
@@ -117,7 +129,8 @@ const createIdentifySimQuestionary = ({icc}: {icc: string}, store: Store) =>
         finishCallback: responses =>
             store.sim.saveSimInCatalog(
                 responses[ICC_DATA_KEY],
-                responses[MSISDN_DATA_KEY],
+                responses[MSISDN_DATA_KEY].international,
+                responses[MSISDN_DATA_KEY].national,
                 responses[BRAND_DATA_KEY],
                 responses[COUNTRY_DATA_KEY],
                 responses[LINE_TYPE_DATA_KEY],

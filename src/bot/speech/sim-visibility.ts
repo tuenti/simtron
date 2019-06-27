@@ -30,6 +30,7 @@ const changeSimVisibility = async (
             store.sim.saveSimInCatalog(
                 simToEdit.icc,
                 simToEdit.msisdn,
+                simToEdit.displayNumber,
                 simToEdit.brand,
                 simToEdit.country,
                 simToEdit.lineType,
