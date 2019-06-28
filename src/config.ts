@@ -34,6 +34,8 @@ const DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME = 750;
 const COUNTRIES_DATA_PATH = '/countries';
 const DEFAULT_FLAG_REPRESENTATION = ':flag-aq:';
 
+const PHONE_NUMBER_FORMATTER_PATH = '/phoneNumber/formatters';
+
 const db = new JsonDB(CONFIG_DB_FILE, true, true);
 
 const readPath = (path: string, defaultValue: any) => {
@@ -80,3 +82,9 @@ export const getSupportedBrands = (country: string) =>
     Object.keys(readPath(`${COUNTRIES_DATA_PATH}/${country}/lineTypes`, {}));
 export const getSupportedLineTypes = (country: string, brand: string) =>
     readPath(`${COUNTRIES_DATA_PATH}/${country}/lineTypes/${brand}`, []);
+
+export const getPhoneNumberCustomFormatters = (
+    country: string,
+    brand: string
+): {regexp: string; replaceValue: string} | null =>
+    readPath(`${PHONE_NUMBER_FORMATTER_PATH}/${brand}/${country}`, null);

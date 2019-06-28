@@ -9,6 +9,7 @@ import {
 } from '../config';
 import {NON_DIGITS} from '../util/matcher';
 import {Store} from '../store';
+import {formatPhoneNumber} from '../util/phone-number';
 
 const ICC_DATA_KEY = 'icc';
 const MSISDN_DATA_KEY = 'msisdn';
@@ -75,19 +76,20 @@ const createIdentifySimQuestionary = ({icc}: {icc: string}, store: Store) =>
                     const number = phoneUtil.parseAndKeepRawInput(msisdn, previousAnswers[COUNTRY_DATA_KEY]);
                     return phoneUtil.isValidNumber(number) ? NO_ERROR : INVALID_MSISDN_ERROR;
                 },
-                answerFormatter: (msisdn, previousAnswers): PhoneNumberInfo => {
-                    const phoneUtil = libPhoneNumber.PhoneNumberUtil.getInstance();
-                    const number = phoneUtil.parseAndKeepRawInput(msisdn, previousAnswers[COUNTRY_DATA_KEY]);
-                    const phoneNumberFormat = libPhoneNumber.PhoneNumberFormat;
-                    return {
-                        national: phoneUtil
-                            .format(number, phoneNumberFormat.NATIONAL)
-                            .replace(NON_DIGITS, ''),
-                        international: phoneUtil
-                            .format(number, phoneNumberFormat.INTERNATIONAL)
-                            .replace(NON_DIGITS, ''),
-                    };
-                },
+                answerFormatter: (msisdn, previousAnswers): PhoneNumberInfo => ({
+                    national: formatPhoneNumber(
+                        msisdn,
+                        previousAnswers[COUNTRY_DATA_KEY],
+                        previousAnswers[BRAND_DATA_KEY],
+                        'national'
+                    ),
+                    international: formatPhoneNumber(
+                        msisdn,
+                        previousAnswers[COUNTRY_DATA_KEY],
+                        previousAnswers[BRAND_DATA_KEY],
+                        'international'
+                    ),
+                }),
                 errorMessages: {
                     [INVALID_MSISDN_ERROR]: ':sleepy: Ops, you must enter a valid *phone number*.',
                 },
