@@ -12,32 +12,34 @@ import {AnswerMessageCallback} from '.';
 
 const SIM_DETAILS_COMMAND = 'details';
 
-const getRequestDetailsMsisdn = (messageText: string) => {
+const getRequestDetailsPhoneNumber = (messageText: string) => {
     const words = messageText.split(' ');
-    const [botName, command, msisdn] = words;
-    return getBotNames().includes(botName) && command === SIM_DETAILS_COMMAND && !!msisdn ? msisdn : null;
+    const [botName, command, phoneNumber] = words;
+    return getBotNames().includes(botName) && command === SIM_DETAILS_COMMAND && !!phoneNumber
+        ? phoneNumber
+        : null;
 };
 
-const isRequestSimDetailsMessage = (messageText: string) => getRequestDetailsMsisdn(messageText) !== null;
+const isRequestSimDetailsMessage = (messageText: string) =>
+    getRequestDetailsPhoneNumber(messageText) !== null;
 export const createRequestSimDetailsSpeech = () => ({
     messageType: MessageType.REQUEST_SIM_DETAILS,
     messageIdentifier: (receivedMessage: IncomingMessage) =>
         isRequestSimDetailsMessage(receivedMessage.messageText),
     action: (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
         answerMessage(createSimDetailsAnswerMessage(), receivedMessage);
-        const msisdn = getRequestDetailsMsisdn(receivedMessage.messageText);
-        if (msisdn) {
-            const sim = store.sim.findSimInUseByMsisdn(msisdn, receivedMessage.isFromAdmin);
-            if (sim) {
-                delayed(
-                    () => answerMessage(createSimDetailsContentMessage(sim), receivedMessage),
-                    getBotMessageSequenceEnsuringTime()
-                );
+        const phoneNumber = getRequestDetailsPhoneNumber(receivedMessage.messageText);
+        if (phoneNumber) {
+            const sims = store.sim.findSimsInUseByDisplayNumber(phoneNumber, receivedMessage.isFromAdmin);
+            if (sims.length > 0) {
+                delayed(() => {
+                    sims.forEach(sim => answerMessage(createSimDetailsContentMessage(sim), receivedMessage));
+                }, getBotMessageSequenceEnsuringTime());
             } else {
                 delayed(
                     () =>
                         answerMessage(
-                            createErrorMessage(`:-1: Sim not found with msisdn *${msisdn}*`),
+                            createErrorMessage(`:-1: Sim not found with phoneNumber *${phoneNumber}*`),
                             receivedMessage
                         ),
                     getBotMessageSequenceEnsuringTime()

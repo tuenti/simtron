@@ -74,7 +74,7 @@ export const createCatalogAnswerContentMessage = (
 export const createSimDetailsContentMessage = (sim: SimInUse, notificationText?: string): OutgoingMessage => {
     const simId = createSimIdentityLine(sim);
     const lineInfo = createLineInfo(sim);
-    const iccPart = lineInfo ? `icc: ${sim.icc} ` : '';
+    const simDataPart = lineInfo ? `icc: ${sim.icc}, msisdn: ${sim.msisdn} ` : '';
     const fields = lineInfo
         ? [
               {
@@ -96,8 +96,8 @@ export const createSimDetailsContentMessage = (sim: SimInUse, notificationText?:
         type: MessageType.SIM_DETAILS_CONTENT,
         text: `${
             sim.networkStatus.isWorking
-                ? `${getCountryFlag(sim.country)} *${simId}* ${iccPart}`
-                : `${getCountryFlag(sim.country)} *~${simId}~* ${iccPart}`
+                ? `${getCountryFlag(sim.country)} *${simId}* ${simDataPart}`
+                : `${getCountryFlag(sim.country)} *~${simId}~* ${simDataPart}`
         } ${notificationText ? notificationText : ''}`,
         attachments: [
             {

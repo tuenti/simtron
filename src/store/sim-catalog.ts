@@ -50,6 +50,8 @@ export interface SimStore {
 
     findSimInUseByMsisdn: (msisdn: string, returnHiddenSim: boolean) => SimInUse | null;
 
+    findSimsInUseByDisplayNumber: (displayNumber: string, returnHiddenSim: boolean) => SimInUse[];
+
     getAllUnknownSimsInUse: () => SimInUse[];
 
     findSimInUseByPortId: (portId: string) => SimInUse | null;
@@ -159,6 +161,12 @@ const createSimStore = (): SimStore => ({
 
     findSimInUseByMsisdn(msisdn: string, returnHiddenSim: boolean) {
         return this.getAllSimsInUse(returnHiddenSim).find((sim: SimInUse) => sim.msisdn === msisdn) || null;
+    },
+
+    findSimsInUseByDisplayNumber(displayNumber: string, returnHiddenSim: boolean) {
+        return this.getAllSimsInUse(returnHiddenSim).filter(
+            (sim: SimInUse) => sim.displayNumber === displayNumber
+        );
     },
 
     getAllUnknownSimsInUse(): SimInUse[] {
