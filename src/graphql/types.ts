@@ -27,11 +27,13 @@ export interface Mutation {
 }
 
 export interface Subscription {
-    otpReceived: Otp;
+    otpReceived: ParsedOtp;
 }
 
-export interface Otp {
-    code: string;
+export interface ParsedOtp {
+    phoneNumber: string;
+
+    otp: string;
 }
 
 // ====================================================

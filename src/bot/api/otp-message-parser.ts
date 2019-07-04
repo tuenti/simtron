@@ -1,8 +1,12 @@
 import {SlackMessage} from '../message-adapter/slack';
 import {LINE_INFO, OTP_CODE} from '../../util/matcher';
-import {OtpStoreOperation} from '../../graphql/resolvers/otp-request-storage';
 
-const createOtpMessageParser = (storeOtp: OtpStoreOperation) => (message: SlackMessage) => {
+interface ParsedOtp {
+    phoneNumber: string;
+    otp: string;
+}
+
+const createOtpMessageParser = () => (message: SlackMessage): ParsedOtp | null => {
     const phoneNumberMatch = LINE_INFO.exec(message.text);
     LINE_INFO.lastIndex = 0;
     if (phoneNumberMatch) {
@@ -11,10 +15,14 @@ const createOtpMessageParser = (storeOtp: OtpStoreOperation) => (message: SlackM
             const otpMatch = OTP_CODE.exec(message.attachments[0].text);
             OTP_CODE.lastIndex = 0;
             if (otpMatch) {
-                storeOtp(phoneNumber, otpMatch[1]);
+                return {
+                    phoneNumber,
+                    otp: otpMatch[1],
+                };
             }
         }
     }
+    return null;
 };
 
 export default createOtpMessageParser;
