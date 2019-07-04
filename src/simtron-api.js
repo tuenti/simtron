@@ -1,14 +1,17 @@
 import express from 'express';
-import createGraphqlServer from './graphql';
 import logger from './util/logger';
+import createApiServer from './graphql';
+import createApiSlackBot from './bot/api';
+import {getApiSlackBotToken} from './config';
 
 const startApi = () => {
-    const graphql = createGraphqlServer(store);
-    const app = express();
-    app.use(express.json());
-    app.use(express.urlencoded({extended: true}));
-    graphql.applyMiddleware({app, path: '/api'});
-    app.listen({port: 4000}, () => logger.debug('Server ready at http://localhost:4000/api'));
+    const apiBot = createApiSlackBot(getApiSlackBotToken());
+    apiBot.start();
+    const {server, notificationsHandler} = createApiServer();
+    server.listen(4000, notificationsHandler);
+    logger.debug(
+        'Api ready at http://localhost:4000/api, subscriptions ready at http://localhost:4000/subscriptions'
+    );
 };
 
 export default startApi;

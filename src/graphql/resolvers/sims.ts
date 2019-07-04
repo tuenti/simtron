@@ -1,20 +1,10 @@
-import {SimInUse} from '../../store/sim-catalog';
-import {Store} from '../../store';
-import {Sim} from '../types';
+import {GetSimsQueryArgs, Sim} from '../types';
 
-type AllSimsResolver = () => Sim[];
+type AllSimsResolver = (_: any, args: GetSimsQueryArgs) => Promise<Sim[]>;
 
-const createGetAllSimsResolver = (store: Store): AllSimsResolver => () =>
-    store.sim.getAllSimsInUse(false).map((sim: SimInUse) => ({
-        msisdn: sim.msisdn,
-        brand: sim.brand,
-        country: sim.country,
-        environments: ['prod'],
-        status: {
-            id: sim.networkStatus.id.toString(),
-            name: sim.networkStatus.name,
-        },
-        isOnline: sim.networkStatus.isWorking,
-    }));
+const createGetAllSimsResolver = (): AllSimsResolver => async (_: any, args: GetSimsQueryArgs) => {
+    console.log(args.brand);
+    return [];
+};
 
 export default createGetAllSimsResolver;

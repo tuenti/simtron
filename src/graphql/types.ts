@@ -1,41 +1,35 @@
-/* tslint:disable */
+export type Maybe<T> = T | null;
 
-// ====================================================
-// START: Typescript template
-// ====================================================
+export enum PaymentType {
+    Prepay = 'Prepay',
+    Control = 'Control',
+    Postpay = 'Postpay',
+}
 
 // ====================================================
 // Types
 // ====================================================
 
 export interface Query {
-    getSims?: (Sim | null)[] | null;
+    getSims: Sim[];
 }
 
 export interface Sim {
-    msisdn?: string | null;
+    phoneNumber?: Maybe<string>;
 
-    environments?: (string | null)[] | null;
+    brand?: Maybe<string>;
 
-    brand?: string | null;
+    country?: Maybe<string>;
 
-    country?: string | null;
+    paymentType?: Maybe<PaymentType>;
 
-    status?: SimStatus | null;
-
-    isOnline?: boolean | null;
-}
-
-export interface SimStatus {
-    id?: string | null;
-
-    name?: string | null;
+    isOnline?: Maybe<boolean>;
 }
 
 // ====================================================
 // Arguments
 // ====================================================
 
-// ====================================================
-// END: Typescript template
-// ====================================================
+export interface GetSimsQueryArgs {
+    brand: string;
+}

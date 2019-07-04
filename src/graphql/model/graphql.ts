@@ -2,22 +2,30 @@ import {gql} from 'apollo-server-express';
 
 export default [
     gql`
-        type SimStatus {
-            id: String
-            name: String
+        enum PaymentType {
+            Prepay
+            Control
+            Postpay
         }
 
         type Sim {
-            msisdn: String
-            environments: [String]
+            phoneNumber: String
             brand: String
             country: String
-            status: SimStatus
+            paymentType: PaymentType
             isOnline: Boolean
         }
 
+        type Otp {
+            code: String!
+        }
+
+        type Subscription {
+            otpReceived: Otp!
+        }
+
         type Query {
-            getSims: [Sim]
+            getSims(brand: String!): [Sim!]!
         }
     `,
 ];
