@@ -203,7 +203,6 @@ export const createSearchOperatorsCommand = () => ({
     timeout: getSearchOperatorsCommandsTimeout(),
     responseParser: (responseLines: string[]) => {
         const [, operatorsLine] = responseLines;
-        console.log(operatorsLine);
         if (operatorsLine.startsWith(OPERATORS_LINE_PREFIX)) {
             const [operatorsPart, metadataPart] = operatorsLine
                 .substring(OPERATORS_LINE_PREFIX.length)

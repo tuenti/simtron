@@ -1,4 +1,3 @@
-import express from 'express';
 import {
     createBootingMessage,
     createBootDoneMessage,
@@ -9,7 +8,6 @@ import getMessageSpeech from './bot/speech';
 import scheduleDeviceConfiguration from './device-config';
 import handleNotification from './port-notification';
 import {getSimStatusPollingTime} from './config';
-import createGraphqlServer from './graphql';
 import logger from './util/logger';
 import Error, {PORT_NOT_FOUND} from './util/error';
 
@@ -78,15 +76,6 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
         }, pollingTime);
     };
 
-    const startApi = () => {
-        const graphql = createGraphqlServer(store);
-        const app = express();
-        app.use(express.json());
-        app.use(express.urlencoded({extended: true}));
-        graphql.applyMiddleware({app, path: '/api'});
-        app.listen({port: 4000}, () => logger.debug('Server ready at http://localhost:4000/api'));
-    };
-
     return {
         async start() {
             bots = botFactory.createBots();
@@ -95,7 +84,6 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
             devicePortHandlers = await devicePortsFactory.createPorts();
             await configureAllPorts(devicePortHandlers);
             await startSimStatusPolling(devicePortHandlers, getSimStatusPollingTime());
-            startApi();
             sendMessageOnAllBots(createBootDoneMessage());
         },
     };

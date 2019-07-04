@@ -22,7 +22,7 @@ const SIM_STATUS_POLLING_TIME_PATH = '/sim/statusPollingMs';
 const DEFAULT_SIM_STATUS_POLLING_TIME_MS = 600000; // 10 min
 
 const SLACK_BOT_TOKEN_PATH = '/bot/slack/token';
-const DEVELOPMENT_SLACK_CHANNEL_NAME_PATH = '/bot/slack/developmentChannelName';
+const DEVELOPMENT_SLACK_CHANNEL_ID_PATH = '/bot/slack/developmentChannelId';
 const SLACK_BOT_ADMIN_USER_IDS_PATH = '/bot/slack/adminUserIds';
 const DEFAULT_SLACK_BOT_ADMIN_USER_IDS: string[] = [];
 
@@ -65,7 +65,7 @@ export const getSimStatusPollingTime = () =>
     readPath(SIM_STATUS_POLLING_TIME_PATH, DEFAULT_SIM_STATUS_POLLING_TIME_MS);
 
 export const getSlackBotToken = () => readPath(SLACK_BOT_TOKEN_PATH, undefined);
-export const getDevelopmentSlackChannelName = () => readPath(DEVELOPMENT_SLACK_CHANNEL_NAME_PATH, undefined);
+export const getDevelopmentSlackChannelId = () => readPath(DEVELOPMENT_SLACK_CHANNEL_ID_PATH, undefined);
 export const getSlackBotAdminUserIds = () =>
     readPath(SLACK_BOT_ADMIN_USER_IDS_PATH, DEFAULT_SLACK_BOT_ADMIN_USER_IDS);
 

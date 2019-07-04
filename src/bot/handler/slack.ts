@@ -1,7 +1,7 @@
 import {RTMClient} from '@slack/rtm-api';
 import {WebClient, WebAPICallResult} from '@slack/web-api';
 import logger from '../../util/logger';
-import {getDevelopmentSlackChannelName, getSlackBotAdminUserIds} from '../../config';
+import {getSlackBotAdminUserIds, getDevelopmentSlackChannelId} from '../../config';
 import adaptMessage, {SlackMessage, SlackMessageContainer} from '../message-adapter/slack';
 import {OutgoingMessage, IncomingMessage} from '../model/message';
 import {IncomingMessageListener, Bot} from '..';
@@ -44,7 +44,7 @@ export const sanitize = (text: string) =>
         .replace(';', '');
 
 const canAccessToChannel = (channel: ConversationChannel) =>
-    channel.is_member && (!process.env.DEVELOPMENT || channel.name === getDevelopmentSlackChannelName());
+    channel.is_member && (!process.env.DEVELOPMENT || channel.id === getDevelopmentSlackChannelId());
 
 const createSlackBot = (botToken: string) => {
     let botId: string;
@@ -93,7 +93,11 @@ const createSlackBot = (botToken: string) => {
             limit: ALL_CHANNELS,
         });
         const conversations = conversationsResult as ConversationsPostMessageResult;
-        return conversations.channels.filter(canAccessToChannel).map(channel => channel.id);
+        const channels = conversations.channels.filter(canAccessToChannel).map(channel => channel.id);
+        if (process.env.DEVELOPMENT) {
+            channels.push(getDevelopmentSlackChannelId());
+        }
+        return channels;
     };
 
     const sendMessage = async (message: SlackMessage, userId: string | null) => {
