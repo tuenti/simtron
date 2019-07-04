@@ -1,5 +1,5 @@
 import createGetAllSimsResolver from './sims';
-import {PubSub} from 'graphql-subscriptions';
+import {PubSub, withFilter} from 'graphql-subscriptions';
 import {ApiBot} from '../../bot/api';
 import {createListenToOtpsResolver, createGetOtpsResolver} from './otp';
 import {addOtpRequest, readOtp, storeOtp} from './otp-request-storage';
@@ -26,7 +26,12 @@ const createResolvers = (slackBot: ApiBot) => {
         {
             Subscription: {
                 otpReceived: {
-                    subscribe: () => graphqlPubSub.asyncIterator(NEW_OTP),
+                    subscribe: withFilter(
+                        () => graphqlPubSub.asyncIterator(NEW_OTP),
+                        (payload, variables) =>
+                            !variables.phoneNumber ||
+                            payload.otpReceived.phoneNumber === variables.phoneNumber
+                    ),
                 },
             },
             Mutation: {

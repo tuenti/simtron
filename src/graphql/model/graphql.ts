@@ -16,7 +16,7 @@ export default [
         }
 
         type Subscription {
-            otpReceived: ParsedOtp!
+            otpReceived(phoneNumber: String): ParsedOtp!
         }
 
         type Mutation {

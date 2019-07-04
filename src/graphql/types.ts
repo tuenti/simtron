@@ -50,3 +50,6 @@ export interface ListenToOtpsMutationArgs {
 
     phoneNumber: string;
 }
+export interface OtpReceivedSubscriptionArgs {
+    phoneNumber?: Maybe<string>;
+}
