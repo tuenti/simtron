@@ -6,8 +6,8 @@ import {getApiSlackBotToken} from './config';
 
 const startApi = () => {
     const apiBot = createApiSlackBot(getApiSlackBotToken());
+    const {server, notificationsHandler} = createApiServer(apiBot);
     apiBot.start();
-    const {server, notificationsHandler} = createApiServer();
     server.listen(4000, notificationsHandler);
     logger.debug(
         'Api ready at http://localhost:4000/api, subscriptions ready at http://localhost:4000/subscriptions'

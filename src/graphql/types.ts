@@ -1,35 +1,50 @@
 export type Maybe<T> = T | null;
 
-export enum PaymentType {
-    Prepay = 'Prepay',
-    Control = 'Control',
-    Postpay = 'Postpay',
-}
-
 // ====================================================
 // Types
 // ====================================================
 
 export interface Query {
     getSims: Sim[];
+
+    getOtps: string[];
 }
 
 export interface Sim {
-    phoneNumber?: Maybe<string>;
+    phoneNumber: string;
 
-    brand?: Maybe<string>;
+    brand: string;
 
-    country?: Maybe<string>;
+    country: string;
 
-    paymentType?: Maybe<PaymentType>;
+    lineType: string;
 
-    isOnline?: Maybe<boolean>;
+    isOnline: boolean;
+}
+
+export interface Mutation {
+    listenToOtps?: Maybe<boolean>;
+}
+
+export interface Subscription {
+    otpReceived: Otp;
+}
+
+export interface Otp {
+    code: string;
 }
 
 // ====================================================
 // Arguments
 // ====================================================
 
-export interface GetSimsQueryArgs {
-    brand: string;
+export interface GetOtpsQueryArgs {
+    apiToken: string;
+
+    phoneNumber: string;
+}
+export interface ListenToOtpsMutationArgs {
+    apiToken: string;
+
+    phoneNumber: string;
 }

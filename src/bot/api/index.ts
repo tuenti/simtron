@@ -2,8 +2,19 @@ import {RTMClient} from '@slack/rtm-api';
 import {WebClient} from '@slack/web-api';
 import logger from '../../util/logger';
 import {getSlackBotId, getSlackChannelId} from '../../config';
-import {IncomingMessageListener} from '..';
 import {SlackMessage, SlackMessageContainer} from '../message-adapter/slack';
+import {Sim} from '../../graphql/types';
+import {listeners} from 'cluster';
+import {LINE_INFO} from '../../util/matcher';
+
+type MessageListener = (message: SlackMessage) => void;
+
+export interface ApiBot {
+    addListener: (listener: MessageListener) => void;
+    clearListeners: () => void;
+    getSims: () => Promise<Sim[]>;
+    start: () => void;
+}
 
 const isMessage = (event: {type: string; text: string}) => event.type === 'message' && event.text;
 
@@ -18,7 +29,7 @@ export const sanitize = (text: string) =>
         .replace('.', '')
         .replace(';', '');
 
-const createApiSlackBot = (botToken: string) => {
+const createApiSlackBot = (botToken: string): ApiBot => {
     let botId: string;
     const retryConfig = {
         forever: true,
@@ -52,19 +63,32 @@ const createApiSlackBot = (botToken: string) => {
         }
     };
 
-    const bot = {
-        listeners: <IncomingMessageListener[]>[],
+    const sendMessage = (message: SlackMessage) => {
+        postMessageToBot(message, getSlackBotId());
+    };
 
-        addListener(listener: IncomingMessageListener) {
+    let ongoingRequestResolver: ((message: any) => void) | null = null;
+
+    const bot = {
+        listeners: <MessageListener[]>[],
+
+        addListener(listener: MessageListener) {
             this.listeners.push(listener);
+        },
+
+        async getSims() {
+            return new Promise<Sim[]>(simsResolver => {
+                ongoingRequestResolver = simsResolver;
+                sendMessage({
+                    container: SlackMessageContainer.PLAIN,
+                    text: 'simtron',
+                    isPrivate: false,
+                });
+            });
         },
 
         clearListeners() {
             this.listeners = [];
-        },
-
-        sendMessage(message: SlackMessage) {
-            postMessageToBot(message, getSlackBotId());
         },
 
         start() {
@@ -72,9 +96,59 @@ const createApiSlackBot = (botToken: string) => {
         },
     };
 
+    const getPhoneNumber = (phoneNumberText: string) =>
+        phoneNumberText.startsWith('~')
+            ? phoneNumberText.substr(1, phoneNumberText.length - 2)
+            : phoneNumberText;
+
+    const isOnline = (phoneNumberText: string) => !phoneNumberText.startsWith('~');
+
+    const getBrand = (flag: string) => {
+        const brands: {[index: string]: string} = {
+            'flag-es': 'ES',
+            'flag-gb': 'UK',
+            'flag-ar': 'AR',
+            'flag-br': 'BR',
+            'flag-ec': 'EC',
+            'flag-uy': 'UY',
+        };
+        return brands[flag] || 'ES';
+    };
+
+    const extractSimsFromMessage = (messageText: string) => {
+        let sims: Sim[] = [];
+        const regexp = LINE_INFO;
+        let match = regexp.exec(messageText);
+        while (match != null) {
+            sims.push({
+                phoneNumber: getPhoneNumber(match[2]),
+                country: getBrand(match[1]),
+                brand: match[3],
+                lineType: match[4],
+                isOnline: isOnline(match[2]),
+            });
+            match = regexp.exec(messageText);
+        }
+        LINE_INFO.lastIndex = 0;
+        return sims;
+    };
+
     slackBot.on('message', async message => {
         if (isMessage(message) && isFromUser(message, getSlackBotId())) {
-            console.log(message);
+            let canBeSmsMessage = true;
+            if (ongoingRequestResolver) {
+                const sims = extractSimsFromMessage(message.text);
+                if (sims.length > 0) {
+                    ongoingRequestResolver(sims);
+                    ongoingRequestResolver = null;
+                    canBeSmsMessage = false;
+                }
+            }
+            if (canBeSmsMessage) {
+                bot.listeners.map(listener => {
+                    listener(message);
+                });
+            }
         }
     });
 

@@ -4,9 +4,10 @@ import {ApolloServer} from 'apollo-server-express';
 import {createServer} from 'http';
 import {SubscriptionServer} from 'subscriptions-transport-ws';
 import {execute, subscribe} from 'graphql';
+import {ApiBot} from '../bot/api';
 
-const createApiServer = () => {
-    const schema = createSchema();
+const createApiServer = (slackBot: ApiBot) => {
+    const schema = createSchema(slackBot);
     const graphql = new ApolloServer({schema, playground: false});
 
     const api = express();

@@ -2,18 +2,12 @@ import {gql} from 'apollo-server-express';
 
 export default [
     gql`
-        enum PaymentType {
-            Prepay
-            Control
-            Postpay
-        }
-
         type Sim {
-            phoneNumber: String
-            brand: String
-            country: String
-            paymentType: PaymentType
-            isOnline: Boolean
+            phoneNumber: String!
+            brand: String!
+            country: String!
+            lineType: String!
+            isOnline: Boolean!
         }
 
         type Otp {
@@ -24,8 +18,13 @@ export default [
             otpReceived: Otp!
         }
 
+        type Mutation {
+            listenToOtps(apiToken: String!, phoneNumber: String!): Boolean
+        }
+
         type Query {
-            getSims(brand: String!): [Sim!]!
+            getSims: [Sim!]!
+            getOtps(apiToken: String!, phoneNumber: String!): [String!]!
         }
     `,
 ];

@@ -1,10 +1,10 @@
-import {GetSimsQueryArgs, Sim} from '../types';
+import {Sim} from '../types';
+import {ApiBot} from '../../bot/api';
 
-type AllSimsResolver = (_: any, args: GetSimsQueryArgs) => Promise<Sim[]>;
+type AllSimsResolver = () => Promise<Sim[]>;
 
-const createGetAllSimsResolver = (): AllSimsResolver => async (_: any, args: GetSimsQueryArgs) => {
-    console.log(args.brand);
-    return [];
+const createGetAllSimsResolver = (slackBot: ApiBot): AllSimsResolver => async () => {
+    return await slackBot.getSims();
 };
 
 export default createGetAllSimsResolver;
