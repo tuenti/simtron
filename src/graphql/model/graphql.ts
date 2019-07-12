@@ -10,12 +10,13 @@ export default [
             isOnline: Boolean!
         }
 
-        type Otp {
-            code: String!
+        type ParsedOtp {
+            phoneNumber: String!
+            otp: String!
         }
 
         type Subscription {
-            otpReceived: Otp!
+            otpReceived(phoneNumber: String): ParsedOtp!
         }
 
         type Mutation {

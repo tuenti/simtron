@@ -4,7 +4,6 @@ import logger from '../../util/logger';
 import {getSlackBotId, getSlackChannelId} from '../../config';
 import {SlackMessage, SlackMessageContainer} from '../message-adapter/slack';
 import {Sim} from '../../graphql/types';
-import {listeners} from 'cluster';
 import {LINE_INFO} from '../../util/matcher';
 
 type MessageListener = (message: SlackMessage) => void;
