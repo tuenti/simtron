@@ -4,3 +4,4 @@ export const NETWORK_STATUS_LINE_PREFIX = '+CREG:';
 export const ENCODINGS_LINE_PREFIX = '+CSCS:';
 export const UTF16_ENCODING = 'UCS2';
 export const OPERATORS_LINE_PREFIX = '+COPS:';
+export const PIN_STATUS_LINE_PREFIX = '+CPIN:';

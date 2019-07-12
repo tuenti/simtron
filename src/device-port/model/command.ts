@@ -5,6 +5,7 @@ import {
     ENCODINGS_LINE_PREFIX,
     SIM_CARD_ICC_LINE_PREFIX,
     OPERATORS_LINE_PREFIX,
+    PIN_STATUS_LINE_PREFIX,
 } from './parser-token';
 import {NON_DIGITS, QUOTED_TEXTS, QUOTES, PARENTHESIS_GROUP} from '../../util/matcher';
 import decodeUtf16 from '../encoding/utf16';
@@ -250,5 +251,26 @@ export const createReadSmsCommand = (smsIndex: number, smsMode: number) => ({
                 smsText: parsedSms.text,
             };
         }
+    },
+});
+
+export const createReadPinStatusCommand = () => ({
+    command: 'AT+CPIN?',
+    responseParser: (responseLines: string[]) => {
+        const [pinStatusLine] = responseLines;
+        if (pinStatusLine) {
+            if (pinStatusLine.startsWith(PIN_STATUS_LINE_PREFIX)) {
+                const pinStatus = pinStatusLine.substring(PIN_STATUS_LINE_PREFIX.length).trim();
+                return {
+                    pinStatus,
+                    requiresPin: pinStatus !== 'READY',
+                    requiresPuk: pinStatus === 'SIM PUK' || pinStatus === 'SIM PUK2',
+                };
+            }
+        }
+        return {
+            requiresPin: false,
+            requiresPuk: false,
+        };
     },
 });
