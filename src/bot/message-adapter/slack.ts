@@ -106,13 +106,14 @@ const adaptMessage = (
                                 } unknown SIM cards* needing to be identified:`
                               : 'There is an *unknown SIM* card needing to be identified:',
                       attachments: message.textLines
-                          ? message.textLines.map((line, index) => ({
-                                color: '#D3D3D3',
-                                text: line,
-                                footer: `To identify this sim, type: *${getBotDisplayName()} ${SIM_IDENTIFICATION_COMMAND} ${
-                                    message.textLines && message.textLines.length > 1 ? index + 1 : ''
-                                }*`,
-                            }))
+                          ? message.textLines.map(line => {
+                                const [simLine, simIndex] = line.split('|');
+                                return {
+                                    color: '#D3D3D3',
+                                    text: simLine,
+                                    footer: `To identify this sim, type: *${getBotDisplayName()} ${SIM_IDENTIFICATION_COMMAND} ${simIndex}*`,
+                                };
+                            })
                           : [],
                   }
                 : null;

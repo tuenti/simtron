@@ -119,7 +119,7 @@ export const createSimNetworkStatusChangedNotificationMessage = (sim: SimInUse):
 export const createUnknownSimsExistenceNotificationMessage = (unknownSims: SimInUse[]): OutgoingMessage => {
     return {
         type: MessageType.NOTIFY_UNKNOWN_SIM_EXISTENCE,
-        textLines: unknownSims.map(sim => `Icc: *${sim.icc}*`),
+        textLines: unknownSims.map(sim => `Icc: *${sim.icc}* |${sim.portIndex}`),
     };
 };
 

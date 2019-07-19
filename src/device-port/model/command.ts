@@ -274,3 +274,7 @@ export const createReadPinStatusCommand = () => ({
         };
     },
 });
+
+export const createSetLedStatusCommand = (isEnabled: boolean) => ({
+    command: `AT+CGFUNC=1,${isEnabled ? 1 : 0}`,
+});

@@ -84,12 +84,13 @@ const handleCommandResponseLine = (line, portHandler) => {
     }
 };
 
-const createPortHandler = ({portName, baudRate}) => {
+const createPortHandler = ({portName, baudRate}, portIndex) => {
     const port = new SerialPort(portName, {baudRate});
 
     const portHandler = {
         port,
         portId: portName,
+        portIndex,
 
         ongoingCommand: null,
         commandResponseLines: [],

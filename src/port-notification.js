@@ -57,9 +57,9 @@ const notificationHandlers = [
     {
         notificationIds: [NETWORK_STATUS_NOTIFICATION_ID],
         action: (port, notification, store, sendMessage) => {
-            const {portId} = port;
+            const {portId, portIndex} = port;
             const {networkStatus} = notification;
-            store.sim.updateSimNetworkStatus(networkStatus, portId);
+            store.sim.updateSimNetworkStatus(networkStatus, portId, portIndex);
             const sim = store.sim.findSimInUseByPortId(portId);
             if (sim) {
                 sendMessage(createSimNetworkStatusChangedNotificationMessage(sim));

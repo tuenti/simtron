@@ -7,7 +7,6 @@ import {
     getSupportedBrands,
     getSupportedLineTypes,
 } from '../config';
-import {NON_DIGITS} from '../util/matcher';
 import {Store} from '../store';
 import {formatPhoneNumber} from '../util/phone-number';
 

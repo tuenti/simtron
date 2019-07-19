@@ -31,27 +31,31 @@ export const createStartSimIdentificationSpeech = () => ({
     action: (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
         const simIndex = getSimIdentificationIndex(receivedMessage.messageText);
         const allUnknownSims = store.sim.getAllUnknownSimsInUse();
-        if (!simIndex || (simIndex >= 0 && simIndex < allUnknownSims.length)) {
-            const sim = allUnknownSims[simIndex || 0];
-            answerMessage(
-                createSuccessFeedbackMessage(
-                    `*Ok*, lets identify the sim card with icc: *${
-                        sim.icc
-                    }*\nTo cancel, just type *${getBotDisplayName()} forget it, please* :wink:`
-                ),
-                receivedMessage
-            );
-            const questionary = createIdentifySimQuestionary(sim, store);
-            store.questionary.start(questionary, receivedMessage.botId, receivedMessage.userId);
-            delayed(
-                () =>
-                    questionary
-                        .getCurrentQuestion()
-                        .then(question => answerMessage(createQuestionMessage(question), receivedMessage)),
-                getBotMessageSequenceEnsuringTime()
-            );
-        } else {
-            answerMessage(createErrorMessage(':-1: Invalid SIM index.'), receivedMessage);
+        if (simIndex) {
+            const sim = allUnknownSims.find(sim => sim.portIndex == simIndex);
+            if (sim) {
+                answerMessage(
+                    createSuccessFeedbackMessage(
+                        `*Ok*, lets identify the sim card with icc: *${
+                            sim.icc
+                        }*\nTo cancel, just type *${getBotDisplayName()} forget it, please* :wink:`
+                    ),
+                    receivedMessage
+                );
+                const questionary = createIdentifySimQuestionary(sim, store);
+                store.questionary.start(questionary, receivedMessage.botId, receivedMessage.userId);
+                delayed(
+                    () =>
+                        questionary
+                            .getCurrentQuestion()
+                            .then(question =>
+                                answerMessage(createQuestionMessage(question), receivedMessage)
+                            ),
+                    getBotMessageSequenceEnsuringTime()
+                );
+                return;
+            }
         }
+        answerMessage(createErrorMessage(':-1: Invalid SIM index.'), receivedMessage);
     },
 });

@@ -4,6 +4,7 @@ import Error, {COMMAND_NOT_RESPONDING} from '../util/error';
 const createCommandQueue = portHandler => {
     const commandQueue = {
         portId: portHandler.portId,
+        portIndex: portHandler.portIndex,
         portHandler,
 
         lastCommandToExecute: Promise.resolve(),

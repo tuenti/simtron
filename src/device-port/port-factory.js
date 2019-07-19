@@ -16,6 +16,9 @@ const NO_TRIED_REASON = 'no-tried';
 const MODEM_RESPONSE_TIMEOUT_MS = 1000;
 const PORT_SCAN_TIMEOUT_MS = 1000;
 
+let currentPortIndex = 1;
+const getNextPortIndex = () => currentPortIndex++;
+
 const isEligiblePort = (portData, allowedVendorIds) => {
     return (
         portData &&
@@ -138,7 +141,7 @@ export default {
                     portData.baudRate
                 }`
             );
-            const portHandler = createPortHandler(portData);
+            const portHandler = createPortHandler(portData, getNextPortIndex());
             return createMessageQueue(portHandler);
         });
     },

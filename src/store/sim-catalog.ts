@@ -22,6 +22,7 @@ export interface SimInUse extends Sim {
     networkStatus: NetworkStatus;
     smsMode: SmsMode;
     portId: string;
+    portIndex: number;
     msisdn?: string;
     displayNumber?: string;
     brand?: string;
@@ -52,15 +53,23 @@ export interface SimStore {
 
     findSimsInUseByDisplayNumber: (displayNumber: string, returnHiddenSim: boolean) => SimInUse[];
 
+    findSimInUseByIcc: (icc: string, returnHiddenSim: boolean) => SimInUse | null;
+
     getAllUnknownSimsInUse: () => SimInUse[];
 
     findSimInUseByPortId: (portId: string) => SimInUse | null;
 
-    setSimInUse: (icc: string, networkStatus: NetworkStatus, smsMode: SmsMode, portId: string) => void;
+    setSimInUse: (
+        icc: string,
+        networkStatus: NetworkStatus,
+        smsMode: SmsMode,
+        portId: string,
+        portIndex: number
+    ) => void;
 
     setSimRemoved: (portId: string) => void;
 
-    updateSimNetworkStatus: (networkStatus: NetworkStatus, portId: string) => void;
+    updateSimNetworkStatus: (networkStatus: NetworkStatus, portId: string, portIndex: number) => void;
 }
 
 const DB_FILE = 'data/sim-catalog';
@@ -90,12 +99,14 @@ const createSimInUse = (
     icc: string,
     networkStatus: NetworkStatus,
     smsMode: SmsMode,
-    portId: string
+    portId: string,
+    portIndex: number
 ): SimInUse => ({
     icc,
     networkStatus,
     smsMode,
     portId,
+    portIndex,
 });
 
 const readSimCatalog = (): SimData[] => {
@@ -169,6 +180,10 @@ const createSimStore = (): SimStore => ({
         );
     },
 
+    findSimInUseByIcc(icc: string, returnHiddenSim: boolean) {
+        return this.getAllSimsInUse(returnHiddenSim).find((sim: SimInUse) => sim.icc === icc) || null;
+    },
+
     getAllUnknownSimsInUse(): SimInUse[] {
         return [...Object.values(inUse)].filter(simInUse => !findSimByIcc(simInUse.icc, catalog));
     },
@@ -182,9 +197,9 @@ const createSimStore = (): SimStore => ({
         return null;
     },
 
-    setSimInUse(icc: string, networkStatus: NetworkStatus, smsMode: SmsMode, portId: string) {
+    setSimInUse(icc: string, networkStatus: NetworkStatus, smsMode: SmsMode, portId: string, portIndex) {
         if (icc && networkStatus && smsMode) {
-            inUse[portId] = createSimInUse(icc, networkStatus, smsMode, portId);
+            inUse[portId] = createSimInUse(icc, networkStatus, smsMode, portId, portIndex);
         } else {
             logger.error(
                 Error(
@@ -201,10 +216,10 @@ const createSimStore = (): SimStore => ({
         delete inUse[portId];
     },
 
-    updateSimNetworkStatus(networkStatus: NetworkStatus, portId: string) {
+    updateSimNetworkStatus(networkStatus: NetworkStatus, portId: string, portIndex: number) {
         const sim = inUse[portId];
         if (sim) {
-            this.setSimInUse(sim.icc, networkStatus, sim.smsMode, portId);
+            this.setSimInUse(sim.icc, networkStatus, sim.smsMode, portId, portIndex);
         }
     },
 });

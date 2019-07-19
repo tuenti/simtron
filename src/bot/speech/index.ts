@@ -13,6 +13,7 @@ import {
     createEnablePortActivityNotifications,
     createDisablePortActivityNotifications,
 } from './port-activity-notifications';
+import {createStartPortIdentificationSpeech} from './port-identification';
 
 export type AnswerMessageCallback = (message: OutgoingMessage, receivedMessage: IncomingMessage) => void;
 
@@ -40,6 +41,7 @@ const speeches: Speech[] = [
     createRequestSimDetailsSpeech(),
     createEnablePortActivityNotifications(),
     createDisablePortActivityNotifications(),
+    createStartPortIdentificationSpeech(),
     createRequestCatalogSpeech(),
 ];
 

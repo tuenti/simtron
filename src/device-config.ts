@@ -104,7 +104,13 @@ const configureDevice = async (portHandler: any, simStore: SimStore) => {
                     enableNetworkStatusNotificationsResponse.isSuccessful;
 
                 if (simConfigured) {
-                    simStore.setSimInUse(simStatus.icc, simStatus.networkStatus, smsMode, portHandler.portId);
+                    simStore.setSimInUse(
+                        simStatus.icc,
+                        simStatus.networkStatus,
+                        smsMode,
+                        portHandler.portId,
+                        portHandler.portIndex
+                    );
                     return true;
                 }
             }
