@@ -1,14 +1,18 @@
 import createQuestionaryHandler, {INVALID_INDEX} from './handler';
 import {Store} from '../store';
 import {createSetLedStatusCommand} from '../device-port/model/command';
+import {Command} from '../device-port/model/command';
+import {SimInUse} from '../store/sim-catalog';
 
 const SEARCH_CRITERIA = 'criteria';
 const SEARCH_VALUE = 'value';
 
-const highlightPort = async (port: any, allPorts: any[]) =>
+type Port = {portId: string; sendCommand: (command: Command) => void};
+
+const highlightPorts = async (ports: string[], allPorts: Port[]) =>
     new Promise(async resolve => {
         await Promise.all(
-            allPorts.map(p => p.sendCommand(createSetLedStatusCommand(p.portId === port.portId)))
+            allPorts.map(p => p.sendCommand(createSetLedStatusCommand(ports.includes(p.portId))))
         );
         setTimeout(async () => {
             await Promise.all(allPorts.map(p => p.sendCommand(createSetLedStatusCommand(true))));
@@ -16,21 +20,23 @@ const highlightPort = async (port: any, allPorts: any[]) =>
         }, 10000);
     });
 
-const findPort = (
+const findPorts = (
     criteria: PortSearchCriteriaConcept,
     value: string,
     store: Store,
     includeHiddenSims: boolean
-) => {
+): string[] => {
     switch (criteria) {
         case PortSearchCriteriaConcept.ByIndex: {
-            return store.ports.findPortByIndex(parseInt(value));
+            const foundPort = store.ports.findPortByIndex(parseInt(value)) as Port;
+            return foundPort ? [foundPort.portId] : [];
         }
         case PortSearchCriteriaConcept.ByIcc: {
-            return store.sim.findSimInUseByIcc(value, includeHiddenSims);
+            const foundSim = store.sim.findSimInUseByIcc(value, includeHiddenSims) as SimInUse;
+            return foundSim ? [foundSim.portId] : [];
         }
         case PortSearchCriteriaConcept.ByPhoneNumber: {
-            return store.sim.findSimsInUseByDisplayNumber(value, includeHiddenSims);
+            return store.sim.findSimsInUseByDisplayNumber(value, includeHiddenSims).map(sim => sim.portId);
         }
     }
 };
@@ -79,14 +85,14 @@ const createIdentifyPortQuestionary = (store: Store, includeHiddenSims: boolean)
         ],
         initialData: [],
         finishCallback: responses => {
-            const port = findPort(
+            const ports = findPorts(
                 responses[SEARCH_CRITERIA],
                 responses[SEARCH_VALUE],
                 store,
                 includeHiddenSims
             );
-            if (port) {
-                highlightPort(port, store.ports.getAll());
+            if (ports.length > 0) {
+                highlightPorts(ports, store.ports.getAll());
             }
         },
         finishFeedbackText: `Take a look to hardware, it should be a blinking light somewhere, this is the SIM port you're identifying.`,

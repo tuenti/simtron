@@ -17,7 +17,7 @@ const getSimIdentificationIndex = (messageText: string) => {
     const words = messageText.split(' ');
     const [botName, command, index = undefined] = words;
     const simIndex = index !== undefined ? parseInt(index) : 1;
-    return getBotNames().includes(botName) && command === SIM_IDENTIFICATION_COMMAND ? simIndex - 1 : null;
+    return getBotNames().includes(botName) && command === SIM_IDENTIFICATION_COMMAND ? simIndex : null;
 };
 
 const isSimIdentificationStartMessage = (messageText: string) =>
