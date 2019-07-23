@@ -5,21 +5,15 @@ import {createSetLedStatusCommand} from '../device-port/model/command';
 const SEARCH_CRITERIA = 'criteria';
 const SEARCH_VALUE = 'value';
 
-const blinkPortLed = async (port: any, allPorts: any[]) =>
+const highlightPort = async (port: any, allPorts: any[]) =>
     new Promise(async resolve => {
-        await Promise.all(allPorts.map(p => p.sendCommand(createSetLedStatusCommand(false))));
-        let blinkCounter = 0;
-        let ledEnabled = false;
-        let intervalHandler = setInterval(() => {
-            port.sendCommand(createSetLedStatusCommand(ledEnabled));
-            ledEnabled = !ledEnabled;
-            blinkCounter++;
-            if (blinkCounter >= 50) {
-                clearInterval(intervalHandler);
-                Promise.all(allPorts.map(p => p.sendCommand(createSetLedStatusCommand(true))));
-                resolve();
-            }
-        }, 200);
+        await Promise.all(
+            allPorts.map(p => p.sendCommand(createSetLedStatusCommand(p.portId === port.portId)))
+        );
+        setTimeout(async () => {
+            await Promise.all(allPorts.map(p => p.sendCommand(createSetLedStatusCommand(true))));
+            resolve();
+        }, 10000);
     });
 
 const findPort = (
@@ -92,10 +86,10 @@ const createIdentifyPortQuestionary = (store: Store, includeHiddenSims: boolean)
                 includeHiddenSims
             );
             if (port) {
-                blinkPortLed(port, store.ports.getAll());
+                highlightPort(port, store.ports.getAll());
             }
         },
-        finishFeedbackText: `Take a look to hardware, it should ba a blinking light somewhere, this is the SIM port you're looking for :tada:`,
+        finishFeedbackText: `Take a look to hardware, it should be a blinking light somewhere, this is the SIM port you're identifying.`,
     });
 
 export default createIdentifyPortQuestionary;
