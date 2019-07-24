@@ -254,7 +254,7 @@ export const createReadSmsCommand = (smsIndex: number, smsMode: number) => ({
     },
 });
 
-export const createReadPinStatusCommand = () => ({
+export const createReadPasswordStatusCommand = () => ({
     command: 'AT+CPIN?',
     responseParser: (responseLines: string[]) => {
         const [pinStatusLine] = responseLines;
@@ -273,6 +273,10 @@ export const createReadPinStatusCommand = () => ({
             requiresPuk: false,
         };
     },
+});
+
+export const createSetPasswordCommand = (currentPassword: string, newPassword?: string) => ({
+    command: newPassword ? `AT+CPIN=${currentPassword},${newPassword}` : `AT+CPIN=${currentPassword}`,
 });
 
 export const createSetLedStatusCommand = (isEnabled: boolean) => ({

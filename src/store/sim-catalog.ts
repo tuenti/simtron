@@ -30,6 +30,10 @@ export interface SimInUse extends Sim {
     lineType?: string;
 }
 
+export interface PortInUse {
+    portId: string;
+}
+
 export interface SimStore {
     getSimCatalog: () => SimData[];
 
@@ -48,6 +52,8 @@ export interface SimStore {
     ) => void;
 
     getAllSimsInUse: (showHiddenSims: boolean) => SimInUse[];
+
+    getAllPortsWithBlockedSims: () => PortInUse[];
 
     findSimInUseByMsisdn: (msisdn: string, returnHiddenSim: boolean) => SimInUse | null;
 
@@ -109,6 +115,10 @@ const createSimInUse = (
     portIndex,
 });
 
+const createPortInUse = (portId: string): PortInUse => ({
+    portId,
+});
+
 const readSimCatalog = (): SimData[] => {
     try {
         return catalogDb.getData(SIM_CATALOG_PATH);
@@ -124,7 +134,8 @@ const findSimByIcc = <T extends Sim>(icc: string, simList: T[]): T | null =>
     simList.find(sim => sim.icc === icc) || null;
 
 let catalog: SimData[] = readSimCatalog();
-let inUse: {[key: string]: SimInUse} = {};
+let simsInUse: {[key: string]: SimInUse} = {};
+let portsInUse: {[key: string]: PortInUse} = {};
 
 const createSimStore = (): SimStore => ({
     getSimCatalog(): SimData[] {
@@ -159,7 +170,7 @@ const createSimStore = (): SimStore => ({
     },
 
     getAllSimsInUse(showHiddenSims: boolean): SimInUse[] {
-        const sims = Object.values(inUse)
+        const sims = Object.values(simsInUse)
             .map((simInUse: SimInUse) => {
                 const simData = findSimByIcc(simInUse.icc, catalog);
                 return showHiddenSims || !simData || simData.isVisible
@@ -168,6 +179,10 @@ const createSimStore = (): SimStore => ({
             })
             .filter(Boolean) as SimInUse[];
         return sims.sort((simA, simB) => compareNullableStrings(simA.msisdn, simB.msisdn));
+    },
+
+    getAllPortsWithBlockedSims(): PortInUse[] {
+        return Object.values(portsInUse).filter(port => !simsInUse[port.portId]);
     },
 
     findSimInUseByMsisdn(msisdn: string, returnHiddenSim: boolean) {
@@ -185,11 +200,11 @@ const createSimStore = (): SimStore => ({
     },
 
     getAllUnknownSimsInUse(): SimInUse[] {
-        return [...Object.values(inUse)].filter(simInUse => !findSimByIcc(simInUse.icc, catalog));
+        return [...Object.values(simsInUse)].filter(simInUse => !findSimByIcc(simInUse.icc, catalog));
     },
 
     findSimInUseByPortId(portId: string): SimInUse | null {
-        const simInUse = inUse[portId];
+        const simInUse = simsInUse[portId];
         if (simInUse) {
             const simData = findSimByIcc(simInUse.icc, catalog);
             return {...simInUse, ...(simData ? simData : {})};
@@ -199,7 +214,8 @@ const createSimStore = (): SimStore => ({
 
     setSimInUse(icc: string, networkStatus: NetworkStatus, smsMode: SmsMode, portId: string, portIndex) {
         if (icc && networkStatus && smsMode) {
-            inUse[portId] = createSimInUse(icc, networkStatus, smsMode, portId, portIndex);
+            simsInUse[portId] = createSimInUse(icc, networkStatus, smsMode, portId, portIndex);
+            portsInUse[portId] = createPortInUse(portId);
         } else {
             logger.error(
                 Error(
@@ -213,11 +229,12 @@ const createSimStore = (): SimStore => ({
     },
 
     setSimRemoved(portId: string) {
-        delete inUse[portId];
+        delete simsInUse[portId];
+        delete portsInUse[portId];
     },
 
     updateSimNetworkStatus(networkStatus: NetworkStatus, portId: string, portIndex: number) {
-        const sim = inUse[portId];
+        const sim = simsInUse[portId];
         if (sim) {
             this.setSimInUse(sim.icc, networkStatus, sim.smsMode, portId, portIndex);
         }
