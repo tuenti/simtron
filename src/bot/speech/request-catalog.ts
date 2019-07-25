@@ -34,9 +34,16 @@ export const createRequestCatalogSpeech = () => ({
         ).then(() =>
             delayed(() => {
                 const allUnknownSims = store.sim.getAllUnknownSimsInUse();
-                if (receivedMessage.isFromAdmin && allUnknownSims.length > 0) {
+                const allPortsWithBlockedSims = store.sim.getAllPortsWithBlockedSims();
+                if (
+                    receivedMessage.isFromAdmin &&
+                    (allUnknownSims.length > 0 || allPortsWithBlockedSims.length > 0)
+                ) {
                     answerMessage(
-                        createUnknownSimsExistenceNotificationMessage(allUnknownSims),
+                        createUnknownSimsExistenceNotificationMessage(
+                            allUnknownSims,
+                            allPortsWithBlockedSims
+                        ),
                         receivedMessage
                     );
                 }

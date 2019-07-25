@@ -1,7 +1,9 @@
-import {getCountryFlag} from '../../config';
-import {SimInUse} from '../../store/sim-catalog';
+import {getCountryFlag, getBotDisplayName} from '../../config';
+import {SimInUse, PortInUse} from '../../store/sim-catalog';
 import {Question, isSelectionQuestion} from '../../questionary/handler';
 import {MessageType} from './message-type';
+import {SIM_IDENTIFICATION_COMMAND} from '../speech/sim-identification';
+import {SIM_PIN_REMOVE_COMMAND} from '../speech/sim-pin-remove';
 
 export const USER_MENTION = '[USER_MENTION]';
 
@@ -116,10 +118,29 @@ export const createSimRemovedNotificationMessage = (sim: SimInUse): OutgoingMess
 export const createSimNetworkStatusChangedNotificationMessage = (sim: SimInUse): OutgoingMessage =>
     createSimDetailsContentMessage(sim, 'network status changed');
 
-export const createUnknownSimsExistenceNotificationMessage = (unknownSims: SimInUse[]): OutgoingMessage => {
+export const createUnknownSimsExistenceNotificationMessage = (
+    unknownSims: SimInUse[],
+    portsWithBlockedSims: PortInUse[]
+): OutgoingMessage => {
+    const unknownSimsLines = unknownSims.map(
+        sim =>
+            `Icc: *${
+                sim.icc
+            }* |To identify this SIM, type: *${getBotDisplayName()} ${SIM_IDENTIFICATION_COMMAND} ${
+                sim.portIndex
+            }*`
+    );
+    const portsWithBlockedSimsLines = portsWithBlockedSims.map(
+        port =>
+            `Blocked *SIM* requiring pin or puk in port *${
+                port.portIndex
+            }* |To unblock this SIM, type: *${getBotDisplayName()} ${SIM_PIN_REMOVE_COMMAND} ${
+                port.portIndex
+            }*`
+    );
     return {
         type: MessageType.NOTIFY_UNKNOWN_SIM_EXISTENCE,
-        textLines: unknownSims.map(sim => `Icc: *${sim.icc}* |${sim.portIndex}`),
+        textLines: [...unknownSimsLines, ...portsWithBlockedSimsLines],
     };
 };
 

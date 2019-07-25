@@ -9,11 +9,11 @@ import {
     createSetSmsTextModeCommand,
     createSetUtf16EncodingCommand,
     createReadIccDirectCardAccessCommand,
+    createReadPasswordStatusCommand,
+    isSuccessfulSimPasswordStatusCommandResponse,
 } from './device-port/model/command';
 import {UTF16_ENCODING} from './device-port/model/parser-token';
-import logger from './util/logger';
 import {SimStore, SimInUse} from './store/sim-catalog';
-import Error, {DEVICE_CONFIGURATION_ERROR} from './util/error';
 
 export interface SimDiff {
     oldSim: SimInUse | null;
@@ -92,31 +92,39 @@ const configureDevice = async (portHandler: any, simStore: SimStore) => {
             createEnableNetworkStatusNotificationsCommand()
         );
         const simStatus = await getSimStatus(portHandler);
-        if (enableNetworkStatusNotificationsResponse.isSuccessful && simStatus) {
-            const smsMode = await configureSmsMode(portHandler);
-            if (smsMode !== SmsMode.NONE) {
-                const enableSmsNotificationsResponse = await portHandler.sendCommand(
-                    createEnableSmsNotificationsCommand()
-                );
-
-                const simConfigured =
-                    enableSmsNotificationsResponse.isSuccessful &&
-                    enableNetworkStatusNotificationsResponse.isSuccessful;
-
-                if (simConfigured) {
-                    simStore.setSimInUse(
-                        simStatus.icc,
-                        simStatus.networkStatus,
-                        smsMode,
-                        portHandler.portId,
-                        portHandler.portIndex
+        if (enableNetworkStatusNotificationsResponse.isSuccessful) {
+            if (simStatus) {
+                const smsMode = await configureSmsMode(portHandler);
+                if (smsMode !== SmsMode.NONE) {
+                    const enableSmsNotificationsResponse = await portHandler.sendCommand(
+                        createEnableSmsNotificationsCommand()
                     );
+
+                    const simConfigured =
+                        enableSmsNotificationsResponse.isSuccessful &&
+                        enableNetworkStatusNotificationsResponse.isSuccessful;
+
+                    if (simConfigured) {
+                        simStore.setSimInUse(
+                            simStatus.icc,
+                            simStatus.networkStatus,
+                            smsMode,
+                            portHandler.portId,
+                            portHandler.portIndex
+                        );
+                        return true;
+                    }
+                }
+            } else {
+                const simPasswordStatus = await portHandler.sendCommand(createReadPasswordStatusCommand());
+                if (
+                    isSuccessfulSimPasswordStatusCommandResponse(simPasswordStatus) &&
+                    (simPasswordStatus.requiresPin || simPasswordStatus.requiresPuk)
+                ) {
+                    simStore.setSimBlockedInPort(portHandler.portId, portHandler.portIndex);
                     return true;
                 }
             }
-            logger.error(
-                Error(DEVICE_CONFIGURATION_ERROR, `Device configuration error on port: ${portHandler.portId}`)
-            );
         }
     }
     simStore.setSimRemoved(portHandler.portId);

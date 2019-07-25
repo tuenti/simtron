@@ -63,6 +63,12 @@ interface SupportedOperatorsMetadata {
     formats: OperatorFormat[];
 }
 
+interface SimPasswordStatus {
+    pinStatus: string;
+    requiresPin: boolean;
+    requiresPuk: boolean;
+}
+
 export const createSetEchoModeCommand = () => ({
     command: 'ATE1',
 });
@@ -254,10 +260,13 @@ export const createReadSmsCommand = (smsIndex: number, smsMode: number) => ({
     },
 });
 
+export const isSuccessfulSimPasswordStatusCommandResponse = (arg: any): arg is SimPasswordStatus =>
+    !!arg.pinStatus && arg.requiresPin !== undefined && arg.requiresPuk !== undefined;
+
 export const createReadPasswordStatusCommand = () => ({
     command: 'AT+CPIN?',
-    responseParser: (responseLines: string[]) => {
-        const [pinStatusLine] = responseLines;
+    responseParser: (responseLines: string[]): SimPasswordStatus => {
+        const [, pinStatusLine] = responseLines;
         if (pinStatusLine) {
             if (pinStatusLine.startsWith(PIN_STATUS_LINE_PREFIX)) {
                 const pinStatus = pinStatusLine.substring(PIN_STATUS_LINE_PREFIX.length).trim();
@@ -269,6 +278,7 @@ export const createReadPasswordStatusCommand = () => ({
             }
         }
         return {
+            pinStatus: '',
             requiresPin: false,
             requiresPuk: false,
         };

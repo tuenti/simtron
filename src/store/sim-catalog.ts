@@ -32,6 +32,7 @@ export interface SimInUse extends Sim {
 
 export interface PortInUse {
     portId: string;
+    portIndex: number;
 }
 
 export interface SimStore {
@@ -72,6 +73,8 @@ export interface SimStore {
         portId: string,
         portIndex: number
     ) => void;
+
+    setSimBlockedInPort: (portId: string, portIndex: number) => void;
 
     setSimRemoved: (portId: string) => void;
 
@@ -115,8 +118,9 @@ const createSimInUse = (
     portIndex,
 });
 
-const createPortInUse = (portId: string): PortInUse => ({
+const createPortInUse = (portId: string, portIndex: number): PortInUse => ({
     portId,
+    portIndex,
 });
 
 const readSimCatalog = (): SimData[] => {
@@ -215,7 +219,7 @@ const createSimStore = (): SimStore => ({
     setSimInUse(icc: string, networkStatus: NetworkStatus, smsMode: SmsMode, portId: string, portIndex) {
         if (icc && networkStatus && smsMode) {
             simsInUse[portId] = createSimInUse(icc, networkStatus, smsMode, portId, portIndex);
-            portsInUse[portId] = createPortInUse(portId);
+            portsInUse[portId] = createPortInUse(portId, portIndex);
         } else {
             logger.error(
                 Error(
@@ -226,6 +230,10 @@ const createSimStore = (): SimStore => ({
                 )
             );
         }
+    },
+
+    setSimBlockedInPort(portId: string, portIndex: number) {
+        portsInUse[portId] = createPortInUse(portId, portIndex);
     },
 
     setSimRemoved(portId: string) {
