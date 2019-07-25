@@ -30,6 +30,9 @@ export interface SimInUse extends Sim {
     lineType?: string;
 }
 
+export const isSimInUse = (arg: any): arg is SimInUse =>
+    !!arg.icc && !!arg.networkStatus && !!arg.smsMode && !!arg.portId && arg.portIndex !== undefined;
+
 export interface PortInUse {
     portId: string;
     portIndex: number;
@@ -65,6 +68,8 @@ export interface SimStore {
     getAllUnknownSimsInUse: () => SimInUse[];
 
     findSimInUseByPortId: (portId: string) => SimInUse | null;
+
+    getBlockedSimByPortId: (portId: string) => PortInUse | null;
 
     setSimInUse: (
         icc: string,
@@ -187,6 +192,10 @@ const createSimStore = (): SimStore => ({
 
     getAllPortsWithBlockedSims(): PortInUse[] {
         return Object.values(portsInUse).filter(port => !simsInUse[port.portId]);
+    },
+
+    getBlockedSimByPortId(portId: string) {
+        return portsInUse[portId] && !simsInUse[portId] ? portsInUse[portId] : null;
     },
 
     findSimInUseByMsisdn(msisdn: string, returnHiddenSim: boolean) {

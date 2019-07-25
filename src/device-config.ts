@@ -13,11 +13,11 @@ import {
     isSuccessfulSimPasswordStatusCommandResponse,
 } from './device-port/model/command';
 import {UTF16_ENCODING} from './device-port/model/parser-token';
-import {SimStore, SimInUse} from './store/sim-catalog';
+import {SimStore, SimInUse, PortInUse} from './store/sim-catalog';
 
 export interface SimDiff {
-    oldSim: SimInUse | null;
-    newSim: SimInUse | null;
+    oldSim: SimInUse | PortInUse | null;
+    newSim: SimInUse | PortInUse | null;
 }
 
 export enum SmsMode {
@@ -91,38 +91,38 @@ const configureDevice = async (portHandler: any, simStore: SimStore) => {
         const enableNetworkStatusNotificationsResponse = await portHandler.sendCommand(
             createEnableNetworkStatusNotificationsCommand()
         );
-        const simStatus = await getSimStatus(portHandler);
         if (enableNetworkStatusNotificationsResponse.isSuccessful) {
-            if (simStatus) {
-                const smsMode = await configureSmsMode(portHandler);
-                if (smsMode !== SmsMode.NONE) {
-                    const enableSmsNotificationsResponse = await portHandler.sendCommand(
-                        createEnableSmsNotificationsCommand()
-                    );
-
-                    const simConfigured =
-                        enableSmsNotificationsResponse.isSuccessful &&
-                        enableNetworkStatusNotificationsResponse.isSuccessful;
-
-                    if (simConfigured) {
-                        simStore.setSimInUse(
-                            simStatus.icc,
-                            simStatus.networkStatus,
-                            smsMode,
-                            portHandler.portId,
-                            portHandler.portIndex
-                        );
-                        return true;
-                    }
-                }
+            const simPasswordStatus = await portHandler.sendCommand(createReadPasswordStatusCommand());
+            if (
+                isSuccessfulSimPasswordStatusCommandResponse(simPasswordStatus) &&
+                (simPasswordStatus.requiresPin || simPasswordStatus.requiresPuk)
+            ) {
+                simStore.setSimBlockedInPort(portHandler.portId, portHandler.portIndex);
+                return true;
             } else {
-                const simPasswordStatus = await portHandler.sendCommand(createReadPasswordStatusCommand());
-                if (
-                    isSuccessfulSimPasswordStatusCommandResponse(simPasswordStatus) &&
-                    (simPasswordStatus.requiresPin || simPasswordStatus.requiresPuk)
-                ) {
-                    simStore.setSimBlockedInPort(portHandler.portId, portHandler.portIndex);
-                    return true;
+                const simStatus = await getSimStatus(portHandler);
+                if (simStatus) {
+                    const smsMode = await configureSmsMode(portHandler);
+                    if (smsMode !== SmsMode.NONE) {
+                        const enableSmsNotificationsResponse = await portHandler.sendCommand(
+                            createEnableSmsNotificationsCommand()
+                        );
+
+                        const simConfigured =
+                            enableSmsNotificationsResponse.isSuccessful &&
+                            enableNetworkStatusNotificationsResponse.isSuccessful;
+
+                        if (simConfigured) {
+                            simStore.setSimInUse(
+                                simStatus.icc,
+                                simStatus.networkStatus,
+                                smsMode,
+                                portHandler.portId,
+                                portHandler.portIndex
+                            );
+                            return true;
+                        }
+                    }
                 }
             }
         }
@@ -139,10 +139,15 @@ const scheduleDeviceConfiguration = async (
     new Promise(resolve => {
         if (!pendingRequests[portHandler.portId] || timeOutMs === 0) {
             pendingRequests[portHandler.portId] = setTimeout(async () => {
-                const oldSim = simStore.findSimInUseByPortId(portHandler.portId);
+                const oldSim =
+                    simStore.findSimInUseByPortId(portHandler.portId) ||
+                    simStore.getBlockedSimByPortId(portHandler.portId);
                 await configureDevice(portHandler, simStore);
+                const newSim =
+                    simStore.findSimInUseByPortId(portHandler.portId) ||
+                    simStore.getBlockedSimByPortId(portHandler.portId);
                 pendingRequests[portHandler.portId] = undefined;
-                resolve({oldSim, newSim: simStore.findSimInUseByPortId(portHandler.portId)});
+                resolve({oldSim, newSim});
             }, timeOutMs);
         } else {
             const currentSim = simStore.findSimInUseByPortId(portHandler.portId);

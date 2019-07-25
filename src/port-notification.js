@@ -18,6 +18,8 @@ import {
 import scheduleDeviceConfiguration from './device-config';
 import {getSimStatusRequestScheduleTime} from './config';
 
+const SIM_READY_TIMEOUT_MS = 5000;
+
 const handleSimManipulation = (simDiff, sendMessage) => {
     if (simDiff.oldSim === null && simDiff.newSim !== null) {
         sendMessage(createSimInsertedNotificationMessage(simDiff.newSim));
@@ -73,12 +75,14 @@ const notificationHandlers = [
         notificationIds: [MODEM_RESTART_ID, SIM_READY_ID],
         action: async (port, notification, store, sendMessage) => {
             const {portId} = port;
-            handleSimManipulation(await scheduleDeviceConfiguration(port, store.sim), sendMessage);
-            handleSimManipulation(
-                await scheduleDeviceConfiguration(port, store.sim, getSimStatusRequestScheduleTime()),
-                sendMessage
-            );
             logger.debug(`Sim manipulation notification received on port: ${portId}`);
+            setTimeout(async () => {
+                handleSimManipulation(await scheduleDeviceConfiguration(port, store.sim), sendMessage);
+                handleSimManipulation(
+                    await scheduleDeviceConfiguration(port, store.sim, getSimStatusRequestScheduleTime()),
+                    sendMessage
+                );
+            }, SIM_READY_TIMEOUT_MS);
         },
     },
 ];

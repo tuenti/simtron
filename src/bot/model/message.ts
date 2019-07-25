@@ -1,5 +1,5 @@
 import {getCountryFlag, getBotDisplayName} from '../../config';
-import {SimInUse, PortInUse} from '../../store/sim-catalog';
+import {SimInUse, PortInUse, isSimInUse} from '../../store/sim-catalog';
 import {Question, isSelectionQuestion} from '../../questionary/handler';
 import {MessageType} from './message-type';
 import {SIM_IDENTIFICATION_COMMAND} from '../speech/sim-identification';
@@ -73,46 +73,61 @@ export const createCatalogAnswerContentMessage = (
     };
 };
 
-export const createSimDetailsContentMessage = (sim: SimInUse, notificationText?: string): OutgoingMessage => {
-    const simId = createSimIdentityLine(sim);
-    const lineInfo = createLineInfo(sim);
-    const simDataPart = lineInfo ? `icc: ${sim.icc}, msisdn: ${sim.msisdn} ` : '';
-    const fields = lineInfo
-        ? [
-              {
-                  name: 'Line Info',
-                  value: lineInfo,
-              },
-              {
-                  name: 'Network Status',
-                  value: sim.networkStatus.name,
-              },
-          ]
-        : [
-              {
-                  name: 'Network Status',
-                  value: sim.networkStatus.name,
-              },
-          ];
-    return {
-        type: MessageType.SIM_DETAILS_CONTENT,
-        text: `${
-            sim.networkStatus.isWorking
-                ? `${getCountryFlag(sim.country)} *${simId}* ${simDataPart}`
-                : `${getCountryFlag(sim.country)} *~${simId}~* ${simDataPart}`
-        } ${notificationText ? notificationText : ''}`,
-        attachments: [
-            {
-                fields,
-            },
-        ],
-    };
+const createUnknownSimExistenceText = (portIndex: number) =>
+    `Blocked *SIM* requiring pin or puk in port *${portIndex}*`;
+
+export const createSimDetailsContentMessage = (
+    simData: SimInUse | PortInUse,
+    notificationText?: string
+): OutgoingMessage => {
+    if (isSimInUse(simData)) {
+        const simId = createSimIdentityLine(simData);
+        const lineInfo = createLineInfo(simData);
+        const simDataPart = lineInfo ? `icc: ${simData.icc}, msisdn: ${simData.msisdn} ` : '';
+        const fields = lineInfo
+            ? [
+                  {
+                      name: 'Line Info',
+                      value: lineInfo,
+                  },
+                  {
+                      name: 'Network Status',
+                      value: simData.networkStatus.name,
+                  },
+              ]
+            : [
+                  {
+                      name: 'Network Status',
+                      value: simData.networkStatus.name,
+                  },
+              ];
+        return {
+            type: MessageType.SIM_DETAILS_CONTENT,
+            text: `${
+                simData.networkStatus.isWorking
+                    ? `${getCountryFlag(simData.country)} *${simId}* ${simDataPart}`
+                    : `${getCountryFlag(simData.country)} *~${simId}~* ${simDataPart}`
+            } ${notificationText ? notificationText : ''}`,
+            attachments: [
+                {
+                    fields,
+                },
+            ],
+        };
+    } else {
+        return {
+            type: MessageType.SIM_DETAILS_CONTENT,
+            text: `${createUnknownSimExistenceText(simData.portIndex)} ${
+                notificationText ? notificationText : ''
+            }`,
+        };
+    }
 };
 
-export const createSimInsertedNotificationMessage = (sim: SimInUse): OutgoingMessage =>
+export const createSimInsertedNotificationMessage = (sim: SimInUse | PortInUse): OutgoingMessage =>
     createSimDetailsContentMessage(sim, 'inserted :+1:');
 
-export const createSimRemovedNotificationMessage = (sim: SimInUse): OutgoingMessage =>
+export const createSimRemovedNotificationMessage = (sim: SimInUse | PortInUse): OutgoingMessage =>
     createSimDetailsContentMessage(sim, 'removed :+1:');
 
 export const createSimNetworkStatusChangedNotificationMessage = (sim: SimInUse): OutgoingMessage =>
@@ -132,9 +147,9 @@ export const createUnknownSimsExistenceNotificationMessage = (
     );
     const portsWithBlockedSimsLines = portsWithBlockedSims.map(
         port =>
-            `Blocked *SIM* requiring pin or puk in port *${
+            `${createUnknownSimExistenceText(
                 port.portIndex
-            }* |To unblock this SIM, type: *${getBotDisplayName()} ${SIM_PIN_REMOVE_COMMAND} ${
+            )} |To unblock this SIM, type: *${getBotDisplayName()} ${SIM_PIN_REMOVE_COMMAND} ${
                 port.portIndex
             }*`
     );
