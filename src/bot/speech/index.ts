@@ -14,7 +14,9 @@ import {
     createDisablePortActivityNotifications,
 } from './port-activity-notifications';
 import {createStartPortIdentificationSpeech} from './port-identification';
+import {createStartSimPinEntrySpeech} from './enter-sim-pin';
 
+export type SendMessageCallback = (message: OutgoingMessage) => void;
 export type AnswerMessageCallback = (message: OutgoingMessage, receivedMessage: IncomingMessage) => void;
 
 export type SendCommandCallback = (command: Command, portId: string) => Promise<{[key: string]: any}>;
@@ -34,6 +36,7 @@ const speeches: Speech[] = [
     createStopQuestionarySpeech(),
     createFillQuestionSpeech(),
     createStartSimIdentificationSpeech(),
+    createStartSimPinEntrySpeech(),
     createStartForceSimOperatorSpeech(),
     createStartSimDataEditSpeech(),
     createHideSimSpeech(),

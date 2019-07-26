@@ -64,7 +64,12 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
     };
 
     const configurePort = async portHandler => {
-        await scheduleDeviceConfiguration(portHandler, store.sim);
+        await scheduleDeviceConfiguration(
+            portHandler.portId,
+            portHandler.portIndex,
+            store.sim,
+            (command, portId) => portHandler.sendCommand(command)
+        );
         portHandler.addListener(handlePortIncomingNotification);
     };
 
@@ -72,7 +77,13 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
 
     const startSimStatusPolling = (devicePortHandlers, pollingTime) => {
         setInterval(() => {
-            Promise.all(devicePortHandlers.map(port => scheduleDeviceConfiguration(port, store.sim)));
+            Promise.all(
+                devicePortHandlers.map(port =>
+                    scheduleDeviceConfiguration(port.portId, port.portIndex, store.sim, (command, portId) =>
+                        port.sendCommand(command)
+                    )
+                )
+            );
         }, pollingTime);
     };
 

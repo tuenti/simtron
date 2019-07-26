@@ -285,8 +285,23 @@ export const createReadPasswordStatusCommand = () => ({
     },
 });
 
-export const createSetPasswordCommand = (currentPassword: string, newPassword?: string) => ({
-    command: newPassword ? `AT+CPIN=${currentPassword},${newPassword}` : `AT+CPIN=${currentPassword}`,
+export const isSuccessFulImeiResponse = (arg: any): arg is {imei: string} => arg.imei;
+
+export const createGetImeiCommand = () => ({
+    command: 'AT+CGSN',
+    responseParser: (responseLines: string[]) => {
+        const [, imei] = responseLines;
+        if (imei) {
+            return {
+                imei,
+            };
+        }
+        return {};
+    },
+});
+
+export const createEnterPinCommand = (currentPin: string) => ({
+    command: `AT+CPIN=${currentPin}`,
 });
 
 export const createSetLedStatusCommand = (isEnabled: boolean) => ({

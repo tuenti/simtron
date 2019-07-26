@@ -11,6 +11,7 @@ export enum MessageType {
     START_SIM_IDENTIFICATION = 'start-sim-id',
     START_PORT_IDENTIFICATION = 'start-port-identification',
     START_SIM_DATA_EDIT = 'start-sim-data-edit',
+    START_SIM_PIN_REMOVE = 'start-sim-pin-remove',
     NOTIFY_SMS_RECEIVED = 'notify-sms-received',
     NOTIFY_PORT_ACTIVITY_DETECTED = 'notify-port-activity-detected',
     START_FORCE_SIM_OPERATOR = 'start-force-sim-operator',

@@ -9,6 +9,13 @@ interface Sim {
     icc: string;
 }
 
+interface SimPin {
+    pin: string;
+    imei: string;
+}
+
+type SimPins = {[key: string]: SimPin};
+
 interface SimData extends Sim {
     msisdn: string;
     displayNumber: string;
@@ -28,6 +35,7 @@ export interface SimInUse extends Sim {
     brand?: string;
     country?: string;
     lineType?: string;
+    imei: string;
 }
 
 export const isSimInUse = (arg: any): arg is SimInUse =>
@@ -36,6 +44,8 @@ export const isSimInUse = (arg: any): arg is SimInUse =>
 export interface PortInUse {
     portId: string;
     portIndex: number;
+    imei: string;
+    icc?: string;
 }
 
 export interface SimStore {
@@ -55,6 +65,8 @@ export interface SimStore {
         isVisible: boolean
     ) => void;
 
+    getPinForImei: (imei: string) => SimPin | undefined;
+
     getAllSimsInUse: (showHiddenSims: boolean) => SimInUse[];
 
     getAllPortsWithBlockedSims: () => PortInUse[];
@@ -71,25 +83,33 @@ export interface SimStore {
 
     getBlockedSimByPortId: (portId: string) => PortInUse | null;
 
+    setPinForImei: (pin: string, imei: string) => void;
+
     setSimInUse: (
         icc: string,
         networkStatus: NetworkStatus,
         smsMode: SmsMode,
         portId: string,
-        portIndex: number
+        portIndex: number,
+        imei: string
     ) => void;
 
-    setSimBlockedInPort: (portId: string, portIndex: number) => void;
+    setSimBlockedInPort: (portId: string, portIndex: number, imei: string, icc?: string) => void;
 
     setSimRemoved: (portId: string) => void;
 
     updateSimNetworkStatus: (networkStatus: NetworkStatus, portId: string, portIndex: number) => void;
 }
 
-const DB_FILE = 'data/sim-catalog';
+const CATALOG_DB_FILE = 'data/sim-catalog';
+const PINS_DB_FILE = 'data/sim-pins';
 const SIM_CATALOG_PATH = '/catalog';
+const SIM_PINS_PATH = '/pins';
 
-const catalogDb = new JsonDB(DB_FILE, true, true);
+const catalogDb = new JsonDB(CATALOG_DB_FILE, true, true);
+const pinsDb = new JsonDB(PINS_DB_FILE, true, true);
+
+const createSimPinForImei = (pin: string, imei: string) => ({pin, imei});
 
 const createSimData = (
     icc: string,
@@ -114,18 +134,22 @@ const createSimInUse = (
     networkStatus: NetworkStatus,
     smsMode: SmsMode,
     portId: string,
-    portIndex: number
+    portIndex: number,
+    imei: string
 ): SimInUse => ({
     icc,
     networkStatus,
     smsMode,
     portId,
     portIndex,
+    imei,
 });
 
-const createPortInUse = (portId: string, portIndex: number): PortInUse => ({
+const createPortInUse = (portId: string, portIndex: number, imei: string, icc?: string): PortInUse => ({
     portId,
     portIndex,
+    imei,
+    icc,
 });
 
 const readSimCatalog = (): SimData[] => {
@@ -139,10 +163,22 @@ const readSimCatalog = (): SimData[] => {
     }
 };
 
+const readSimPins = (): SimPins => {
+    try {
+        return pinsDb.getData(SIM_PINS_PATH);
+    } catch (e) {
+        if (e.name === 'DataError') {
+            catalogDb.push(SIM_PINS_PATH, []);
+        }
+        return {};
+    }
+};
+
 const findSimByIcc = <T extends Sim>(icc: string, simList: T[]): T | null =>
     simList.find(sim => sim.icc === icc) || null;
 
 let catalog: SimData[] = readSimCatalog();
+let simPins: SimPins = readSimPins();
 let simsInUse: {[key: string]: SimInUse} = {};
 let portsInUse: {[key: string]: PortInUse} = {};
 
@@ -176,6 +212,10 @@ const createSimStore = (): SimStore => ({
             catalogDb.push(SIM_CATALOG_PATH, [newSimData], false);
         }
         catalog = readSimCatalog();
+    },
+
+    getPinForImei(imei: string): SimPin | undefined {
+        return simPins[imei];
     },
 
     getAllSimsInUse(showHiddenSims: boolean): SimInUse[] {
@@ -225,10 +265,25 @@ const createSimStore = (): SimStore => ({
         return null;
     },
 
-    setSimInUse(icc: string, networkStatus: NetworkStatus, smsMode: SmsMode, portId: string, portIndex) {
+    setPinForImei(pin: string, imei: string) {
+        const newSimPin = createSimPinForImei(pin, imei);
+        const pins = readSimPins();
+        pins[imei] = newSimPin;
+        pinsDb.push(SIM_PINS_PATH, pins, true);
+        simPins = readSimPins();
+    },
+
+    setSimInUse(
+        icc: string,
+        networkStatus: NetworkStatus,
+        smsMode: SmsMode,
+        portId: string,
+        portIndex: number,
+        imei: string
+    ) {
         if (icc && networkStatus && smsMode) {
-            simsInUse[portId] = createSimInUse(icc, networkStatus, smsMode, portId, portIndex);
-            portsInUse[portId] = createPortInUse(portId, portIndex);
+            simsInUse[portId] = createSimInUse(icc, networkStatus, smsMode, portId, portIndex, imei);
+            portsInUse[portId] = createPortInUse(portId, portIndex, imei, icc);
         } else {
             logger.error(
                 Error(
@@ -241,8 +296,8 @@ const createSimStore = (): SimStore => ({
         }
     },
 
-    setSimBlockedInPort(portId: string, portIndex: number) {
-        portsInUse[portId] = createPortInUse(portId, portIndex);
+    setSimBlockedInPort(portId: string, portIndex: number, imei: string, icc?: string) {
+        portsInUse[portId] = createPortInUse(portId, portIndex, imei, icc);
     },
 
     setSimRemoved(portId: string) {
@@ -253,7 +308,7 @@ const createSimStore = (): SimStore => ({
     updateSimNetworkStatus(networkStatus: NetworkStatus, portId: string, portIndex: number) {
         const sim = simsInUse[portId];
         if (sim) {
-            this.setSimInUse(sim.icc, networkStatus, sim.smsMode, portId, portIndex);
+            this.setSimInUse(sim.icc, networkStatus, sim.smsMode, portId, portIndex, sim.imei);
         }
     },
 });

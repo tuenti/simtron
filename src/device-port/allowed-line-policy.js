@@ -16,7 +16,7 @@ const allowedLinePrefixes = [
     'PB DONE',
 ];
 
-const previousLinesExceptionPrefixes = ['AT+CCID', '+CMGR:'];
+const previousLinesExceptionPrefixes = ['AT+CCID', '+CMGR:', 'AT+CGSN'];
 
 const someStartsWith = (lines, prefix) => lines.some(line => line.startsWith(prefix));
 

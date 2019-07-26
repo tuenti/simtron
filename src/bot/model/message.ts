@@ -3,7 +3,7 @@ import {SimInUse, PortInUse, isSimInUse} from '../../store/sim-catalog';
 import {Question, isSelectionQuestion} from '../../questionary/handler';
 import {MessageType} from './message-type';
 import {SIM_IDENTIFICATION_COMMAND} from '../speech/sim-identification';
-import {SIM_PIN_REMOVE_COMMAND} from '../speech/sim-pin-remove';
+import {SIM_PIN_REMOVE_COMMAND} from '../speech/enter-sim-pin';
 
 export const USER_MENTION = '[USER_MENTION]';
 

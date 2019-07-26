@@ -1,45 +1,35 @@
-import {
-    NEW_SMS_NOTIFICATION_ID,
-    NETWORK_STATUS_NOTIFICATION_ID,
-    SIM_PIN_READY_ID,
-    MODEM_RESTART_ID,
-    SIM_READY_ID,
-} from './device-port/model/notification';
+import {NotificationId} from './device-port/model/notification';
 import logger from './util/logger';
 import Error, {SIM_NOT_PRESENT, NOTIFICATION_HANDLER_NOT_FOUND} from './util/error';
-import {createReadSmsCommand, createDeleteAllSmsCommand} from './device-port/model/command';
+import {createReadSmsCommand, createDeleteAllSmsCommand, Command} from './device-port/model/command';
 import {
     createNewSmsNotificationMessage,
-    createPortActivityNotificationMessage,
-    createSimInsertedNotificationMessage,
-    createSimRemovedNotificationMessage,
     createSimNetworkStatusChangedNotificationMessage,
 } from './bot/model/message';
-import scheduleDeviceConfiguration from './device-config';
-import {getSimStatusRequestScheduleTime} from './config';
+import {Store} from './store';
+import {SendMessageCallback} from './bot/speech';
+import scanPort from './port-scan';
 
-const SIM_READY_TIMEOUT_MS = 5000;
-
-const handleSimManipulation = (simDiff, sendMessage) => {
-    if (simDiff.oldSim === null && simDiff.newSim !== null) {
-        sendMessage(createSimInsertedNotificationMessage(simDiff.newSim));
-    } else if (simDiff.oldSim !== null && simDiff.newSim === null) {
-        sendMessage(createSimRemovedNotificationMessage(simDiff.oldSim));
-    } else if (
-        simDiff.oldSim !== null &&
-        simDiff.newSim !== null &&
-        simDiff.oldSim.icc !== simDiff.newSim.icc
-    ) {
-        sendMessage(createSimRemovedNotificationMessage(simDiff.oldSim));
-        delayed(() => {
-            sendMessage(createSimInsertedNotificationMessage(simDiff.newSim));
-        }, getBotMessageSequenceEnsuringTime());
-    }
+type NotificationData = {[index: string]: any};
+type PortHandler = {
+    portId: string;
+    portIndex: number;
+    sendCommand: (command: Command) => Promise<{[key: string]: any}>;
 };
 
-const notificationHandlers = [
+type NotificationHandler = {
+    notificationIds: NotificationId[];
+    action: (
+        port: PortHandler,
+        notification: NotificationData,
+        store: Store,
+        sendMessage: SendMessageCallback
+    ) => void;
+};
+
+const notificationHandlers: NotificationHandler[] = [
     {
-        notificationIds: [NEW_SMS_NOTIFICATION_ID],
+        notificationIds: [NotificationId.NewSms],
         action: async (port, notification, store, sendMessage) => {
             const {portId} = port;
             const {smsIndex} = notification;
@@ -57,7 +47,7 @@ const notificationHandlers = [
         },
     },
     {
-        notificationIds: [NETWORK_STATUS_NOTIFICATION_ID],
+        notificationIds: [NotificationId.NetworkStatus],
         action: (port, notification, store, sendMessage) => {
             const {portId, portIndex} = port;
             const {networkStatus} = notification;
@@ -72,22 +62,21 @@ const notificationHandlers = [
         },
     },
     {
-        notificationIds: [MODEM_RESTART_ID, SIM_READY_ID],
-        action: async (port, notification, store, sendMessage) => {
+        notificationIds: [NotificationId.ModemRestart, NotificationId.SimReady],
+        action: async (port, _, store, sendMessage) => {
             const {portId} = port;
             logger.debug(`Sim manipulation notification received on port: ${portId}`);
-            setTimeout(async () => {
-                handleSimManipulation(await scheduleDeviceConfiguration(port, store.sim), sendMessage);
-                handleSimManipulation(
-                    await scheduleDeviceConfiguration(port, store.sim, getSimStatusRequestScheduleTime()),
-                    sendMessage
-                );
-            }, SIM_READY_TIMEOUT_MS);
+            scanPort(port.portId, port.portIndex, command => port.sendCommand(command), store, sendMessage);
         },
     },
 ];
 
-const handleNotification = (port, notification, store, sendMessage) => {
+const handleNotification = (
+    port: PortHandler,
+    notification: NotificationData,
+    store: Store,
+    sendMessage: SendMessageCallback
+) => {
     const {portId} = port;
     const notificationHandler = notificationHandlers.find(handler =>
         handler.notificationIds.includes(notification.id)
