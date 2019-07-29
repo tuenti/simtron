@@ -9,7 +9,7 @@
 
 We prefer pull request, but you can also open an issue.
 
-# Why do you need one simtron in your workflow
+# Is Simtron needed in your workflow ?
 
 Simtron can be extended to do whatever you need with a bunch of sim cards, imagine you have 16 mobile phones connected through USB to keep them charged and also to communicate with them. Then you need to listen to received SMS and react doing something usefull. Simtron can just automate that, avoiding all that mess of phones with sims you need to keep up and running.
 
@@ -29,7 +29,7 @@ You will need following hardware:
   <img align="center" height="200" src="sim5320emultimodem.jpg">
 </p>
 
-- A PC or server having at least one USB 2.0 port and running linux. Simtron can run on windows and mac too, but we have not tested in such operating systems.
+- A PC or server having at least one USB 2.0 port and running linux (USB 3.0 is not recommended because of its hard limit of 32 devices per USB controller). Simtron can run on windows and mac too, but we have not tested in such operating systems.
 
 # Installation
 
@@ -54,7 +54,7 @@ To make this installation works, you will need to set a file with basic configur
         "names": ["Simtron"], // all the names the bot will respond to.
     	  "slack": {
             "token": "YOUR SLACK INTEGRATION TOKEN",
-            "adminUserIds": [...] // valid slack user ids.
+            "adminUserIds": [...] // array of valid slack user ids.
         }
     },
     "countries": { // These entries are used to configure the sim card catalog, organized by country and operator.
@@ -71,13 +71,17 @@ To make this installation works, you will need to set a file with basic configur
 }
 ```
 
+Depending on your system, to access USB ports you will need to run previous command as sudo, please do this on your own risk and responsibility. To avoid running as **sudo**, you should add the non sudoable linux user to **dialout** group, to do so, use following command:
+
+```bash
+sudo usermod -a -G dialout YOUR-USER
+```
+
 Last, just execute:
 
 ```bash
-npm start
+npm run start-service
 ```
-
-Depending on your system, to access USB ports you will need to run previous command as sudo, please do this on your own risk and responsibility.
 
 This will show a new process running under **pm2** process manager. If you need Simtron to restart on every system restart, just type:
 
