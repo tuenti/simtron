@@ -129,6 +129,18 @@ This command will display the ICC, msisdn and connection status of the sim ident
 
 For Admins:
 
+## Port identification
+
+```
+Simtron identify port
+```
+
+By executing this command, simtron will ask for port search criteria.
+
+You can search a port in where the required SIM is inserted by entering the device's port index, the ICC or the phone number. By doing so, all LEDs on the phisical devices will go off and only the selected port LED will light. That way, you can identify the port in where a simcard is inserted.
+
+This effect will last for 10 seconds.
+
 ## Register sim card in catalog
 
 ```
@@ -169,3 +181,22 @@ Please, make sure the used pin code is correct, if you enter it wrong, you can m
 
 You will find the **blocked sim port's index** in SIM catalog output.
 
+## Force SIM operator
+
+```
+Simtron force operator <phone number>
+```
+
+If a Sim card is not working as expected, and it should, you can force the operator to one available, to do so, please select the operator from the list after executing this command, this command will take some minutes scaning available operators, please be patient.
+
+## SIM visibility
+
+```
+Simtron show <phone number>
+```
+
+```
+Simtron hide <phone number>
+```
+
+By using these commands, you can make a SIM card visible to everyone or just for admins. When a SIM card is hidden, only admins will see it, please notice the icon shown in catalog output for hidden SIMs.
