@@ -137,6 +137,8 @@ Simtron register <unregistered sim port's index>
 
 This command starts a formulary to identify and then register all required sim data, just answer inline questions (single selection questions should be answered by typing the option number).
 
+You can find **the unregister sim port's index** in the SIM catalog, being an **admin** user.
+
 To cancel a registration process, just type:
 
 ```
@@ -152,3 +154,18 @@ Simtron edit <phone number>
 ```
 
 This command edits previously registered sim cards' data. This process is also cancellable with same command.
+
+## Enter pin code
+
+```
+Simtron enter pin <blocked sim port's index>
+```
+
+This command allows to enter a pin code to unblock a SIM card. This won't modify the SIM, this will simply enter the pin code every time the SIM requires it, untill you change the SIM to a new slot in the hardware, so please, avoid moving SIMs from one slot to another without real need.
+
+If you need to move the SIM card to a new slot, you will need to enter the pin code again.
+
+Please, make sure the used pin code is correct, if you enter it wrong, you can make the SIM require the PUK. By now, Simtron only allows to enter pin codes, to unblock a SIM that requires a PUK, you'll need to extract the SIM from Simtron and unblock it on a phone.
+
+You will find the **blocked sim port's index** in SIM catalog output.
+
