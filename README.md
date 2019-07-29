@@ -125,17 +125,25 @@ If some sim is not working properly, it will be ~~strikethrough~~
 Simtron details <phone number>
 ```
 
-This command will display the ICC and connection status of the sim identified by the given phone number.
+This command will display the ICC, msisdn and connection status of the sim identified by the given phone number.
 
 For Admins:
 
 ## Register sim card in catalog
 
 ```
-Simtron register <unregistered sim index>
+Simtron register <unregistered sim port's index>
 ```
 
-This command starts a formulary to identify and then register all required sim data, just answer inline questions.
+This command starts a formulary to identify and then register all required sim data, just answer inline questions (single selection questions should be answered by typing the option number).
+
+To cancel a registration process, just type:
+
+```
+Simtron forget it please
+```
+
+the **please** wor¡d is not required, but, you know, we need gentile, also when talking to bots (remember terminator).
 
 ## Edit sim card data in catalog
 
@@ -143,4 +151,4 @@ This command starts a formulary to identify and then register all required sim d
 Simtron edit <phone number>
 ```
 
-This command edits previously registered sim cards' data.
+This command edits previously registered sim cards' data. This process is also cancellable with same command.
