@@ -143,7 +143,7 @@ To cancel a registration process, just type:
 Simtron forget it please
 ```
 
-the **please** wor¡d is not required, but, you know, we need gentile, also when talking to bots (remember terminator).
+the **please** wor¡!d is not required, but, you know, we need gentile, also when talking to bots (remember terminator).
 
 ## Edit sim card data in catalog
 
