@@ -2,7 +2,6 @@ import JsonDB from 'node-json-db';
 import logger from '../util/logger';
 import Error, {INVALID_SIM_STATUS_DATA} from '../util/error';
 import {NetworkStatus} from '../device-port/model/network-status';
-import {SmsMode} from '../device-config';
 import {compareNullableStrings} from '../util/text';
 
 interface Sim {
@@ -23,6 +22,12 @@ interface SimData extends Sim {
     country: string;
     lineType: string;
     isVisible: boolean;
+}
+
+export enum SmsMode {
+    NONE = 0,
+    SMS_TEXT_MODE,
+    SMS_PDU_MODE,
 }
 
 export interface SimInUse extends Sim {

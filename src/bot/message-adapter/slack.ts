@@ -1,7 +1,5 @@
 import {MessageType} from '../model/message-type';
 import {USER_MENTION, OutgoingMessage, IncomingMessage} from '../model/message';
-import {getBotDisplayName} from '../../config';
-import {SIM_IDENTIFICATION_COMMAND} from '../speech/sim-identification';
 
 export enum SlackMessageContainer {
     PLAIN = 'plain',
@@ -101,9 +99,7 @@ const adaptMessage = (
                       replyOn: incomingMessage.channel,
                       text:
                           message.textLines && message.textLines.length > 1
-                              ? `There are *${
-                                    message.textLines.length
-                                } unknown SIM cards* needing to be identified:`
+                              ? `There are *${message.textLines.length} unknown SIM cards* needing to be identified:`
                               : 'There is an *unknown SIM* card needing to be identified:',
                       attachments: message.textLines
                           ? message.textLines.map(line => {

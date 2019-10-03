@@ -36,13 +36,12 @@ const notificationHandlers: NotificationHandler[] = [
             const sim = store.sim.findSimInUseByPortId(portId);
             if (sim) {
                 const readSmsResponse = await port.sendCommand(createReadSmsCommand(smsIndex, sim.smsMode));
-                const {senderMsisdn, time, smsText} = readSmsResponse;
-                store.sms.addSms(senderMsisdn, time, smsText, portId);
+                const {senderMsisdn, smsText} = readSmsResponse;
                 sendMessage(createNewSmsNotificationMessage(sim, smsText));
                 port.sendCommand(createDeleteAllSmsCommand());
                 logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
             } else {
-                logger.error(Error(SIM_NOT_PRESENT, `Sms arrived on port: ${portId}, no sim on port`));
+                logger.error(Error(SIM_NOT_PRESENT, `Sms received on port: ${portId}, no sim on port`));
             }
         },
     },

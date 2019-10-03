@@ -11,6 +11,7 @@ import {NON_DIGITS, QUOTED_TEXTS, QUOTES, PARENTHESIS_GROUP} from '../../util/ma
 import decodeUtf16 from '../encoding/utf16';
 import decodePdu from '../encoding/pdu';
 import {getSearchOperatorsCommandsTimeout} from '../../config';
+import {SmsMode} from '../../store/sim-catalog';
 
 const SMS_METADATA_SENDER_INDEX = 1;
 
@@ -227,17 +228,14 @@ export const createSearchOperatorsCommand = () => ({
 });
 
 export const createForceOperatorCommand = (operator: Operator) => ({
-    command: `AT+COPS=${OperatorMode.Manual},${operator.format},${operator.applicableId},${
-        operator.accessTechnology
-    }`,
+    command: `AT+COPS=${OperatorMode.Manual},${operator.format},${operator.applicableId},${operator.accessTechnology}`,
 });
 
-export const createReadSmsCommand = (smsIndex: number, smsMode: number) => ({
+export const createReadSmsCommand = (smsIndex: number, smsMode: SmsMode) => ({
     command: `AT+CMGR=${smsIndex}`,
     responseParser: (responseLines: string[]) => {
         const [, smsMetaDataLine, smsTextLine] = responseLines;
-        // fixme use Enum
-        if (smsMode === 1) {
+        if (smsMode === SmsMode.SMS_TEXT_MODE) {
             const matches = smsMetaDataLine.match(QUOTED_TEXTS);
             if (matches) {
                 const smsMetaData = matches.map(item => item.replace(QUOTES, ''));

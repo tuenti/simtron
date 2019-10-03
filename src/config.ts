@@ -13,9 +13,6 @@ const DEFAULT_SEARCH_OPERATORS_COMMAND_TIMEOUT_MS = 120000;
 const DEVICES_COMMANDS_RESOLVE_DELAY_PATH = '/ports/commands/resolveDelay';
 const DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY = 100;
 
-const SMS_MEMORY_MAX_COUNT_PATH = '/sms/memoryMaxCount';
-const DEFAULT_SMS_MEMORY_MAX_COUNT = 25;
-
 const SIM_STATUS_SCHEDULE_TIME_PATH = '/sim/statusScheduleMs';
 const DEFAULT_SIM_STATUS_SCHEDULE_TIME_MS = 30000; // 30 sec.
 const SIM_STATUS_POLLING_TIME_PATH = '/sim/statusPollingMs';
@@ -24,7 +21,6 @@ const DEFAULT_SIM_STATUS_POLLING_TIME_MS = 600000; // 10 min
 const SLACK_BOT_TOKEN_PATH = '/bot/slack/token';
 const SLACK_BOT_ID_PATH = '/bot/slack/botId';
 const DEFAULT_SLACK_BOT_ID = 'B9EBK9YCT';
-const API_SLACK_BOT_TOKEN_PATH = '/api/bot/slack/token';
 const SLACK_CHANNEL_ID_PATH = '/bot/slack/channelName';
 const DEFAULT_SLACK_CHANNEL_ID = 'C9HRTJ44F';
 const DEVELOPMENT_SLACK_CHANNEL_ID_PATH = '/bot/slack/developmentChannelId';
@@ -61,8 +57,6 @@ export const getSearchOperatorsCommandsTimeout = () =>
 export const getDevicesCommandsResolveDelay = () =>
     readPath(DEVICES_COMMANDS_RESOLVE_DELAY_PATH, DEFAULT_DEVICES_COMMANDS_RESOLVE_DELAY);
 
-export const getSmsMemoryMaxCount = () => readPath(SMS_MEMORY_MAX_COUNT_PATH, DEFAULT_SMS_MEMORY_MAX_COUNT);
-
 export const getSimStatusRequestScheduleTime = () =>
     readPath(SIM_STATUS_SCHEDULE_TIME_PATH, DEFAULT_SIM_STATUS_SCHEDULE_TIME_MS);
 
@@ -70,7 +64,6 @@ export const getSimStatusPollingTime = () =>
     readPath(SIM_STATUS_POLLING_TIME_PATH, DEFAULT_SIM_STATUS_POLLING_TIME_MS);
 
 export const getSlackBotToken = () => readPath(SLACK_BOT_TOKEN_PATH, undefined);
-export const getApiSlackBotToken = () => readPath(API_SLACK_BOT_TOKEN_PATH, undefined);
 export const getSlackBotId = () => readPath(SLACK_BOT_ID_PATH, DEFAULT_SLACK_BOT_ID);
 export const getSlackChannelId = () => readPath(SLACK_CHANNEL_ID_PATH, DEFAULT_SLACK_CHANNEL_ID);
 export const getDevelopmentSlackChannelId = () => readPath(DEVELOPMENT_SLACK_CHANNEL_ID_PATH, undefined);
@@ -81,6 +74,7 @@ export const getBotNames = () => readPath(BOT_NAMES_PATH, DEFAULT_BOT_NAMES);
 export const getBotDisplayName = () => getBotNames()[0];
 export const getBotMessageSequenceEnsuringTime = () =>
     readPath(BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH, DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME);
+
 export const getCountryName = (country: string) =>
     readPath(`${COUNTRIES_DATA_PATH}/${country}/name`, country);
 export const getCountryFlag = (country: string | undefined) =>

@@ -16,18 +16,12 @@ import {
     createEnterPinCommand,
 } from './device-port/model/command';
 import {UTF16_ENCODING} from './device-port/model/parser-token';
-import {SimStore, SimInUse, PortInUse} from './store/sim-catalog';
+import {SimStore, SimInUse, PortInUse, SmsMode} from './store/sim-catalog';
 import {SendCommandCallback} from './bot/speech';
 
 export interface SimDiff {
     oldSim: SimInUse | PortInUse | null;
     newSim: SimInUse | PortInUse | null;
-}
-
-export enum SmsMode {
-    NONE = 0,
-    SMS_TEXT_MODE,
-    SMS_PDU_MODE,
 }
 
 let pendingRequests: {[key: string]: any} = {};
