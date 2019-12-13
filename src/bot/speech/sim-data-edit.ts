@@ -10,13 +10,16 @@ import createIdentifySimQuestionary from '../../questionary/sim-id';
 import delayed from '../../util/delay';
 import {Store} from '../../store';
 import {AnswerMessageCallback} from '.';
+import {NON_DIGITS} from '../../util/matcher';
 
 const SIM_DATA_EDIT_COMMAND = 'edit';
 
 const getSimDataEditMsisdn = (messageText: string) => {
     const words = messageText.split(' ');
     const [botName, command, msisdn] = words;
-    return getBotNames().includes(botName) && command === SIM_DATA_EDIT_COMMAND && !!msisdn ? msisdn : null;
+    return getBotNames().includes(botName) && command === SIM_DATA_EDIT_COMMAND && !!msisdn
+        ? msisdn.replace(NON_DIGITS, '')
+        : null;
 };
 
 const isSimDataEditStartMessage = (messageText: string) => getSimDataEditMsisdn(messageText) !== null;

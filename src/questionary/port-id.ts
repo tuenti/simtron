@@ -3,6 +3,7 @@ import {Store} from '../store';
 import {createSetLedStatusCommand} from '../device-port/model/command';
 import {Command} from '../device-port/model/command';
 import {SimInUse} from '../store/sim-catalog';
+import {NON_DIGITS} from '../util/matcher';
 
 const SEARCH_CRITERIA = 'criteria';
 const SEARCH_VALUE = 'value';
@@ -28,15 +29,20 @@ const findPorts = (
 ): string[] => {
     switch (criteria) {
         case PortSearchCriteriaConcept.ByIndex: {
-            const foundPort = store.ports.findPortByIndex(parseInt(value)) as Port;
+            const foundPort = store.ports.findPortByIndex(parseInt(value.replace(NON_DIGITS, ''))) as Port;
             return foundPort ? [foundPort.portId] : [];
         }
         case PortSearchCriteriaConcept.ByIcc: {
-            const foundSim = store.sim.findSimInUseByIcc(value, includeHiddenSims) as SimInUse;
+            const foundSim = store.sim.findSimInUseByIcc(
+                value.replace(NON_DIGITS, ''),
+                includeHiddenSims
+            ) as SimInUse;
             return foundSim ? [foundSim.portId] : [];
         }
         case PortSearchCriteriaConcept.ByPhoneNumber: {
-            return store.sim.findSimsInUseByDisplayNumber(value, includeHiddenSims).map(sim => sim.portId);
+            return store.sim
+                .findSimsInUseByDisplayNumber(value.replace(NON_DIGITS, ''), includeHiddenSims)
+                .map(sim => sim.portId);
         }
     }
 };

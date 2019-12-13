@@ -3,6 +3,7 @@ import {createSuccessFeedbackMessage, createErrorMessage, IncomingMessage} from 
 import {getBotNames} from '../../config';
 import {Store} from '../../store';
 import {AnswerMessageCallback} from '.';
+import {NON_DIGITS} from '../../util/matcher';
 
 const SHOW_SIM_COMMAND = 'show';
 const HIDE_SIM_COMMAND = 'hide';
@@ -10,7 +11,9 @@ const HIDE_SIM_COMMAND = 'hide';
 const getMsisdn = (messageText: string, commandWord: string) => {
     const words = messageText.split(' ');
     const [botName, command, msisdn] = words;
-    return getBotNames().includes(botName) && command === commandWord && !!msisdn ? msisdn : null;
+    return getBotNames().includes(botName) && command === commandWord && !!msisdn
+        ? msisdn.replace(NON_DIGITS, '')
+        : null;
 };
 
 const isShowSimMessage = (messageText: string) => getMsisdn(messageText, SHOW_SIM_COMMAND) !== null;

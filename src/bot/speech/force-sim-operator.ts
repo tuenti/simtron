@@ -11,6 +11,7 @@ import delayed from '../../util/delay';
 import {Question} from '../../questionary/handler';
 import createForceSimOperatorQuestionary from '../../questionary/force-sim-operator';
 import {AnswerMessageCallback, SendCommandCallback} from '.';
+import {NON_DIGITS} from '../../util/matcher';
 
 const FORCE_OPERATOR_COMMAND1 = 'force';
 const FORCE_OPERATOR_COMMAND2 = 'operator';
@@ -22,7 +23,7 @@ const getMsisdnOfSimToForceOperator = (messageText: string) => {
         command1 === FORCE_OPERATOR_COMMAND1 &&
         command2 === FORCE_OPERATOR_COMMAND2 &&
         !!msisdn
-        ? msisdn
+        ? msisdn.replace(NON_DIGITS, '')
         : null;
 };
 

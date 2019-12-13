@@ -9,6 +9,7 @@ import {
 } from '../config';
 import {Store} from '../store';
 import {formatPhoneNumber} from '../util/phone-number';
+import {NON_DIGITS} from '../util/matcher';
 
 const ICC_DATA_KEY = 'icc';
 const MSISDN_DATA_KEY = 'msisdn';
@@ -130,8 +131,8 @@ const createIdentifySimQuestionary = ({icc}: {icc: string}, store: Store) =>
         finishCallback: responses =>
             store.sim.saveSimInCatalog(
                 responses[ICC_DATA_KEY],
-                responses[MSISDN_DATA_KEY].international,
-                responses[MSISDN_DATA_KEY].national,
+                responses[MSISDN_DATA_KEY].international.replace(NON_DIGITS, ''),
+                responses[MSISDN_DATA_KEY].national.replace(NON_DIGITS, ''),
                 responses[BRAND_DATA_KEY],
                 responses[COUNTRY_DATA_KEY],
                 responses[LINE_TYPE_DATA_KEY],

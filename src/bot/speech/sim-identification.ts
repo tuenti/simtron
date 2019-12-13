@@ -10,13 +10,14 @@ import createIdentifySimQuestionary from '../../questionary/sim-id';
 import delayed from '../../util/delay';
 import {Store} from '../../store';
 import {AnswerMessageCallback} from '.';
+import {NON_DIGITS} from '../../util/matcher';
 
 export const SIM_IDENTIFICATION_COMMAND = 'register';
 
 const getSimIdentificationIndex = (messageText: string) => {
     const words = messageText.split(' ');
     const [botName, command, index = undefined] = words;
-    const simIndex = index !== undefined ? parseInt(index) : 1;
+    const simIndex = index !== undefined ? parseInt(index.replace(NON_DIGITS, '')) : 1;
     return getBotNames().includes(botName) && command === SIM_IDENTIFICATION_COMMAND ? simIndex : null;
 };
 

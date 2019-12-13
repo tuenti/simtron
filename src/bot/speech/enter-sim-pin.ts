@@ -10,6 +10,7 @@ import delayed from '../../util/delay';
 import {Store} from '../../store';
 import {AnswerMessageCallback, SendCommandCallback} from '.';
 import createEnterPinQuestionary from '../../questionary/enter-sim-pin';
+import {NON_DIGITS} from '../../util/matcher';
 
 const SIM_PIN_REMOVE_COMMAND_1 = 'enter';
 const SIM_PIN_REMOVE_COMMAND_2 = 'pin';
@@ -22,7 +23,7 @@ const getSimPinRemoveIndex = (messageText: string) => {
         command1 === SIM_PIN_REMOVE_COMMAND_1 &&
         command2 === SIM_PIN_REMOVE_COMMAND_2 &&
         index !== undefined
-        ? parseInt(index)
+        ? parseInt(index.replace(NON_DIGITS, ''))
         : null;
 };
 

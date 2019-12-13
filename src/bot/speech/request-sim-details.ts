@@ -9,6 +9,7 @@ import {
 import delayed from '../../util/delay';
 import {Store} from '../../store';
 import {AnswerMessageCallback} from '.';
+import {NON_DIGITS} from '../../util/matcher';
 
 const SIM_DETAILS_COMMAND = 'details';
 
@@ -16,7 +17,7 @@ const getRequestDetailsPhoneNumber = (messageText: string) => {
     const words = messageText.split(' ');
     const [botName, command, phoneNumber] = words;
     return getBotNames().includes(botName) && command === SIM_DETAILS_COMMAND && !!phoneNumber
-        ? phoneNumber
+        ? phoneNumber.replace(NON_DIGITS, '')
         : null;
 };
 
