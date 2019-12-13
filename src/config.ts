@@ -37,6 +37,10 @@ const DEFAULT_FLAG_REPRESENTATION = ':flag-aq:';
 
 const PHONE_NUMBER_FORMATTER_PATH = '/phoneNumber/formatters';
 
+const OTP_GMAIL_SENDER_ADDRESS_PATH = '/notifications/senderGmailAddress';
+const OTP_GMAIL_SENDER_PASSWORD_PATH = '/notifications/senderPassword';
+const OTP_MAIL_RECEIVERS_PATH = '/notifications/receivers';
+
 const db = new JsonDB(CONFIG_DB_FILE, true, true);
 
 const readPath = (path: string, defaultValue: any) => {
@@ -90,3 +94,7 @@ export const getPhoneNumberCustomFormatters = (
     brand: string
 ): {regexp: string; replaceValue: string} | null =>
     readPath(`${PHONE_NUMBER_FORMATTER_PATH}/${brand}/${country}`, null);
+
+export const getOtpGMailSenderAddress = () => readPath(OTP_GMAIL_SENDER_ADDRESS_PATH, null);
+export const getOtpGMailSenderPassword = () => readPath(OTP_GMAIL_SENDER_PASSWORD_PATH, null);
+export const getOtpMailReceivers = (): string[] => readPath(OTP_MAIL_RECEIVERS_PATH, null);

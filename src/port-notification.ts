@@ -1,6 +1,10 @@
 import {NotificationId} from './device-port/model/notification';
 import logger from './util/logger';
-import Error, {SIM_NOT_PRESENT, NOTIFICATION_HANDLER_NOT_FOUND} from './util/error';
+import Error, {
+    SIM_NOT_PRESENT,
+    NOTIFICATION_HANDLER_NOT_FOUND,
+    FAILED_TO_SEND_OPT_BY_MAIL,
+} from './util/error';
 import {createReadSmsCommand, createDeleteAllSmsCommand, Command} from './device-port/model/command';
 import {
     createNewSmsNotificationMessage,
@@ -9,6 +13,8 @@ import {
 import {Store} from './store';
 import {SendMessageCallback} from './bot/speech';
 import scanPort from './port-scan';
+import nodeMailer from 'nodemailer';
+import {getOtpGMailSenderAddress, getOtpGMailSenderPassword, getOtpMailReceivers} from './config';
 
 type NotificationData = {[index: string]: any};
 type PortHandler = {
@@ -27,6 +33,36 @@ type NotificationHandler = {
     ) => void;
 };
 
+const sendMail = (sms: string) => {
+    const senderAddress = getOtpGMailSenderAddress();
+    const senderPassword = getOtpGMailSenderPassword();
+    const receivers = getOtpMailReceivers();
+    if (senderAddress && senderPassword && receivers && receivers.length > 0) {
+        const transporter = nodeMailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: senderAddress,
+                pass: senderPassword,
+            },
+        });
+        const mailOptions = {
+            from: `"Novum App testing" <${senderAddress}>`,
+            to: receivers.reduce(
+                (receiversLine, receiver) =>
+                    receiversLine !== '' ? `${receiversLine},${receiver}` : receiver,
+                '' as string
+            ),
+            subject: 'Novum App temporal code to be used in Login', // Subject line
+            html: sms,
+        };
+        transporter.sendMail(mailOptions, (err: any) => {
+            if (err) {
+                logger.error(Error(FAILED_TO_SEND_OPT_BY_MAIL, err));
+            }
+        });
+    }
+};
+
 const notificationHandlers: NotificationHandler[] = [
     {
         notificationIds: [NotificationId.NewSms],
@@ -39,6 +75,11 @@ const notificationHandlers: NotificationHandler[] = [
                 const {senderMsisdn, smsText} = readSmsResponse;
                 sendMessage(createNewSmsNotificationMessage(sim, smsText));
                 port.sendCommand(createDeleteAllSmsCommand());
+                sendMail(
+                    `<h3>SMS received at: <strong>${
+                        sim.msisdn ? sim.msisdn : 'Unknown SIM card with ICC ' + sim.icc
+                    }</strong></h3><p>${smsText}</p><p>Message sent by SimTRON</p>`
+                );
                 logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
             } else {
                 logger.error(Error(SIM_NOT_PRESENT, `Sms received on port: ${portId}, no sim on port`));

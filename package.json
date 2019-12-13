@@ -16,6 +16,7 @@
         "debug": "^4.1.1",
         "google-libphonenumber": "^3.2.2",
         "node-json-db": "^0.11.0",
+        "nodemailer": "^6.4.2",
         "pdu": "*",
         "serialport": "^7.1.5",
         "winston": "^3.2.1"
@@ -25,6 +26,7 @@
         "@types/google-libphonenumber": "*",
         "@types/jest": "^24.0.13",
         "@types/node-json-db": "*",
+        "@types/nodemailer": "^6.2.2",
         "@types/serialport": "^7.0.3",
         "@types/supertest": "*",
         "jest": "^24.8.0",

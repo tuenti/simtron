@@ -95,7 +95,7 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
             devicePortHandlers = await devicePortsFactory.createPorts();
             store.ports.registerPorts(devicePortHandlers);
             await configureAllPorts(devicePortHandlers);
-            await startSimStatusPolling(devicePortHandlers, getSimStatusPollingTime());
+            startSimStatusPolling(devicePortHandlers, getSimStatusPollingTime());
             sendMessageOnAllBots(createBootDoneMessage());
         },
     };
