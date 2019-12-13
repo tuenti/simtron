@@ -218,8 +218,10 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# Distro folder
+# Distro folders
 dist/*
+dist-api/*
+dist-service/*
 
 #VS Code
 .vscode/
