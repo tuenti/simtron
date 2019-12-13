@@ -5,11 +5,9 @@
     "scripts": {
         "watch": "rm -rf dist && tsc -p src",
         "compile": "rm -rf dist && tsc -p src/tsconfig-dist.json",
-        "start": "./start-containers.sh && npm run compile && pm2 start ./dist/index.js --name simtron-service",
+        "start": "npm run compile && pm2 start ./dist/index.js --name simtron-service",
         "stop": "pm2 delete simtron-service && docker-compose -f ./server-provision/docker-compose.yaml stop",
         "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch dist --exec node dist/index.js --",
-        "start-dev-containers": "./start-containers.sh dev",
-        "stop-dev-containers": "docker-compose -f ./server-provision/docker-compose-dev.yaml stop",
         "test": "jest"
     },
     "dependencies": {
