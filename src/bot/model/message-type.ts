@@ -20,6 +20,7 @@ export enum MessageType {
     SHOW_SIM = 'show-sim',
     HIDE_SIM = 'hide-sim',
     SET_SMS_EMAIL_RECEIVERS = 'set-sms-email-receivers',
+    CLEAR_SMS_EMAIL_RECEIVERS = 'clear-sms-email-receivers',
     ENABLE_PORT_ACTIVITY_NOTIFICATIONS = 'enable-port-activity-notifications',
     DISABLE_PORT_ACTIVITY_NOTIFICATIONS = 'disable-port-activity-notifications',
     FREE_TEXT_QUESTION = 'free-text-question',

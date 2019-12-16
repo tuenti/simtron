@@ -10,22 +10,35 @@ interface SmsEmailReceiversData {
     receivers: string[];
 }
 
-const COMMAND = 'redirect';
+const SET_COMMAND = 'redirect';
+const CLEAR_COMMAND1 = 'clear';
+const CLEAR_COMMAND2 = 'redirects';
 
-const getSmsEmailReceiversData = (messageText: string): SmsEmailReceiversData | undefined => {
+const getSetSmsEmailReceiversData = (messageText: string): SmsEmailReceiversData | undefined => {
     const words = messageText.split(' ');
     const [botName, command, phoneNumber, ...receivers] = words;
-    return getBotNames().includes(botName) && command === COMMAND && !!phoneNumber
+    return getBotNames().includes(botName) && command === SET_COMMAND && !!phoneNumber
         ? {phoneNumber: phoneNumber.replace(NON_DIGITS, ''), receivers}
+        : undefined;
+};
+
+const getClearSmsEmailReceiversPhoneNumber = (messageText: string): string | undefined => {
+    const words = messageText.split(' ');
+    const [botName, command1, command2, phoneNumber] = words;
+    return getBotNames().includes(botName) &&
+        command1 === CLEAR_COMMAND1 &&
+        command2 === CLEAR_COMMAND2 &&
+        !!phoneNumber
+        ? phoneNumber.replace(NON_DIGITS, '')
         : undefined;
 };
 
 export const createSetSmsEmailReceivers = () => ({
     messageType: MessageType.SET_SMS_EMAIL_RECEIVERS,
     messageIdentifier: (receivedMessage: IncomingMessage) =>
-        getSmsEmailReceiversData(receivedMessage.messageText) != null,
+        !!getSetSmsEmailReceiversData(receivedMessage.messageText),
     action: async (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
-        const receiversData = getSmsEmailReceiversData(receivedMessage.messageText);
+        const receiversData = getSetSmsEmailReceiversData(receivedMessage.messageText);
         if (receiversData) {
             const foundSims = store.sim.findSimsInUseByDisplayNumber(receiversData.phoneNumber, true);
             if (foundSims.length === 0) {
@@ -59,6 +72,36 @@ export const createSetSmsEmailReceivers = () => ({
                 createErrorMessage(
                     ':-1: You need to enter at least one valid phone number and one email address.'
                 ),
+                receivedMessage
+            );
+        }
+    },
+});
+
+export const createClearSmsEmailReceivers = () => ({
+    messageType: MessageType.CLEAR_SMS_EMAIL_RECEIVERS,
+    messageIdentifier: (receivedMessage: IncomingMessage) =>
+        !!getClearSmsEmailReceiversPhoneNumber(receivedMessage.messageText),
+    action: async (receivedMessage: IncomingMessage, store: Store, answerMessage: AnswerMessageCallback) => {
+        const phoneNumber = getClearSmsEmailReceiversPhoneNumber(receivedMessage.messageText);
+        if (phoneNumber) {
+            const foundSims = store.sim.findSimsInUseByDisplayNumber(phoneNumber, true);
+            if (foundSims.length === 0) {
+                answerMessage(
+                    createErrorMessage(':-1: We dont have any sim card with this phone number.'),
+                    receivedMessage
+                );
+                return;
+            }
+
+            store.settings.setSmsEmailReceivers(phoneNumber, []);
+            answerMessage(
+                createSuccessFeedbackMessage(`:+1: Redirections for ${phoneNumber} cleared.`),
+                receivedMessage
+            );
+        } else {
+            answerMessage(
+                createErrorMessage(':-1: You need to enter a valid phone number.'),
                 receivedMessage
             );
         }

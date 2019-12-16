@@ -90,7 +90,9 @@ const notificationHandlers: NotificationHandler[] = [
                     ? sim.displayNumber
                     : 'Unknown SIM card with ICC ' + sim.icc;
                 try {
-                    const mailReceivers = sim.msisdn ? store.settings.getSmsEmailReceivers(sim.msisdn) : [];
+                    const mailReceivers = sim.displayNumber
+                        ? store.settings.getSmsEmailReceivers(sim.displayNumber)
+                        : [];
                     if (mailReceivers.length > 0) {
                         await sendMail(
                             receiverSimId,
