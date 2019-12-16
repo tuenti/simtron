@@ -19,6 +19,7 @@ export enum MessageType {
     FILL_QUESTIONARY = 'fill-questionary',
     SHOW_SIM = 'show-sim',
     HIDE_SIM = 'hide-sim',
+    SET_SMS_EMAIL_RECEIVERS = 'set-sms-email-receivers',
     ENABLE_PORT_ACTIVITY_NOTIFICATIONS = 'enable-port-activity-notifications',
     DISABLE_PORT_ACTIVITY_NOTIFICATIONS = 'disable-port-activity-notifications',
     FREE_TEXT_QUESTION = 'free-text-question',

@@ -15,6 +15,7 @@ import {
 } from './port-activity-notifications';
 import {createStartPortIdentificationSpeech} from './port-identification';
 import {createStartSimPinEntrySpeech} from './enter-sim-pin';
+import {createSetSmsEmailReceivers} from './sms-email-receivers';
 
 export type SendMessageCallback = (message: OutgoingMessage) => void;
 export type AnswerMessageCallback = (message: OutgoingMessage, receivedMessage: IncomingMessage) => void;
@@ -39,12 +40,13 @@ const speeches: Speech[] = [
     createStartSimPinEntrySpeech(),
     createStartForceSimOperatorSpeech(),
     createStartSimDataEditSpeech(),
-    createHideSimSpeech(),
-    createShowSimSpeech(),
     createRequestSimDetailsSpeech(),
     createEnablePortActivityNotifications(),
     createDisablePortActivityNotifications(),
     createStartPortIdentificationSpeech(),
+    createHideSimSpeech(),
+    createShowSimSpeech(),
+    createSetSmsEmailReceivers(),
     createRequestCatalogSpeech(),
 ];
 

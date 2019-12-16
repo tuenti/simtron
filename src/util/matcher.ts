@@ -6,3 +6,4 @@ export const LAST_DIGITS = /\d+$/g;
 export const PARENTHESIS_GROUP = /\(([^()]*)\)/g;
 export const LINE_INFO = /:(.+):.*\*(~?\d\d+~?)\*\s(\w*)\s(.*\S)/gm;
 export const OTP_CODE = /\D*(\d{4,})\D*/g;
+export const EMAIL_ADDRESS = /(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^|<>()[\]\.,;:\s@\"]+\.)+[^|<>()[\]\.,;:\s@\"]{2,})/g;

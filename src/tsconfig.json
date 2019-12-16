@@ -10,7 +10,7 @@
         "allowSyntheticDefaultImports": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "noEmitOnError": true,
+        "noEmitOnError": false,
         "watch": true
     }
 }

@@ -191,7 +191,11 @@ const adaptMessage = (
                               : ''
                       }`,
                   }
-                : null;
+                : {
+                      container: SlackMessageContainer.PLAIN,
+                      isPrivate: false,
+                      text: `${message.text ? message.text : ''}`,
+                  };
         default:
             return null;
     }
