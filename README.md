@@ -45,7 +45,7 @@ You will need following hardware:
 
 # Installation
 
-You will need **node 10** to run Simtron.
+You will need **node 12** to run Simtron.
 
 Just clone this repo and then execute:
 
@@ -147,6 +147,23 @@ Simtron details <phone number>
 
 This command will display the ICC, msisdn and connection status of the sim identified by the given phone
 number.
+
+## Enable a SMS to Email redirection
+
+```
+Simtron redirect <phone number> <email 1> [email 2] [email 3] ...
+```
+
+This command will set redirections from given phone number to all provided emails. For now on, all SMS
+arriving to phone number will be redirected to the given emails.
+
+## Clear SMS to Email redirections
+
+```
+Simtron clear redirects <phone number>
+```
+
+This command will delete all previously configured redirections for the given phone number.
 
 For Admins:
 
