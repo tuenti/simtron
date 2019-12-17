@@ -1,9 +1,8 @@
 # Simtron
 
-<p>
-  <img align="right" height="45" src="simtrnLogo.png">
-  Simtron is a SMS reception Slack Bot and Api software built on top of standard SIM5320e gsm and 3g modems serial connections through USB.
-</p>
+![simtron logo](simtrnLogo.png)
+
+Simtron is a SMS reception Slack Bot and Api software built on top of standard SIM5320e gsm and 3g modems serial connections through USB.
 
 # Contribute
 
@@ -35,9 +34,7 @@ You will need following hardware:
 - Multi SIM card module device, simtron is compatible with lot of hardware, take a look to the following
   picture. We've tested in hardware containing SIM5320e and SIM800l modems.
 
-<p align="center">
-  <img align="center" height="200" src="sim5320emultimodem.jpg">
-</p>
+![simtron compatible hardware](sim5320emultimodem.jpg)
 
 - A PC or server having at least one USB 2.0 port and running linux (USB 3.0 is not recommended because of its
   hard limit of 32 devices per USB controller). Simtron can run on windows and mac too, but we have not tested
