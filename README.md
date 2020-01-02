@@ -93,12 +93,12 @@ your own risk and responsibility. To avoid running as **sudo**, you should add t
 sudo usermod -a -G dialout YOUR-USER
 ```
 
-If you need to use email notification of received messages, you should authroze simtron to use your Gmail account. Simtron will only require email sending permissions.
+If you need to use email notification of received messages, you should authorize Simtron to use your Gmail account. Simtron will only require email sending permissions.
 
 To authorize:
 - Login into your Gmail account in a browser.
 - Go to Google developers console: https://console.developers.google.com/
-- Create and download oauth 2 credentials.
+- Create and download oauth 2 credentials (clicking on Credentials -> Create credentials)
 - Copy downloaded JSON file on ./data/googleAuthKey.json
 - Open terminal, go to simtron folder and run: npm run google-auth
 - Follow on screen instructions until the script get finished.
