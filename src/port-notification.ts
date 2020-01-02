@@ -14,10 +14,8 @@ import {
 import {Store} from './store';
 import {SendMessageCallback} from './bot/speech';
 import scanPort from './port-scan';
-import nodeMailer from 'nodemailer';
-import {getOtpGMailSenderAddress, getOtpGMailSenderPassword} from './config';
-
-const SEND_MAIL_TIMEOUT_MS = 60000;
+import sendEmail from './send-email';
+import {getGMailSenderAddress} from './config';
 
 type NotificationData = {[index: string]: any};
 type PortHandler = {
@@ -35,43 +33,6 @@ type NotificationHandler = {
         sendMessage: SendMessageCallback
     ) => void;
 };
-
-const sendMail = async (receiverSimId: string, sms: string, mailReceivers: string[]) =>
-    new Promise((resolve, reject) => {
-        try {
-            const senderAddress = getOtpGMailSenderAddress();
-            const senderPassword = getOtpGMailSenderPassword();
-            if (senderAddress && senderPassword && mailReceivers && mailReceivers.length > 0) {
-                const transporter = nodeMailer.createTransport({
-                    service: 'gmail',
-                    auth: {
-                        user: senderAddress,
-                        pass: senderPassword,
-                    },
-                });
-                const mailOptions = {
-                    from: `"Novum App testing" <${senderAddress}>`,
-                    to: mailReceivers.reduce(
-                        (receiversLine, receiver) =>
-                            receiversLine !== '' ? `${receiversLine},${receiver}` : receiver,
-                        '' as string
-                    ),
-                    subject: `SMS received at ${receiverSimId}, please, use the code provided on this mail for login.`,
-                    html: sms,
-                };
-                transporter.sendMail(mailOptions, (err: any) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve();
-                    }
-                });
-                setTimeout(() => reject('timeout'), SEND_MAIL_TIMEOUT_MS);
-            }
-        } catch (error) {
-            reject(error);
-        }
-    });
 
 const notificationHandlers: NotificationHandler[] = [
     {
@@ -94,10 +55,11 @@ const notificationHandlers: NotificationHandler[] = [
                         ? store.settings.getSmsEmailReceivers(sim.displayNumber)
                         : [];
                     if (mailReceivers.length > 0) {
-                        await sendMail(
-                            receiverSimId,
-                            `<h3>SMS received at: <strong>${receiverSimId}</strong></h3><p>${smsText}</p><p>Message sent by SimTRON</p>`,
-                            mailReceivers
+                        await sendEmail(
+                            mailReceivers,
+                            getGMailSenderAddress(),
+                            `SMS received at ${receiverSimId}, please, use the code provided on this mail for login.`,
+                            `<h3>SMS received at: <strong>${receiverSimId}</strong></h3><p>${smsText}</p><p>Message sent by SimTRON</p>`
                         );
                         logger.debug(
                             `Sms sent by email : ${portId}, from: ${senderMsisdn}, text: ${smsText}`

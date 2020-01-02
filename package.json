@@ -6,7 +6,7 @@
         "watch": "rm -rf dist && tsc -p src",
         "compile": "rm -rf dist && tsc -p src/tsconfig-dist.json",
         "start": "npm run compile && pm2 start ./dist/index.js --name simtron-service",
-        "stop": "pm2 delete simtron-service && docker-compose -f ./server-provision/docker-compose.yaml stop",
+        "stop": "pm2 delete simtron-service",
         "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch dist --exec node dist/index.js --",
         "test": "jest"
     },
@@ -15,6 +15,7 @@
         "@slack/web-api": "^5.0.1",
         "debug": "^4.1.1",
         "google-libphonenumber": "^3.2.2",
+        "googleapis": "^39.2.0",
         "node-json-db": "^0.11.0",
         "nodemailer": "^6.4.2",
         "pdu": "*",
