@@ -68,6 +68,9 @@ token are optional. In repo root, put a file called **data/config.json**, with f
             "adminUserIds": [...] // array of valid slack user ids.
         }
     },
+    "notifications": {
+        "senderGmailAddress": "Valid Gmail address to be used as mail notifications sender"
+    },
     "countries": { // These entries are used to configure the sim card catalog, organized by country and operator.
         "ES": {
             "name": "Spain",
@@ -89,6 +92,16 @@ your own risk and responsibility. To avoid running as **sudo**, you should add t
 ```bash
 sudo usermod -a -G dialout YOUR-USER
 ```
+
+If you need to use email notification of received messages, you should authroze simtron to use your Gmail account. Simtron will only require email sending permissions.
+
+To authorize:
+- Login into your Gmail account in a browser.
+- Go to Google developers console: https://console.developers.google.com/
+- Create and download oauth 2 credentials.
+- Copy downloaded JSON file on ./data/googleAuthKey.json
+- Open terminal, go to simtron folder and run: npm run google-auth
+- Follow on screen instructions until the script get finished.
 
 Last, just execute:
 
