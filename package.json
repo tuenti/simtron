@@ -8,6 +8,7 @@
         "start": "npm run compile && pm2 start ./dist/index.js --name simtron-service",
         "stop": "pm2 delete simtron-service",
         "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch dist --exec node dist/index.js --",
+        "google-auth": "npm run compile && node ./dist/google/authorize-app.js",
         "test": "jest"
     },
     "dependencies": {

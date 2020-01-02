@@ -9,10 +9,12 @@ const CREDENTIALS = './data/googleAuthKey.json';
 const credentials = JSON.parse(fs.readFileSync(CREDENTIALS).toString('utf8'));
 let gmail: gmail_v1.Gmail;
 
-export const init = async () => {
-    const oAuth2Client = await authorize(credentials);
-    gmail = google.gmail({version: 'v1', auth: oAuth2Client});
-};
+export const init = async (): Promise<gmail_v1.Gmail> =>
+    new Promise(async resolve => {
+        const oAuth2Client = await authorize(credentials);
+        gmail = google.gmail({version: 'v1', auth: oAuth2Client});
+        resolve(gmail);
+    });
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.send'];
 const TOKEN_PATH = './data/googleAuthToken.json';
@@ -68,47 +70,3 @@ const getNewToken = async (oAuth2Client: OAuth2Client): Promise<OAuth2Client> =>
             });
         });
     });
-
-const createEmail = (to: string, from: string, subject: string, message: string) => {
-    var str = [
-        'Content-Type: text/html; charset="UTF-8"\n',
-        'MIME-Version: 1.0\n',
-        'Content-Transfer-Encoding: 7bit\n',
-        'to: ',
-        to,
-        '\n',
-        'from: ',
-        from,
-        '\n',
-        'subject: ',
-        subject,
-        '\n\n',
-        message,
-    ].join('');
-
-    return Buffer.from(str, 'utf8')
-        .toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_');
-};
-
-const sendEmail = async (to: string[], from: string, subject: string, message: string) =>
-    new Promise(async (resolve, reject) => {
-        await init();
-        var raw = createEmail(to.join(','), from, subject, message);
-        gmail.users.messages.send(
-            {
-                userId: 'me',
-                requestBody: {raw},
-            },
-            err => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            }
-        );
-    });
-
-export default sendEmail;

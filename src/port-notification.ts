@@ -14,7 +14,7 @@ import {
 import {Store} from './store';
 import {SendMessageCallback} from './bot/speech';
 import scanPort from './port-scan';
-import sendEmail from './send-email';
+import sendEmail from './google/send-email';
 import {getGMailSenderAddress} from './config';
 
 type NotificationData = {[index: string]: any};
