@@ -10,7 +10,7 @@ const credentials = JSON.parse(fs.readFileSync(CREDENTIALS).toString('utf8'));
 let gmail: gmail_v1.Gmail;
 
 export const init = async (): Promise<gmail_v1.Gmail> =>
-    new Promise(async resolve => {
+    new Promise(async (resolve) => {
         const oAuth2Client = await authorize(credentials);
         gmail = google.gmail({version: 'v1', auth: oAuth2Client});
         resolve(gmail);
@@ -26,7 +26,7 @@ const authorize = async (credentials: {
         redirect_uris: Array<string>;
     };
 }): Promise<OAuth2Client> =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
         const {client_secret, client_id, redirect_uris} = credentials.installed;
         const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
@@ -51,7 +51,7 @@ const getNewToken = async (oAuth2Client: OAuth2Client): Promise<OAuth2Client> =>
             input: process.stdin,
             output: process.stdout,
         });
-        rl.question('Enter the code from that page here: ', code => {
+        rl.question('Enter the code from that page here: ', (code) => {
             rl.close();
             oAuth2Client.getToken(code, (err, token) => {
                 console.log(token);
@@ -60,7 +60,7 @@ const getNewToken = async (oAuth2Client: OAuth2Client): Promise<OAuth2Client> =>
                 }
                 oAuth2Client.setCredentials(token);
                 // Store the token to disk for later program executions
-                fs.writeFile(TOKEN_PATH, JSON.stringify(token), err => {
+                fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
                     if (err) {
                         return void reject(err);
                     }

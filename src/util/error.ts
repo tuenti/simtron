@@ -7,6 +7,7 @@ export const SIM_NOT_PRESENT = 'sim-not-present';
 export const NOTIFICATION_HANDLER_NOT_FOUND = 'notification-handler-not-found';
 export const DEVICE_CONFIGURATION_ERROR = 'device-configuration-error';
 export const FAILED_TO_SEND_OPT_BY_MAIL = 'failed-to-send-otp-by-mail';
+export const MESSAGE_NOT_SEND_TO_TEAMS = 'message-not-sent-to-teams';
 
 const Error = (reason: string, description: string): {reason: string; description: string} => ({
     reason,

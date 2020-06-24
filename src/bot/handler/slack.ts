@@ -37,16 +37,12 @@ const isMessageToChannel = (message: {channel: string}) => typeof message.channe
 const isFromUser = (message: {user: string}, userId: string) => message.user === userId;
 
 export const sanitize = (text: string) =>
-    text
-        .toLowerCase()
-        .replace(',', '')
-        .replace('.', '')
-        .replace(';', '');
+    text.toLowerCase().replace(',', '').replace('.', '').replace(';', '');
 
 const canAccessToChannel = (channel: ConversationChannel) =>
     channel.is_member && (!process.env.DEVELOPMENT || channel.id === getDevelopmentSlackChannelId());
 
-const createSlackBot = (botToken: string) => {
+const createSlackBot = (botToken: string): Bot => {
     let botId: string;
     const retryConfig = {
         forever: true,
@@ -57,7 +53,7 @@ const createSlackBot = (botToken: string) => {
     const slackBotWebClient = new WebClient(botToken, {retryConfig});
 
     const postMessageToRecipients = (message: SlackMessage, channels: string[], userId: string | null) => {
-        channels.map(channelId => {
+        channels.map((channelId) => {
             switch (message.container) {
                 case SlackMessageContainer.PLAIN:
                     const plainMessage = {
@@ -93,7 +89,7 @@ const createSlackBot = (botToken: string) => {
             limit: ALL_CHANNELS,
         });
         const conversations = conversationsResult as ConversationsPostMessageResult;
-        const channels = conversations.channels.filter(canAccessToChannel).map(channel => channel.id);
+        const channels = conversations.channels.filter(canAccessToChannel).map((channel) => channel.id);
         if (process.env.DEVELOPMENT) {
             channels.push(getDevelopmentSlackChannelId());
         }
@@ -117,7 +113,7 @@ const createSlackBot = (botToken: string) => {
         bot: Bot,
         messageData: IncomingMessage
     ) => {
-        listeners.forEach(listener => {
+        listeners.forEach((listener) => {
             listener(bot, messageData);
         });
     };
@@ -150,7 +146,7 @@ const createSlackBot = (botToken: string) => {
         },
     };
 
-    slackBot.on('message', async message => {
+    slackBot.on('message', async (message) => {
         if (isMessage(message) && isMessageToChannel(message) && !isFromUser(message, botId)) {
             const userInfoResult = await slackBotWebClient.users.info({user: message.user});
             const userInfo = userInfoResult as UserInfoPostMessageResult;
@@ -167,7 +163,7 @@ const createSlackBot = (botToken: string) => {
         }
     });
 
-    slackBot.on('authenticated', rtmStartData => {
+    slackBot.on('authenticated', (rtmStartData) => {
         botId = rtmStartData.self.id;
         logger.debug(
             `Logged in as ${rtmStartData.self.name} (id: ${botId}) of team ${rtmStartData.team.name}`

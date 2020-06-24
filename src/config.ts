@@ -27,6 +27,9 @@ const DEVELOPMENT_SLACK_CHANNEL_ID_PATH = '/bot/slack/developmentChannelId';
 const SLACK_BOT_ADMIN_USER_IDS_PATH = '/bot/slack/adminUserIds';
 const DEFAULT_SLACK_BOT_ADMIN_USER_IDS: string[] = [];
 
+const TEAMS_CHANNEL_POST_WEBHOOK_HOST_PATH = '/bot/teams/channelPostWebhook/host';
+const TEAMS_CHANNEL_POST_WEBHOOK_PATH_PATH = '/bot/teams/channelPostWebhook/path';
+
 const BOT_NAMES_PATH = '/bot/names';
 const DEFAULT_BOT_NAMES = ['simtron', '@simtron', '<@U9EEFTDKL>'];
 const BOT_MESSAGE_SEQUENCE_ENSURING_TIME_PATH = '/bot/sequenceWaitTime';
@@ -34,6 +37,7 @@ const DEFAULT_BOT_MESSAGE_SEQUENCE_ENSURING_TIME = 750;
 
 const COUNTRIES_DATA_PATH = '/countries';
 const DEFAULT_FLAG_REPRESENTATION = ':flag-aq:';
+const FLAGS_TO_UNICODE_MAP_PATH = '/flags';
 
 const PHONE_NUMBER_FORMATTER_PATH = '/phoneNumber/formatters';
 
@@ -72,6 +76,9 @@ export const getDevelopmentSlackChannelId = () => readPath(DEVELOPMENT_SLACK_CHA
 export const getSlackBotAdminUserIds = () =>
     readPath(SLACK_BOT_ADMIN_USER_IDS_PATH, DEFAULT_SLACK_BOT_ADMIN_USER_IDS);
 
+export const getTeamsChannelPostWebhookHost = () => readPath(TEAMS_CHANNEL_POST_WEBHOOK_HOST_PATH, undefined);
+export const getTeamsChannelPostWebhookPath = () => readPath(TEAMS_CHANNEL_POST_WEBHOOK_PATH_PATH, undefined);
+
 export const getBotNames = () => readPath(BOT_NAMES_PATH, DEFAULT_BOT_NAMES);
 export const getBotDisplayName = () => getBotNames()[0];
 export const getBotMessageSequenceEnsuringTime = () =>
@@ -81,6 +88,7 @@ export const getCountryName = (country: string) =>
     readPath(`${COUNTRIES_DATA_PATH}/${country}/name`, country);
 export const getCountryFlag = (country: string | undefined) =>
     readPath(`${COUNTRIES_DATA_PATH}/${country ? country : 'none'}/flag`, DEFAULT_FLAG_REPRESENTATION);
+export const getFlagsUnicodeMap = () => readPath(FLAGS_TO_UNICODE_MAP_PATH, {});
 export const getSupportedCountries = () => Object.keys(readPath(COUNTRIES_DATA_PATH, {}));
 export const getSupportedBrands = (country: string) =>
     Object.keys(readPath(`${COUNTRIES_DATA_PATH}/${country}/lineTypes`, {}));

@@ -125,10 +125,10 @@ export const createSimDetailsContentMessage = (
 };
 
 export const createSimInsertedNotificationMessage = (sim: SimInUse | PortInUse): OutgoingMessage =>
-    createSimDetailsContentMessage(sim, 'inserted :+1:');
+    createSimDetailsContentMessage(sim, 'inserted !');
 
 export const createSimRemovedNotificationMessage = (sim: SimInUse | PortInUse): OutgoingMessage =>
-    createSimDetailsContentMessage(sim, 'removed :+1:');
+    createSimDetailsContentMessage(sim, 'removed !');
 
 export const createSimNetworkStatusChangedNotificationMessage = (sim: SimInUse): OutgoingMessage =>
     createSimDetailsContentMessage(sim, 'network status changed');
@@ -138,7 +138,7 @@ export const createUnknownSimsExistenceNotificationMessage = (
     portsWithBlockedSims: PortInUse[]
 ): OutgoingMessage => {
     const unknownSimsLines = unknownSims.map(
-        sim =>
+        (sim) =>
             `Icc: *${
                 sim.icc
             }* |To identify this SIM, type: *${getBotDisplayName()} ${SIM_IDENTIFICATION_COMMAND} ${
@@ -146,7 +146,7 @@ export const createUnknownSimsExistenceNotificationMessage = (
             }*`
     );
     const portsWithBlockedSimsLines = portsWithBlockedSims.map(
-        port =>
+        (port) =>
             `${createUnknownSimExistenceText(
                 port.portIndex
             )} |To unblock this SIM, type: *${getBotDisplayName()} ${SIM_PIN_REMOVE_COMMAND} ${
@@ -183,7 +183,7 @@ export const createQuestionMessage = (question: Question): OutgoingMessage => {
             type: MessageType.SINGLE_SELECTION_QUESTION,
             textLines: [
                 question.text,
-                ...(question.options ? question.options.map(option => option['text']) : []),
+                ...(question.options ? question.options.map((option) => option['text']) : []),
             ],
         };
     } else {

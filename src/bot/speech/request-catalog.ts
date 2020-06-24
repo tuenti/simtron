@@ -20,9 +20,9 @@ export const createRequestCatalogSpeech = () => ({
         const allSimData = store.sim.getSimCatalog();
         const allInUseSims = store.sim
             .getAllSimsInUse(receivedMessage.isFromAdmin)
-            .filter(sim => !!sim.msisdn)
-            .map(simInUse => {
-                const foundSimData = allSimData.find(simData => simInUse.icc === simData.icc);
+            .filter((sim) => !!sim.msisdn)
+            .map((simInUse) => {
+                const foundSimData = allSimData.find((simData) => simInUse.icc === simData.icc);
                 return {
                     sim: simInUse,
                     isVisible: !foundSimData || (foundSimData && foundSimData.isVisible),

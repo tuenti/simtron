@@ -80,8 +80,8 @@ const adaptMessage = (
                 container: SlackMessageContainer.RICH,
                 text: message.text ? message.text : '',
                 attachments: message.attachments
-                    ? message.attachments.map(attachment => ({
-                          fields: attachment.fields.map(field => ({
+                    ? message.attachments.map((attachment) => ({
+                          fields: attachment.fields.map((field) => ({
                               title: field.name,
                               value: field.value,
                               short: true,
@@ -102,7 +102,7 @@ const adaptMessage = (
                               ? `There are *${message.textLines.length} unknown SIM cards* needing to be identified:`
                               : 'There is an *unknown SIM* card needing to be identified:',
                       attachments: message.textLines
-                          ? message.textLines.map(line => {
+                          ? message.textLines.map((line) => {
                                 const [simLine, footer] = line.split('|');
                                 return {
                                     color: '#D3D3D3',
