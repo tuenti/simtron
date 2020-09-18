@@ -10,17 +10,18 @@ import handleNotification from './port-notification';
 import {getSimStatusPollingTime} from './config';
 import logger from './util/logger';
 import Error, {PORT_NOT_FOUND} from './util/error';
+import runApiServer from './api/api';
 
 const createSimtronController = (botFactory, devicePortsFactory, store) => {
     let bots = [];
     let devicePortHandlers = [];
 
-    const answerMessageToBot = bot => (message, receivedMessage) => {
+    const answerMessageToBot = (bot) => (message, receivedMessage) => {
         bot.sendMessage(message, receivedMessage);
     };
 
     const sendCommandToPort = (command, portId) => {
-        const port = devicePortHandlers.find(portHandler => portHandler.portId === portId);
+        const port = devicePortHandlers.find((portHandler) => portHandler.portId === portId);
         if (port) {
             return port.sendCommand(command);
         } else {
@@ -43,27 +44,27 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
         }
     };
 
-    const startBots = bots =>
+    const startBots = (bots) =>
         Promise.all(
-            bots.map(bot => {
+            bots.map((bot) => {
                 bot.addListener(handleBotIncomingMessage);
                 return bot.start();
             })
         );
 
-    const sendMessageOnAllBots = message =>
-        bots.forEach(bot => {
+    const sendMessageOnAllBots = (message) =>
+        bots.forEach((bot) => {
             return bot.sendMessage(message);
         });
 
-    const findPortById = portId => devicePortHandlers.find(portHandler => portHandler.portId === portId);
+    const findPortById = (portId) => devicePortHandlers.find((portHandler) => portHandler.portId === portId);
 
     const handlePortIncomingNotification = async (portId, notification) => {
         const port = findPortById(portId);
         handleNotification(port, notification, store, sendMessageOnAllBots);
     };
 
-    const configurePort = async portHandler => {
+    const configurePort = async (portHandler) => {
         await scheduleDeviceConfiguration(
             portHandler.portId,
             portHandler.portIndex,
@@ -73,12 +74,13 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
         portHandler.addListener(handlePortIncomingNotification);
     };
 
-    const configureAllPorts = async devicePortHandlers => Promise.all(devicePortHandlers.map(configurePort));
+    const configureAllPorts = async (devicePortHandlers) =>
+        Promise.all(devicePortHandlers.map(configurePort));
 
     const startSimStatusPolling = (devicePortHandlers, pollingTime) => {
         setInterval(() => {
             Promise.all(
-                devicePortHandlers.map(port =>
+                devicePortHandlers.map((port) =>
                     scheduleDeviceConfiguration(port.portId, port.portIndex, store.sim, (command, portId) =>
                         port.sendCommand(command)
                     )
@@ -89,6 +91,8 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
 
     return {
         async start() {
+            runApiServer();
+
             bots = botFactory.createBots();
             await startBots(bots);
             sendMessageOnAllBots(createBootingMessage());
