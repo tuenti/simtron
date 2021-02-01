@@ -1,6 +1,5 @@
-import createSlackBot from './handler/slack';
 import createTeamsBot from './handler/teams';
-import {getSlackBotToken, getTeamsChannelPostWebhookHost, getTeamsChannelPostWebhookPath} from '../config';
+import {getTeamsChannelPostWebhookHost, getTeamsChannelPostWebhookPath} from '../config';
 import {OutgoingMessage, IncomingMessage} from './model/message';
 
 export type IncomingMessageListener = (bot: Bot, message: IncomingMessage) => void;
@@ -14,8 +13,7 @@ export interface Bot {
 
 export default {
     createBots: (): Bot[] => {
-        const slackBot = createSlackBot(getSlackBotToken());
         const teamsBot = createTeamsBot(getTeamsChannelPostWebhookHost(), getTeamsChannelPostWebhookPath());
-        return [slackBot, teamsBot];
+        return [teamsBot];
     },
 };
