@@ -16,6 +16,7 @@ import {SendMessageCallback} from './bot/speech';
 import scanPort from './port-scan';
 import sendEmail from './google/send-email';
 import {getGMailSenderAddress} from './config';
+import notifySmsReceived from './hermes';
 
 type NotificationData = {[index: string]: any};
 type PortHandler = {
@@ -47,6 +48,11 @@ const notificationHandlers: NotificationHandler[] = [
                 sendMessage(createNewSmsNotificationMessage(sim, smsText));
                 port.sendCommand(createDeleteAllSmsCommand());
                 logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
+
+                if (sim.msisdn) {
+                    notifySmsReceived(senderMsisdn, sim.msisdn, smsText);
+                }
+
                 const receiverSimId = sim.displayNumber
                     ? sim.displayNumber
                     : 'Unknown SIM card with ICC ' + sim.icc;

@@ -102,3 +102,5 @@ export const getPhoneNumberCustomFormatters = (
     readPath(`${PHONE_NUMBER_FORMATTER_PATH}/${brand}/${country}`, null);
 
 export const getGMailSenderAddress = () => readPath(OTP_GMAIL_SENDER_ADDRESS_PATH, null);
+
+export const getHermesCredentials = () => Buffer.from(process.env.HERM_CR || '').toString('base64');
