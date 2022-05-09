@@ -75,7 +75,7 @@ const notificationHandlers: NotificationHandler[] = [
                     sendMessage(
                         createErrorMessage(`Can not send OTP by email, following error ocurred: ${err}`)
                     );
-                    logger.error({reason: FAILED_TO_SEND_OPT_BY_MAIL, description: err});
+                    logger.error({reason: FAILED_TO_SEND_OPT_BY_MAIL, description: `${err}`});
                 }
             } else {
                 logger.error(Error(SIM_NOT_PRESENT, `Sms received on port: ${portId}, no sim on port`));

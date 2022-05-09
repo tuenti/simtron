@@ -31,7 +31,7 @@ const notifySmsReceived = async (msisdnFrom: string, msisdnTo: string, smsText: 
     req.write(data)
     req.end()
   } catch(e) {
-    logger.error(Error(HERMES_REQUEST_ERROR, e));
+    logger.error(Error(HERMES_REQUEST_ERROR, `${e}`));
   }
 };
 
