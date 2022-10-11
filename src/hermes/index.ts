@@ -24,7 +24,7 @@ const notifySmsReceived = async (msisdnFrom: string, msisdnTo: string, smsText: 
         'Authorization': `Basic ${getHermesCredentials()}`,
       },
     }
-    logger.debug(JSON.strinify(options);
+    logger.debug(JSON.strinify(options));
 
     const req = https.request(options, (res) => {
       let data = '';
