@@ -8,9 +8,10 @@ const notifySmsReceived = async (msisdnFrom: string, msisdnTo: string, smsText: 
     const data = JSON.stringify({
         "received_at": new Date().toISOString(),
         "text": smsText,
-        "msisdn_from": msisdnFrom,
+        "msisdn_from": msisdnFrom.length > 15 ? "none": msisdnFrom,
         "msisdn_to": msisdnTo
     })
+    logger.debug(JSON.strinify(data));
 
     const options = {
       hostname: 'qacdco.d-consumer.com',
@@ -23,8 +24,17 @@ const notifySmsReceived = async (msisdnFrom: string, msisdnTo: string, smsText: 
         'Authorization': `Basic ${getHermesCredentials()}`,
       },
     }
+    logger.debug(JSON.strinify(options);
 
     const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        logger.debug(data);
+      });
+
       logger.debug(`Hermes request status code: ${res.statusCode}`);
     })
 
