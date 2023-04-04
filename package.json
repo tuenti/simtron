@@ -15,7 +15,7 @@
         "@slack/web-api": "^5.0.1",
         "debug": "^4.1.1",
         "google-libphonenumber": "^3.2.2",
-        "googleapis": "^39.2.0",
+        "googleapis": "^114.0.0",
         "node-json-db": "^0.11.0",
         "nodemailer": "^6.7.5",
         "pdu": "*",
