@@ -8,8 +8,7 @@
         "start": "npm run compile && pm2 start ./dist/index.js --name simtron-service",
         "stop": "pm2 delete simtron-service",
         "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch dist --exec node dist/index.js --",
-        "google-auth": "npm run compile && node ./dist/google/authorize-app.js",
-        "test": "jest"
+        "google-auth": "npm run compile && node ./dist/google/authorize-app.js"
     },
     "dependencies": {
         "@slack/rtm-api": "^5.0.1",
@@ -26,14 +25,11 @@
     "devDependencies": {
         "@types/debug": "^4.1.4",
         "@types/google-libphonenumber": "*",
-        "@types/jest": "^24.0.13",
         "@types/node-json-db": "*",
         "@types/nodemailer": "^6.2.2",
         "@types/serialport": "^7.0.3",
         "@types/supertest": "*",
-        "jest": "^25.5.1",
         "nodemon": "^2.0.3",
-        "ts-jest": "^26.1.1",
         "tslint": "^5.16.0",
         "tslint-config-prettier": "^1.18.0",
         "tslint-eslint-rules": "*",
