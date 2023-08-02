@@ -19,7 +19,7 @@
         "node-json-db": "^0.11.0",
         "nodemailer": "^6.7.5",
         "pdu": "*",
-        "serialport": "^7.1.5",
+        "serialport": "^11.0.1",
         "winston": "^3.2.1"
     },
     "devDependencies": {
@@ -27,9 +27,8 @@
         "@types/google-libphonenumber": "*",
         "@types/node-json-db": "*",
         "@types/nodemailer": "^6.2.2",
-        "@types/serialport": "^7.0.3",
-        "@types/supertest": "*",
-        "nodemon": "^2.0.3",
+        "@types/serialport": "^8.0.2",
+        "nodemon": "^3.0.1",
         "tslint": "^5.16.0",
         "tslint-config-prettier": "^1.18.0",
         "tslint-eslint-rules": "*",
