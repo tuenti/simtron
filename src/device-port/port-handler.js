@@ -85,7 +85,7 @@ const handleCommandResponseLine = (line, portHandler) => {
 };
 
 const createPortHandler = ({portName, baudRate}, portIndex) => {
-    const port = new SerialPort(portName, {baudRate});
+    const port = new SerialPort.SerialPort({path: portName, baudRate});
 
     const portHandler = {
         port,
