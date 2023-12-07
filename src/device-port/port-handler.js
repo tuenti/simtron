@@ -1,4 +1,4 @@
-import SerialPort from 'serialport';
+import SerialPort from 'serialport/SerialPort';
 import createDataChunkReader from './data-chunk';
 import logger from '../util/logger';
 import {getDevicesCommandsTimeout, getDevicesCommandsResolveDelay} from '../config';
@@ -85,7 +85,7 @@ const handleCommandResponseLine = (line, portHandler) => {
 };
 
 const createPortHandler = ({portName, baudRate}, portIndex) => {
-    const port = new SerialPort.SerialPort({path: portName, baudRate});
+    const port = new SerialPort({path: portName, baudRate});
 
     const portHandler = {
         port,

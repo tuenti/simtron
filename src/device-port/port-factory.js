@@ -1,4 +1,4 @@
-import SerialPort from 'serialport';
+import SerialPort from 'serialport/SerialPort';
 import { autoDetect } from '@serialport/bindings-cpp'
 import createDataChunkReader from './data-chunk';
 import Error, {NON_RESPONSIVE_PORTS} from '../util/error';
@@ -51,7 +51,7 @@ const portArrayToString = ports =>
 
 const testPort = (portName, baudRate, dataReader) =>
     new Promise(resolve => {
-        const port = new SerialPort.SerialPort({path: portName, baudRate});
+        const port = new SerialPort({path: portName, baudRate});
         const timeoutHandler = setTimeout(() => {
             port.close();
             dataReader.clear();
