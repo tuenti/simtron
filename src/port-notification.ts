@@ -3,18 +3,14 @@ import logger from './util/logger';
 import Error, {
     SIM_NOT_PRESENT,
     NOTIFICATION_HANDLER_NOT_FOUND,
-    FAILED_TO_SEND_OPT_BY_MAIL,
 } from './util/error';
 import {createReadSmsCommand, createDeleteAllSmsCommand, Command} from './device-port/model/command';
 import {
     createNewSmsNotificationMessage,
     createSimNetworkStatusChangedNotificationMessage,
-    createErrorMessage,
 } from './bot/model/message';
 import {Store} from './store';
 import scanPort from './port-scan';
-import sendEmail from './google/send-email';
-import {getGMailSenderAddress} from './config';
 import notifySmsReceived from './hermes';
 import { SendMessageCallback } from './bot/types';
 
@@ -51,31 +47,6 @@ const notificationHandlers: NotificationHandler[] = [
 
                 if (sim.msisdn) {
                     notifySmsReceived(senderMsisdn, sim.msisdn, smsText);
-                }
-
-                const receiverSimId = sim.displayNumber
-                    ? sim.displayNumber
-                    : 'Unknown SIM card with ICC ' + sim.icc;
-                try {
-                    const mailReceivers = sim.displayNumber
-                        ? store.settings.getSmsEmailReceivers(sim.displayNumber)
-                        : [];
-                    if (mailReceivers.length > 0) {
-                        await sendEmail(
-                            mailReceivers,
-                            getGMailSenderAddress(),
-                            `SMS received at ${receiverSimId}, please, use the code provided on this mail for login.`,
-                            `<h3>SMS received at: <strong>${receiverSimId}</strong></h3><p>${smsText}</p><p>Message sent by SimTRON</p>`
-                        );
-                        logger.debug(
-                            `Sms sent by email : ${portId}, from: ${senderMsisdn}, text: ${smsText}`
-                        );
-                    }
-                } catch (err) {
-                    sendMessage(
-                        createErrorMessage(`Can not send OTP by email, following error ocurred: ${err}`)
-                    );
-                    logger.error({reason: FAILED_TO_SEND_OPT_BY_MAIL, description: `${err}`});
                 }
             } else {
                 logger.error(Error(SIM_NOT_PRESENT, `Sms received on port: ${portId}, no sim on port`));

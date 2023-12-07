@@ -3,36 +3,29 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "watch": "rm -rf dist && tsc -w -p src",
+        "watch": "rm -rf dist && tsc -p src",
         "compile": "rm -rf dist && tsc -p src/tsconfig-dist.json",
         "start": "npm run compile && pm2 start ./dist/index.js --name simtron-service",
         "stop": "pm2 delete simtron-service",
-        "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch dist --exec node dist/index.js --",
-        "google-auth": "npm run compile && node ./dist/google/authorize-app.js"
+        "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch dist --exec node dist/index.js --"
     },
     "dependencies": {
-        "@slack/rtm-api": "^5.0.1",
-        "@slack/web-api": "^5.0.1",
         "debug": "^4.1.1",
         "google-libphonenumber": "^3.2.2",
-        "googleapis": "^114.0.0",
         "node-json-db": "^0.11.0",
-        "nodemailer": "^6.7.5",
         "pdu": "*",
-        "python": "^0.0.4",
-        "serialport": "^11.0.1",
-        "@serialport/bindings-cpp": "*",
+        "serialport": "^7.1.5",
         "winston": "^3.2.1"
     },
     "devDependencies": {
         "@types/debug": "^4.1.4",
         "@types/google-libphonenumber": "*",
         "@types/node-json-db": "*",
-        "@types/nodemailer": "^6.2.2",
-        "@types/serialport": "^8.0.2",
-        "nodemon": "^3.0.1",
+        "@types/serialport": "^7.0.3",
+        "nodemon": "^2.0.3",
         "tslint": "^5.16.0",
         "tslint-config-prettier": "^1.18.0",
-        "typescript": "^5.3.2"
+        "tslint-eslint-rules": "*",
+        "typescript": "^4.8"
     }
 }

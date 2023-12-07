@@ -15,8 +15,6 @@ export enum MessageType {
     NOTIFY_SMS_RECEIVED = 'notify-sms-received',
     NOTIFY_PORT_ACTIVITY_DETECTED = 'notify-port-activity-detected',
     START_FORCE_SIM_OPERATOR = 'start-force-sim-operator',
-    STOP_QUESTIONARY = 'stop-questionary',
-    FILL_QUESTIONARY = 'fill-questionary',
     SHOW_SIM = 'show-sim',
     HIDE_SIM = 'hide-sim',
     SET_SMS_EMAIL_RECEIVERS = 'set-sms-email-receivers',

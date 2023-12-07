@@ -1,11 +1,6 @@
-import {getCountryFlag, getBotDisplayName} from '../../config';
+import {getCountryFlag} from '../../config';
 import {SimInUse, PortInUse, isSimInUse} from '../../store/sim-catalog';
 import {MessageType} from './message-type';
-
-export const SIM_IDENTIFICATION_COMMAND = 'register';
-const SIM_PIN_REMOVE_COMMAND_1 = 'enter';
-const SIM_PIN_REMOVE_COMMAND_2 = 'pin';
-export const SIM_PIN_REMOVE_COMMAND = `${SIM_PIN_REMOVE_COMMAND_1} ${SIM_PIN_REMOVE_COMMAND_2}`;
 
 export const USER_MENTION = '[USER_MENTION]';
 
@@ -143,7 +138,7 @@ export const createUnknownSimsExistenceNotificationMessage = (
         (sim) =>
             `Icc: *${
                 sim.icc
-            }* |To identify this SIM, type: *${getBotDisplayName()} ${SIM_IDENTIFICATION_COMMAND} ${
+            }* | Please identify this sim ${
                 sim.portIndex
             }*`
     );
@@ -151,7 +146,7 @@ export const createUnknownSimsExistenceNotificationMessage = (
         (port) =>
             `${createUnknownSimExistenceText(
                 port.portIndex
-            )} |To unblock this SIM, type: *${getBotDisplayName()} ${SIM_PIN_REMOVE_COMMAND} ${
+            )} |Please unblock this sim ${
                 port.portIndex
             }*`
     );
