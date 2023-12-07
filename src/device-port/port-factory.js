@@ -1,13 +1,11 @@
-import { SerialPort } from 'serialport';
-import { autoDetect } from '@serialport/bindings-cpp'
+import SerialPort from 'serialport';
+import serialPortBindings from '@serialport/bindings';
 import createDataChunkReader from './data-chunk';
 import Error, {NON_RESPONSIVE_PORTS} from '../util/error';
 import logger from '../util/logger';
 import {getVendorIds, getPortScanMaxRetriesCount} from '../config';
 import createPortHandler from './port-handler';
 import createMessageQueue from './command-queue';
-
-const serialPortBindings = autoDetect();
 
 const MODEM_DETECTION_COMMAND = 'AT';
 const MODEM_DETECTION_RESPONSE = 'AT';
@@ -51,7 +49,7 @@ const portArrayToString = ports =>
 
 const testPort = (portName, baudRate, dataReader) =>
     new Promise(resolve => {
-        const port = new SerialPort({path: portName, baudRate});
+        const port = new SerialPort(portName, {baudRate});
         const timeoutHandler = setTimeout(() => {
             port.close();
             dataReader.clear();
@@ -78,9 +76,7 @@ const connectToPort = async (portName, dataReader) => {
             if (isOpenPort(testPortResult)) {
                 return testPortResult;
             }
-        } catch (e) {
-
-        }
+        } catch (e) {}
     }
     return createClosedPort(portName, dataReader, NO_RESPONSE_REASON);
 };
@@ -97,7 +93,7 @@ const scanPorts = () =>
             const allowedVendorIds = getVendorIds();
             const eligibleSimtronPorts = serialPorts
                 .filter(portData => isEligiblePort(portData, allowedVendorIds))
-                .map(({path}) => createClosedPort(path, undefined, NO_TRIED_REASON));
+                .map(({comName}) => createClosedPort(comName, undefined, NO_TRIED_REASON));
             clearTimeout(timeoutHandler);
             resolve(eligibleSimtronPorts);
         });
