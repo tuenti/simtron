@@ -10,7 +10,7 @@
         "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch dist --exec node dist/index.js --"
     },
     "dependencies": {
-        "debug": "^4.1.1",
+        "debug": "^4.3.1",
         "google-libphonenumber": "^3.2.2",
         "node-json-db": "^0.11.0",
         "pdu": "*",
