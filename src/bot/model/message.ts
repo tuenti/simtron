@@ -1,9 +1,6 @@
-import {getCountryFlag, getBotDisplayName} from '../../config';
+import {getCountryFlag} from '../../config';
 import {SimInUse, PortInUse, isSimInUse} from '../../store/sim-catalog';
-import {Question, isSelectionQuestion} from '../../questionary/handler';
 import {MessageType} from './message-type';
-import {SIM_IDENTIFICATION_COMMAND} from '../speech/sim-identification';
-import {SIM_PIN_REMOVE_COMMAND} from '../speech/enter-sim-pin';
 
 export const USER_MENTION = '[USER_MENTION]';
 
@@ -141,7 +138,7 @@ export const createUnknownSimsExistenceNotificationMessage = (
         (sim) =>
             `Icc: *${
                 sim.icc
-            }* |To identify this SIM, type: *${getBotDisplayName()} ${SIM_IDENTIFICATION_COMMAND} ${
+            }* | Please identify this sim ${
                 sim.portIndex
             }*`
     );
@@ -149,7 +146,7 @@ export const createUnknownSimsExistenceNotificationMessage = (
         (port) =>
             `${createUnknownSimExistenceText(
                 port.portIndex
-            )} |To unblock this SIM, type: *${getBotDisplayName()} ${SIM_PIN_REMOVE_COMMAND} ${
+            )} |Please unblock this sim ${
                 port.portIndex
             }*`
     );
@@ -175,23 +172,6 @@ export const createPortActivityNotificationMessage = (sim: SimInUse): OutgoingMe
         type: MessageType.NOTIFY_PORT_ACTIVITY_DETECTED,
         textLines: [`${getCountryFlag(sim.country)} *${simId}* ${lineInfo}`],
     };
-};
-
-export const createQuestionMessage = (question: Question): OutgoingMessage => {
-    if (isSelectionQuestion(question)) {
-        return {
-            type: MessageType.SINGLE_SELECTION_QUESTION,
-            textLines: [
-                question.text,
-                ...(question.options ? question.options.map((option) => option['text']) : []),
-            ],
-        };
-    } else {
-        return {
-            type: MessageType.FREE_TEXT_QUESTION,
-            textLines: [question.text],
-        };
-    }
 };
 
 export const createSuccessFeedbackMessage = (text: string): OutgoingMessage => ({

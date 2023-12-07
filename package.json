@@ -11,8 +11,6 @@
         "google-auth": "npm run compile && node ./dist/google/authorize-app.js"
     },
     "dependencies": {
-        "@slack/rtm-api": "^5.0.1",
-        "@slack/web-api": "^5.0.1",
         "debug": "^4.1.1",
         "google-libphonenumber": "^3.2.2",
         "googleapis": "^114.0.0",
@@ -28,7 +26,6 @@
         "@types/node-json-db": "*",
         "@types/nodemailer": "^6.2.2",
         "@types/serialport": "^7.0.3",
-        "@types/supertest": "*",
         "nodemon": "^2.0.3",
         "tslint": "^5.16.0",
         "tslint-config-prettier": "^1.18.0",

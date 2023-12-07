@@ -10,7 +10,6 @@ export interface SettingsStore {
     setPortActivityNotificationsStatus: (isEnabled: boolean) => void;
     arePortActivityNotificationsEnabled: () => boolean;
     setSmsEmailReceivers: (msisdn: string, emailReceivers: string[]) => void;
-    getSmsEmailReceivers: (msisdn: string) => string[];
 }
 
 const createSettingsStore = (): SettingsStore => {
@@ -46,10 +45,6 @@ const createSettingsStore = (): SettingsStore => {
             settings[SMS_EMAIL_RECEIVERS][msisdn] = emailReceivers;
             writeSettings(settings);
         },
-        getSmsEmailReceivers: (msisdn: string): string[] =>
-            settings[SMS_EMAIL_RECEIVERS] && settings[SMS_EMAIL_RECEIVERS][msisdn]
-                ? settings[SMS_EMAIL_RECEIVERS][msisdn]
-                : [],
     };
 };
 

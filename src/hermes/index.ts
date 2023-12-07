@@ -4,6 +4,7 @@ import Error, { HERMES_REQUEST_ERROR } from '../util/error';
 import logger from '../util/logger';
 
 const notifySmsReceived = async (msisdnFrom: string, msisdnTo: string, smsText: string) => {
+  return; // HERMES is currently forced to disabled
   try {
     const data = JSON.stringify({
         "received_at": new Date().toISOString(),
