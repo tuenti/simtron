@@ -12,6 +12,5 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noEmitOnError": false,
-        "watch": true
     }
 }

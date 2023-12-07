@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "watch": "rm -rf dist && tsc -p src",
+        "watch": "rm -rf dist && tsc -w -p src",
         "compile": "rm -rf dist && tsc -p src/tsconfig-dist.json",
         "start": "npm run compile && pm2 start ./dist/index.js --name simtron-service",
         "stop": "pm2 delete simtron-service",
@@ -19,7 +19,9 @@
         "node-json-db": "^0.11.0",
         "nodemailer": "^6.7.5",
         "pdu": "*",
+        "python": "^0.0.4",
         "serialport": "^11.0.1",
+        "@serialport/bindings-cpp": "*",
         "winston": "^3.2.1"
     },
     "devDependencies": {
@@ -31,7 +33,6 @@
         "nodemon": "^3.0.1",
         "tslint": "^5.16.0",
         "tslint-config-prettier": "^1.18.0",
-        "tslint-eslint-rules": "*",
-        "typescript": "^3.4.5"
+        "typescript": "^5.3.2"
     }
 }

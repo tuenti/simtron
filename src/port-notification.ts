@@ -12,11 +12,11 @@ import {
     createErrorMessage,
 } from './bot/model/message';
 import {Store} from './store';
-import {SendMessageCallback} from './bot/speech';
 import scanPort from './port-scan';
 import sendEmail from './google/send-email';
 import {getGMailSenderAddress} from './config';
 import notifySmsReceived from './hermes';
+import { SendMessageCallback } from './bot/types';
 
 type NotificationData = {[index: string]: any};
 type PortHandler = {
@@ -102,7 +102,7 @@ const notificationHandlers: NotificationHandler[] = [
         action: async (port, _, store, sendMessage) => {
             const {portId} = port;
             logger.debug(`Sim manipulation notification received on port: ${portId}`);
-            scanPort(port.portId, port.portIndex, command => port.sendCommand(command), store, sendMessage);
+            scanPort(port.portId, port.portIndex, (command: Command) => port.sendCommand(command), store, sendMessage);
         },
     },
 ];

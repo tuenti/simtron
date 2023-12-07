@@ -1,3 +1,4 @@
+import { SendCommandCallback } from './bot/types';
 import {
     createSetEchoModeCommand,
     createEnableSmsNotificationsCommand,
@@ -17,7 +18,6 @@ import {
 } from './device-port/model/command';
 import {UTF16_ENCODING} from './device-port/model/parser-token';
 import {SimStore, SimInUse, PortInUse, SmsMode} from './store/sim-catalog';
-import {SendCommandCallback} from './bot/speech';
 
 export interface SimDiff {
     oldSim: SimInUse | PortInUse | null;

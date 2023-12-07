@@ -19,7 +19,7 @@ const createSettingsStore = (): SettingsStore => {
     const readSettings = () => {
         try {
             return settingsDb.getData(SETTINGS_PATH);
-        } catch (e) {
+        } catch (e: any) {
             if (e.name === 'DataError') {
                 settingsDb.push(SETTINGS_PATH, {});
             }

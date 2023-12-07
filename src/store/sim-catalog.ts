@@ -160,7 +160,7 @@ const createPortInUse = (portId: string, portIndex: number, imei: string, icc?: 
 const readSimCatalog = (): SimData[] => {
     try {
         return catalogDb.getData(SIM_CATALOG_PATH);
-    } catch (e) {
+    } catch (e: any) {
         if (e.name === 'DataError') {
             catalogDb.push(SIM_CATALOG_PATH, []);
         }
@@ -171,7 +171,7 @@ const readSimCatalog = (): SimData[] => {
 const readSimPins = (): SimPins => {
     try {
         return pinsDb.getData(SIM_PINS_PATH);
-    } catch (e) {
+    } catch (e: any) {
         if (e.name === 'DataError') {
             catalogDb.push(SIM_PINS_PATH, []);
         }

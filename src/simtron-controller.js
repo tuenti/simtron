@@ -4,7 +4,6 @@ import {
     createErrorMessage,
     USER_MENTION,
 } from './bot/model/message';
-import getMessageSpeech from './bot/speech';
 import scheduleDeviceConfiguration from './device-config';
 import handleNotification from './port-notification';
 import {getSimStatusPollingTime} from './config';

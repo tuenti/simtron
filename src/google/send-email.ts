@@ -23,7 +23,7 @@ const createEmail = (to: string, from: string, subject: string, message: string)
         .replace(/\//g, '_');
 };
 
-const sendEmail = async (to: string[], from: string, subject: string, message: string) =>
+const sendEmail = async (to: string[], from: string, subject: string, message: string): Promise<void> =>
     new Promise(async (resolve, reject) => {
         const gmail = await init();
         var raw = createEmail(to.join(','), from, subject, message);

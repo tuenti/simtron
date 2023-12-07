@@ -3,7 +3,7 @@ import {getBotMessageSequenceEnsuringTime, getSimStatusRequestScheduleTime} from
 import delayed from './util/delay';
 import scheduleDeviceConfiguration, {SimDiff} from './device-config';
 import {Store} from './store';
-import {SendMessageCallback, SendCommandCallback} from './bot/speech';
+import { SendCommandCallback, SendMessageCallback } from './bot/types';
 
 const SIM_READY_TIMEOUT_MS = 5000;
 
