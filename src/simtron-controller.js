@@ -9,7 +9,6 @@ import handleNotification from './port-notification';
 import {getSimStatusPollingTime} from './config';
 import logger from './util/logger';
 import Error, {PORT_NOT_FOUND} from './util/error';
-import runApiServer from './api/api';
 
 const createSimtronController = (botFactory, devicePortsFactory, store) => {
     let bots = [];
@@ -90,8 +89,6 @@ const createSimtronController = (botFactory, devicePortsFactory, store) => {
 
     return {
         async start() {
-            runApiServer();
-
             bots = botFactory.createBots();
             await startBots(bots);
             sendMessageOnAllBots(createBootingMessage());
