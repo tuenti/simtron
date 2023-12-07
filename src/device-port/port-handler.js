@@ -1,4 +1,4 @@
-import SerialPort from 'serialport/SerialPort';
+import { SerialPort } from 'serialport';
 import createDataChunkReader from './data-chunk';
 import logger from '../util/logger';
 import {getDevicesCommandsTimeout, getDevicesCommandsResolveDelay} from '../config';

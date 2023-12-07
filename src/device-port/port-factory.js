@@ -1,4 +1,4 @@
-import SerialPort from 'serialport/SerialPort';
+import { SerialPort } from 'serialport';
 import { autoDetect } from '@serialport/bindings-cpp'
 import createDataChunkReader from './data-chunk';
 import Error, {NON_RESPONSIVE_PORTS} from '../util/error';
