@@ -10,7 +10,7 @@
         "dev": "DEVELOPMENT=1 DEBUG=app nodemon --watch dist --exec node dist/index.js --"
     },
     "dependencies": {
-        "debug": "^4.1.1",
+        "debug": "^4.3.4",
         "google-libphonenumber": "^3.2.2",
         "node-json-db": "^0.11.0",
         "pdu": "*",
@@ -22,7 +22,7 @@
         "@types/google-libphonenumber": "*",
         "@types/node-json-db": "*",
         "@types/serialport": "^7.0.3",
-        "nodemon": "^2.0.3",
+        "nodemon": "^3.0.2",
         "tslint": "^5.16.0",
         "tslint-config-prettier": "^1.18.0",
         "tslint-eslint-rules": "*",
