@@ -1,9 +1,6 @@
 import {NotificationId} from './device-port/model/notification';
 import logger from './util/logger';
-import Error, {
-    SIM_NOT_PRESENT,
-    NOTIFICATION_HANDLER_NOT_FOUND,
-} from './util/error';
+import Error, {SIM_NOT_PRESENT, NOTIFICATION_HANDLER_NOT_FOUND} from './util/error';
 import {createReadSmsCommand, createDeleteAllSmsCommand, Command} from './device-port/model/command';
 import {
     createNewSmsNotificationMessage,
@@ -12,7 +9,7 @@ import {
 import {Store} from './store';
 import scanPort from './port-scan';
 import notifySmsReceived from './hermes';
-import { SendMessageCallback } from './bot/types';
+import {SendMessageCallback} from './bot/types';
 
 type NotificationData = {[index: string]: any};
 type PortHandler = {
@@ -41,7 +38,9 @@ const notificationHandlers: NotificationHandler[] = [
             if (sim) {
                 const readSmsResponse = await port.sendCommand(createReadSmsCommand(smsIndex, sim.smsMode));
                 const {senderMsisdn, smsText} = readSmsResponse;
-                sendMessage(createNewSmsNotificationMessage(sim, smsText));
+                sendMessage(
+                    createNewSmsNotificationMessage(sim, smsText.replace(/[^a-zA-Z0-9\s:;,\.]/g, ''))
+                );
                 port.sendCommand(createDeleteAllSmsCommand());
                 logger.debug(`Sms received on port: ${portId}, from: ${senderMsisdn}, text: ${smsText}`);
 
@@ -73,7 +72,13 @@ const notificationHandlers: NotificationHandler[] = [
         action: async (port, _, store, sendMessage) => {
             const {portId} = port;
             logger.debug(`Sim manipulation notification received on port: ${portId}`);
-            scanPort(port.portId, port.portIndex, (command: Command) => port.sendCommand(command), store, sendMessage);
+            scanPort(
+                port.portId,
+                port.portIndex,
+                (command: Command) => port.sendCommand(command),
+                store,
+                sendMessage
+            );
         },
     },
 ];
@@ -85,7 +90,7 @@ const handleNotification = (
     sendMessage: SendMessageCallback
 ) => {
     const {portId} = port;
-    const notificationHandler = notificationHandlers.find(handler =>
+    const notificationHandler = notificationHandlers.find((handler) =>
         handler.notificationIds.includes(notification.id)
     );
     if (notificationHandler) {
